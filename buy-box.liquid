@@ -702,7 +702,7 @@
       </button>
     </div>
 
-    <div class="buybox-payment-options">
+ <div class="buybox-payment-options">
       <div class="buybox-payment-item">
         <div class="payment-main-group">
           <span>or 4 payments of </span>
@@ -710,14 +710,14 @@
           <span> with </span>
           <div class="payment-logos-group">
             <span class="payment-logo-wrapper">
-              {% if series_handle == 'core-series' or 'gladiator' %}
+              {% if series_handle == 'core-series' or series_handle == 'gladiator' %}
                 <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/sezzle-light.svg?v=1761600001" alt="Sezzle" class="payment-logo" style="height: 18px; width: auto; display: block;">
               {% else %}
                 <img src="https://media.sezzle.com/branding/2.0/Sezzle_Logo_FullColor.svg" alt="Sezzle" class="payment-logo" style="height: 18px; width: auto; display: block;">
               {% endif %}
             </span>
             <span class="payment-logo-wrapper">
-              {% if series_handle == 'core-series' or 'gladiator'%}
+              {% if series_handle == 'core-series' or series_handle == 'gladiator' %}
                 <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/Afterpay_logo.svg?v=1763037720" alt="Afterpay" class="payment-logo" style="height: 18px; width: auto; display: block;">
               {% else %}
               <svg class="payment-logo" width="98" height="24" viewBox="0 0 98 24" fill="none" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="height: 18px; width: auto; display: block;">
@@ -743,7 +743,7 @@
         </div>
         <div class="payment-affirm-group">
           <span class="payment-logo-wrapper">
-            {% if series_handle == 'core-series' or 'gladiator' %}
+            {% if series_handle == 'core-series' or series_handle == 'gladiator' %}
               <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/white_logo-solid_bg.svg?v=1762749600" alt="Affirm" class="payment-logo" style="height: 18px; width: auto; display: block;position:relative; top:1px;">
             {% else %}
               <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/black_logo-white_bg.svg?v=1762749598" alt="Affirm" class="payment-logo" style="height: 18px; width: auto; display: block;position:relative; top:1px;">
@@ -1150,6 +1150,24 @@ min-width: unset!important;
 .buybox-container.is-gladiator-series .buybox-flavor-label {
   color: #fff;
 }
+
+.buybox-container.is-gladiator-series .buybox-variant-option {
+background: #f9aa6700 !!important;
+}
+
+.buybox-container.is-gladiator-series .buybox-variant-info{
+color:white!important;
+}
+
+.buybox-container.is-gladiator-series .buybox-variant-inner{
+    border: 2px solid color-mix(in srgb, var(--swatch-bg, #efefef) 60%, white)!important;
+}
+
+.buybox-container.is-gladiator-series .buybox-variant-option:hover:not(.sold-out) .buybox-variant-inner, .buybox-variant-option.active:not(.sold-out) .buybox-variant-inner{
+    border: 2px solid color-mix(in srgb, var(--swatch-bg, #efefef) 60%, white)!important;
+}
+
+
 .buybox-flavor-static {
   display: flex;
   align-items: center;
@@ -1434,6 +1452,24 @@ min-width: unset!important;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.06));
   border-radius: 8px;
 }
+
+.buybox-container.is-gladiator-series .buybox-variant-option {
+background: color-mix(in srgb, var(--swatch-bg,rgba(109, 109, 109, 0.18)) 25%, #2b2b2b26)!important;
+}
+
+.buybox-container.is-gladiator-series .buybox-variant-option:hover:not(.sold-out) .buybox-variant-swatch img,
+.buybox-variant-option.active:not(.sold-out) .buybox-variant-swatch img{
+filter:brightness (2.5)!important;
+}
+
+.buybox-container.is-gladiator-series .buybox-variant-option.user-selected.active {
+background: var(--swatch-bg)!important;
+}
+
+.buybox-container.is-gladiator-series .buybox-variant-option:hover:not(.sold-out) {
+background: var(--swatch-bg)!important;
+}
+
 .buybox-variant-inner {
   position: relative;
   width: 100%;
