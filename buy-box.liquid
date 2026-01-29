@@ -1,0 +1,3400 @@
+{% assign default_purchase_option = default_purchase_option | default: 'subscribe' %}
+
+{% assign selected_variant = product.selected_or_first_available_variant %}
+
+{% assign product_sfp_raw = product.metafields.custom.sfp_section.value %}
+{% assign product_sfp = product_sfp_raw | first | default: product_sfp_raw %}
+
+{% assign product_series = product_sfp.series.value %}
+
+{% assign series_featured_color = product_series.template_specific_dynamic_featured_color | default: '#AE1F24' %}
+
+{% assign series_accent_colors = product_series.template_specific_accent_color_s %}
+{% if series_accent_colors.first %}
+  {% assign series_accent_1 = series_accent_colors.first %}
+{% elsif series_accent_colors[0] %}
+  {% assign series_accent_1 = series_accent_colors[0] %}
+{% else %}
+  {% assign series_accent_1 = '#333' %}
+{% endif %}
+
+{% assign series_handle = product_series.handle %}
+{% if series_handle == blank %}
+  {% assign series_name_lower = product_series.series_name | downcase | replace: ' ', '-' %}
+  {% assign series_handle = series_name_lower %}
+{% endif %}
+
+{% assign is_apparel_or_gear = false %}
+{% assign variant_type = 'Flavor' %}
+{% assign product_type_lower = product.type | downcase %}
+{% if product_type_lower contains 'apparel' or product_type_lower contains 'gear' or product_type_lower contains 'clothing' or product.tags contains 'apparel' or product.tags contains 'gear' %}
+  {% assign is_apparel_or_gear = true %}
+{% endif %}
+
+{% if is_apparel_or_gear %}
+  {% for option in product.options_with_values %}
+    {% assign option_name_lower = option.name | downcase %}
+    {% if option_name_lower contains 'size' %}
+      {% assign variant_type = 'Size' %}
+      {% break %}
+    {% elsif option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+      {% assign variant_type = 'Color' %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+<div class="buybox-container {% if series_handle == 'core-series' %}is-core{% endif %} {% if series_handle contains 'gladiator' %}is-gladiator-series{% endif %} {% if is_apparel_or_gear %}is-apparel-or-gear{% endif %}"
+     id="buybox-container"
+     data-series="{{ series_handle }}"
+     data-series-featured-default="{{ series_featured_color }}"
+     data-series-accent1-default="{{ series_accent_1 }}"
+     data-is-apparel="{{ is_apparel_or_gear }}"
+     data-is-gear="{{ is_apparel_or_gear }}"
+     style="--series-featured-color: {{ series_featured_color }}; --series-accent-1: {{ series_accent_1 }};">
+  {% assign has_usa_variant = false %}
+  {% if selected_variant.title contains 'USA' or selected_variant.title contains 'usa' %}
+    {% assign has_usa_variant = true %}
+  {% endif %}
+  
+  {% assign is_default_title = false %}
+  {% if selected_variant.title == 'Default Title' %}
+    {% assign is_default_title = true %}
+  {% endif %}
+  
+  {% if product.variants.size > 0 and has_usa_variant == false and is_default_title == false %}
+    {% if is_apparel_or_gear %}
+      <div class="buybox-apparel-selector">
+        {% assign has_size_option = false %}
+        {% assign has_color_option = false %}
+        {% assign size_option_index = -1 %}
+        {% assign color_option_index = -1 %}
+        
+        {% for option in product.options_with_values %}
+          {% assign option_name_lower = option.name | downcase %}
+          {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+            {% assign has_color_option = true %}
+            {% assign color_option_index = forloop.index0 %}
+          {% elsif option_name_lower contains 'size' %}
+            {% assign has_size_option = true %}
+            {% assign size_option_index = forloop.index0 %}
+          {% endif %}
+        {% endfor %}
+
+        {% assign size_values = '' %}
+        {% assign color_values = '' %}
+        {% for variant in product.variants %}
+          {% if has_size_option %}
+            {% assign size_value = variant.options[size_option_index] %}
+            {% if size_values == '' %}
+              {% assign size_values = size_value %}
+            {% elsif size_values contains size_value %}
+            {% else %}
+              {% assign size_values = size_values | append: ',' | append: size_value %}
+            {% endif %}
+          {% endif %}
+          
+          {% if has_color_option %}
+            {% assign color_value = variant.options[color_option_index] %}
+            {% if color_values == '' %}
+              {% assign color_values = color_value %}
+            {% elsif color_values contains color_value %}
+            {% else %}
+              {% assign color_values = color_values | append: ',' | append: color_value %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% assign size_array = size_values | split: ',' %}
+        {% assign color_array = color_values | split: ',' %}
+        
+        {% if has_size_option %}
+        <div class="apparel-size-section">
+          <span class="apparel-label">Size</span>
+          {% if size_array.size > 1 %}
+            <div class="size-combobox" id="size-combobox">
+              <button type="button" class="size-trigger" id="size-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="event.preventDefault(); var c=this.parentElement; var expanded=c.getAttribute('aria-expanded')==='true'; c.setAttribute('aria-expanded',expanded?'false':'true'); this.setAttribute('aria-expanded',expanded?'false':'true');">
+                <span class="size-trigger-text" id="size-trigger-text">{{ selected_variant.options[size_option_index] }}</span>
+                <svg class="trigger-caret" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="size-panel" id="size-panel" role="listbox">
+                <ul class="size-list">
+                  {% for size in size_array %}
+                    {% assign size_available = false %}
+                    {% for variant in product.variants %}
+                      {% if variant.options[size_option_index] == size and variant.available %}
+                        {% assign size_available = true %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                    <li class="size-option {% unless size_available %}is-disabled{% endunless %}"
+                        role="option"
+                        aria-selected="{% if selected_variant.options[size_option_index] == size %}true{% else %}false{% endif %}"
+                        data-size="{{ size }}"
+                        data-available="{{ size_available }}"
+                        onclick="{% if size_available %}selectApparelVariant('{{ size }}', null); closeSizeCombobox();{% endif %}">
+                      <span class="option-text">{{ size }}{% unless size_available %} – Out Of Stock{% endunless %}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% else %}
+            <div class="apparel-static-display">{{ selected_variant.options[size_option_index] }}</div>
+          {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if has_color_option %}
+        <div class="apparel-color-section">
+          <span class="apparel-label">Color</span>
+          {% if color_array.size > 1 %}
+            <div class="apparel-color-display">
+              {% for color in color_array %}
+              {% assign color_available = false %}
+              {% assign color_hex = '#333' %}
+              {% assign swatch_image = blank %}
+
+              {%- for variant in product.variants -%}
+                {%- if variant.options[color_option_index] == color -%}
+                  {%- if variant.available -%}
+                    {% assign color_available = true %}
+                    {% break %}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- assign lookup_handle = color | handleize -%}
+              {%- assign swatch_entry = shop.metaobjects['swatches'][lookup_handle] -%}
+
+              {%- if swatch_entry -%}
+                {%- if swatch_entry.color_swatch -%}
+                  {% assign color_hex = swatch_entry.color_swatch.value | default: '#333' %}
+                {%- endif -%}
+                {%- if swatch_entry.swatch_image -%}
+                  {% assign swatch_image = swatch_entry.swatch_image.value %}
+                {%- endif -%}
+              {%- endif -%}
+
+              <div
+                class="color-display-box{% if selected_variant.options[color_option_index] == color %} active{% endif %}{% unless color_available %} disabled{% endunless %}"
+                data-color="{{ color }}"
+                data-available="{{ color_available }}"
+                {% unless color_available %}disabled{% endunless %}
+                onclick="{% if color_available %}selectApparelVariant(null, '{{ color | escape }}'){% endif %}"
+              >
+                {% if swatch_image != blank %}
+                  <span
+                    class="color-swatch-circle"
+                    style="background-image:url('{{ swatch_image | image_url: width: 40 }}'); background-size: cover; background-position: center;"
+                  ></span>
+                {% else %}
+                  <span
+                    class="color-swatch-circle"
+                    style="background-color: {{ color_hex }};"
+                  ></span>
+                {% endif %}
+                <span class="color-name">{{ color }}{% unless color_available %} – Out Of Stock{% endunless %}</span>
+              </div>
+            {% endfor %}
+          </div>
+          {% else %}
+            {% assign single_color = color_array[0] %}
+            {% assign lookup_handle = single_color | handleize %}
+            {% assign swatch_entry = shop.metaobjects['swatches'][lookup_handle] %}
+            {% assign color_hex = '#333' %}
+            {% assign swatch_image = blank %}
+            {% if swatch_entry %}
+              {% if swatch_entry.color_swatch %}
+                {% assign color_hex = swatch_entry.color_swatch.value | default: '#333' %}
+              {% endif %}
+              {% if swatch_entry.swatch_image %}
+                {% assign swatch_image = swatch_entry.swatch_image.value %}
+              {% endif %}
+            {% endif %}
+            <div class="apparel-static-color-display">
+              {% if swatch_image != blank %}
+                <span class="color-swatch-circle" style="background-image:url('{{ swatch_image | image_url: width: 40 }}'); background-size: cover; background-position: center;"></span>
+              {% else %}
+                <span class="color-swatch-circle" style="background-color: {{ color_hex }};"></span>
+              {% endif %}
+              <span class="color-name">{{ single_color }}</span>
+            </div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      
+      <script>
+      window.selectApparelVariant = function(newSize, newColor) {
+        const select = document.getElementById('variant-select');
+        if (!select) return;
+        
+        const currentTitle = select.options[select.selectedIndex].text;
+        const parts = currentTitle.split(' / ');
+        
+        for (let i = 0; i < select.options.length; i++) {
+          const opt = select.options[i];
+          const optParts = opt.text.split(' / ');
+          
+          let matches = true;
+          for (let j = 0; j < optParts.length; j++) {
+            const searchValue = newSize || newColor;
+            const currentValue = parts[j];
+            const optValue = optParts[j];
+            
+            if (searchValue && optValue === searchValue) continue;
+            if (searchValue && currentValue !== searchValue && optValue === currentValue) continue;
+            if (searchValue && optValue !== searchValue && optValue !== currentValue) {
+              matches = false;
+              break;
+            }
+          }
+          
+          if (matches && (newSize && opt.text.includes(newSize) || newColor && opt.text.includes(newColor))) {
+            select.selectedIndex = i;
+            document.getElementById('selected-variant-id').value = opt.value;
+            
+            const variantId = opt.value;
+            const variants = window.productVariants || [];
+            const variant = variants.find(v => String(v.id) === String(variantId));
+            
+            // Check if variant is available
+            const variantAvailable = variant ? variant.available : false;
+            
+            // Handle out of stock UI updates
+            const purchaseOptions = document.querySelector('.buybox-purchase-options');
+            const quantitySelector = document.querySelector('.buybox-quantity');
+            const paymentOptions = document.querySelector('.buybox-payment-options');
+            const addBtn = document.getElementById('add-to-cart-btn');
+            const cartIcon = document.getElementById('cart-icon');
+            const btnText = addBtn ? addBtn.querySelector('span') : null;
+            
+            if (!variantAvailable) {
+              // Out of stock - hide UI elements and disable button
+              if (purchaseOptions) purchaseOptions.style.display = 'none';
+              if (quantitySelector) quantitySelector.style.display = 'none';
+              if (paymentOptions) {
+                paymentOptions.style.display = 'none';
+                paymentOptions.classList.add('hide-on-subscribe');
+              }
+              if (addBtn) {
+                addBtn.disabled = true;
+                if (cartIcon) cartIcon.style.display = 'none';
+                if (btnText) btnText.textContent = 'Out of Stock';
+              }
+            } else {
+              // In stock - show UI elements and enable button
+              if (cartIcon) cartIcon.style.display = 'inline-block';
+              if (purchaseOptions) purchaseOptions.style.display = 'flex';
+              if (quantitySelector) quantitySelector.style.display = 'flex';
+              if (paymentOptions) paymentOptions.style.display = '';
+              if (addBtn) {
+                addBtn.disabled = false;
+                if (btnText && window.updateButtonText) window.updateButtonText();
+              }
+            }
+            
+            if (variant && variant.featured_media) {
+              const mediaId = variant.featured_media.id;
+              const allMedia = document.querySelectorAll('.product-gallery__media');
+              let mediaIndex = -1;
+              
+              allMedia.forEach(function(el, idx) {
+                if (mediaIndex === -1 && el.getAttribute('data-media-id') === String(mediaId)) {
+                  mediaIndex = idx;
+                }
+              });
+              
+              if (mediaIndex !== -1 && typeof window.selectGalleryByMediaIndex === 'function') {
+                window.selectGalleryByMediaIndex(mediaIndex, false);
+              }
+              
+              const variantChangedEvent = new CustomEvent('variant:changed', {
+                detail: {
+                  variantId: variantId,
+                  mediaId: mediaId,
+                  variantName: opt.text
+                },
+                bubbles: true
+              });
+              document.dispatchEvent(variantChangedEvent);
+            }
+            
+            if (newSize) {
+              const triggerText = document.getElementById('size-trigger-text');
+              if (triggerText) triggerText.textContent = newSize;
+              document.querySelectorAll('.size-option').forEach(o => {
+                o.setAttribute('aria-selected', o.dataset.size === newSize ? 'true' : 'false');
+              });
+            }
+            
+            if (newColor) {
+              document.querySelectorAll('.color-display-box').forEach(box => {
+                box.classList.toggle('active', box.dataset.color === newColor);
+              });
+            }
+            
+            window.closeSizeCombobox();
+            if (window.updatePricesForVariant) updatePricesForVariant(opt.value);
+            break;
+          }
+        }
+      };
+      
+      window.closeSizeCombobox = function() {
+        const combobox = document.getElementById('size-combobox');
+        const trigger = document.getElementById('size-trigger');
+        if (combobox) combobox.setAttribute('aria-expanded', 'false');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      };
+      
+      // Initialize apparel/gear buybox on page load
+      function initializeApparelBuyBox() {
+        const select = document.getElementById('variant-select');
+        if (!select) return;
+        
+        const selectedOption = select.options[select.selectedIndex];
+        if (!selectedOption) return;
+        
+        const variantId = selectedOption.value;
+        const variants = window.productVariants || [];
+        const variant = variants.find(v => String(v.id) === String(variantId));
+        const variantAvailable = variant ? variant.available : false;
+        
+        const purchaseOptions = document.querySelector('.buybox-purchase-options');
+        const quantitySelector = document.querySelector('.buybox-quantity');
+        const paymentOptions = document.querySelector('.buybox-payment-options');
+        const addBtn = document.getElementById('add-to-cart-btn');
+        const cartIcon = document.getElementById('cart-icon');
+        const btnText = addBtn ? addBtn.querySelector('span') : null;
+        
+        if (!variantAvailable) {
+          // Out of stock - hide UI elements and disable button
+          if (purchaseOptions) purchaseOptions.style.display = 'none';
+          if (quantitySelector) quantitySelector.style.display = 'none';
+          if (paymentOptions) {
+            paymentOptions.style.display = 'none';
+            paymentOptions.classList.add('hide-on-subscribe');
+          }
+          if (addBtn) {
+            addBtn.disabled = true;
+            addBtn.setAttribute('data-initialized', 'true');
+            if (cartIcon) cartIcon.style.display = 'none';
+            if (btnText) btnText.textContent = 'Out of Stock';
+          }
+        } else {
+          // In stock - ensure UI elements are shown
+          if (addBtn) addBtn.setAttribute('data-initialized', 'true');
+        }
+      }
+      
+      // Run initialization when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeApparelBuyBox);
+      } else {
+        initializeApparelBuyBox();
+      }
+      
+      document.addEventListener('click', function(e) {
+        const combobox = document.getElementById('size-combobox');
+        if (combobox && !combobox.contains(e.target)) {
+          combobox.setAttribute('aria-expanded', 'false');
+          const trigger = document.getElementById('size-trigger');
+          if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        }
+      });
+      </script>
+    {% else %}
+      <div class="buybox-variant-selector" data-variant-count="{{ product.variants.size }}">
+        <div class="buybox-flavor-header">
+          <span class="buybox-flavor-label">Flavor:</span>
+          <div class="buybox-flavor-static" id="flavor-static-display">
+            <img class="static-swatch" id="static-swatch" src="{{ selected_variant.metafields.custom.sfp_section.value.flavor_swatch_image.value.swatch_image.value | image_url: width: 28 }}" alt="">
+            <span class="static-text" id="static-text">{{ selected_variant.title | replace: ' / US', '' | replace: ' / Domestic', '' }}{% unless selected_variant.available %} - Out of Stock{% endunless %}</span>
+          </div>
+
+        {% assign selected_sfp = selected_variant.metafields.custom.sfp_section.value %}
+        {% assign selected_swatch_obj = selected_sfp.flavor_swatch_image.value %}
+        {% assign selected_gradient_list = selected_swatch_obj.flavor_gradient_color.value %}
+        {% assign selected_gradient_1 = selected_gradient_list[0] %}
+        {% assign selected_gradient_2 = selected_gradient_list[1] %}
+        {% assign selected_bg_style = '' %}
+        {% if selected_gradient_1 != blank and selected_gradient_2 != blank %}
+          {% assign selected_bg_style = 'linear-gradient(0deg, ' | append: selected_gradient_1 | append: ' 0%, ' | append: selected_gradient_2 | append: ' 100%)' %}
+        {% elsif selected_swatch_obj.flavor_swatch_main_color != blank %}
+          {% assign selected_bg_style = selected_swatch_obj.flavor_swatch_main_color %}
+        {% else %}
+          {% assign selected_bg_style = selected_swatch_obj.color_swatch | default: '#AE1F24' %}
+        {% endif %}
+        
+        <div class="flavor-combobox" id="flavor-combobox" style="--active-color:#e0e0e0">
+          <button type="button" class="flavor-trigger" id="flavor-trigger" aria-haspopup="listbox" aria-expanded="false" style="--swatch-bg: {{ selected_bg_style }}">
+            <img class="trigger-swatch" id="trigger-swatch" alt="">
+            <span class="trigger-text" id="trigger-text">{{ selected_variant.title | replace: ' / US', '' | replace: ' / Domestic', '' }}</span>
+            {% if selected_sfp.new_badge %}
+              <span class="trigger-new-badge">NEW!</span>
+            {% endif %}
+            <svg class="trigger-caret" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+
+          <div class="flavor-panel" id="flavor-panel" role="listbox">
+            <ul class="flavor-list">
+              {% for variant in product.variants %}
+                {% assign v_sfp_raw = variant.metafields.custom.sfp_section.value %}
+                {% assign v_sfp = v_sfp_raw | first | default: v_sfp_raw %}
+                
+                {% assign swatch_obj = v_sfp.flavor_swatch_image.value %}
+                {% assign swatch_image = swatch_obj.swatch_image.value %}
+                {% assign swatch_color = swatch_obj.color_swatch %}
+                {% assign v_name = variant.title | replace: ' / US', '' | replace: ' / Domestic', '' %}
+                
+                {% assign v_featured = series_featured_color %}
+                {% assign v_accent1 = series_accent_1 %}
+                {% assign v_series_handle = series_handle %}
+
+                {% assign v_gradient_list = swatch_obj.flavor_gradient_color.value %}
+                {% assign v_gradient_color_1 = v_gradient_list[0] %}
+                {% assign v_gradient_color_2 = v_gradient_list[1] %}
+                {% assign v_bg_style = '' %}
+                {% if v_gradient_color_1 != blank and v_gradient_color_2 != blank %}
+                  {% assign v_bg_style = 'linear-gradient(0deg, ' | append: v_gradient_color_1 | append: ' 0%, ' | append: v_gradient_color_2 | append: ' 100%)' %}
+                {% elsif swatch_obj.flavor_swatch_main_color != blank %}
+                  {% assign v_bg_style = swatch_obj.flavor_swatch_main_color %}
+                {% else %}
+                  {% assign v_bg_style = swatch_color | default: '#AE1F24' %}
+                {% endif %}
+                
+                <li 
+                  class="flavor-option {% unless variant.available %}is-disabled{% endunless %}"
+                  role="option"
+                  aria-selected="{% if variant == selected_variant %}true{% else %}false{% endif %}"
+                  data-variant-id="{{ variant.id }}"
+                  data-available="{{ variant.available }}"
+                  data-variant-name="{{ v_name }}"
+                  data-swatch-url="{{ swatch_image | image_url: width: 40 }}"
+                  data-swatch-color="{{ swatch_color }}"
+                  data-swatch-bg="{{ v_bg_style }}"
+                  data-series="{{ v_series_handle }}"
+                  data-series-featured="{{ v_featured }}"
+                  data-series-accent1="{{ v_accent1 }}"
+                  data-new-badge="{% if v_sfp.new_badge %}true{% else %}false{% endif %}"
+                >
+                  <img class="option-swatch" src="{{ swatch_image | image_url: width: 40 }}" alt="">
+                  <span class="option-text">{{ v_name }}{% unless variant.available %} – Out Of Stock{% endunless %}</span>
+                  {% if v_sfp.new_badge %}
+                    <span class="dropdown-new-badge" style="--badge-bg: {{ v_bg_style }}">NEW!</span>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="buybox-variant-grid" data-variant-count="{{ product.variants.size }}">
+        {% for variant in product.variants %}
+          {% assign v_sfp_raw = variant.metafields.custom.sfp_section.value %}
+          {% assign variant_sfp = v_sfp_raw | first | default: v_sfp_raw %}
+          
+          {% assign swatch_obj = variant_sfp.flavor_swatch_image.value %}
+          {% assign swatch_image = swatch_obj.swatch_image.value %}
+          {% assign swatch_name = swatch_obj.name %}
+          {% assign swatch_color = swatch_obj.color_swatch %}
+          {% assign swatch_main_color = swatch_obj.flavor_swatch_main_color %}
+          {% assign swatch_border_color = swatch_obj.flavor_swatch_border_color %}
+          
+          {% assign gradient_list = swatch_obj.flavor_gradient_color.value %}
+          {% assign gradient_color_1 = gradient_list[0] %}
+          {% assign gradient_color_2 = gradient_list[1] %}
+          {% assign gradient_color_3 = gradient_list[2] %}
+          
+          {% assign bg_style = '' %}
+          
+          {% if swatch_main_color != blank %}
+            {% assign bg_style = swatch_main_color %}
+          {% elsif swatch_color != blank %}
+            {% assign bg_style = swatch_color %}
+          {% else %}
+            {% assign bg_style = '#AE1F24' %}
+          {% endif %}
+          
+          {% assign v_featured = series_featured_color %}
+          {% assign v_accent1 = series_accent_1 %}
+          {% assign v_series_handle = series_handle %}
+          
+          <div class="buybox-variant-wrapper"
+               style="--swatch-bg: {{ bg_style }}; --name-top-bg: {{ bg_style }};">
+            {% if variant_sfp.new_badge %}
+              <div class="buybox-new-badge">NEW!</div>
+            {% endif %}
+            <div class="buybox-variant-option {% if variant == selected_variant %}active{% endif %} {% unless variant.available %}sold-out{% endunless %}"
+                 data-variant-id="{{ variant.id }}"
+                 data-variant-price="{{ variant.price }}"
+                 data-variant-available="{{ variant.available }}"
+                 data-variant-name="{{ variant.title | replace: ' / US', '' | replace: ' / Domestic', '' }}"
+                 data-swatch-url="{{ swatch_image | image_url: width: 60 }}"
+                 data-series="{{ v_series_handle }}"
+                 data-series-featured="{{ v_featured }}"
+                 data-series-accent1="{{ v_accent1 }}"
+                 {% if variant.featured_image %}
+                 data-media-id="{% for media in product.media %}{% if media.preview_image.src == variant.featured_image.src %}{{ media.id }}{% endif %}{% endfor %}"
+                 {% endif %}
+                 onclick="selectVariant(this); if(window.updateStaticDisplay) window.updateStaticDisplay(this.dataset.variantName, this.dataset.swatchUrl, this.dataset.variantAvailable);">
+              <div class="buybox-variant-name-top">
+                {{ variant.title | replace: ' / US', '' | replace: ' / Domestic', '' }}
+              </div>
+              <div class="buybox-variant-inner">
+                <div class="buybox-variant-swatch">
+                  {% if swatch_image %}
+                    <img src="{{ swatch_image | image_url: width: 90 }}" alt="{{ swatch_name | default: variant.title }}" loading="lazy">
+                  {% else %}
+                    <div class="buybox-swatch-placeholder">{{ variant.title | slice: 0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="buybox-variant-info" data-variant-title="{{ variant.title | replace: ' / US', '' | replace: ' / Domestic', '' }}">
+                  <span>{{ variant.title | replace: ' / US', '' | replace: ' / Domestic', '' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    </div>
+    {% endif %}
+  {% endif %}
+  
+  {% if product.variants.size == 1 %}
+    <input type="hidden" name="id" id="selected-variant-id" value="{{ product.variants.first.id }}">
+  {% endif %}
+
+  <select id="variant-select" name="id" style="display: none;">
+    {% for variant in product.variants %}
+      <option value="{{ variant.id }}" {% if variant == selected_variant %}selected{% endif %}>
+        {{ variant.title }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <form method="post" action="/cart/add" class="buybox-form" id="buybox-form">
+    <input type="hidden" name="id" id="selected-variant-id" value="{{ selected_variant.id }}">
+    <input type="hidden" id="selected-selling-plan-id" value="">
+
+    <div class="buybox-purchase-options">
+      {% if product.selling_plan_groups.size > 0 %}
+        {% assign first_plan = product.selling_plan_groups.first.selling_plans.first %}
+        {% assign discount_value = first_plan.price_adjustments[0].value %}
+        
+        <label class="buybox-purchase-option subscribe-option">
+          <div class="buybox-option-content">
+            <div class="buybox-option-badge">Best Value</div>
+            
+            <div class="buybox-header-row">
+              <input type="radio" name="purchase_type" value="subscribe" {% if default_purchase_option == 'subscribe' %}checked{% endif %}
+                     data-selling-plan-id="{{ first_plan.id }}"
+                     data-discount="{{ discount_value }}">
+              <div class="buybox-option-header">
+                <span class="buybox-option-title" id="subscribe-title">Subscribe & Save <span class="mobile-discount" id="mobile-discount">{{ discount_value }}%</span></span>
+                <div class="buybox-subscribe-pricing">
+                  <span class="buybox-discount-badge" id="discount-badge"><span class="buybox-discount-badge-text">Save {{ discount_value }}%</span></span>
+                  <span class="buybox-option-price subscribe-price" id="subscribe-price">
+                    {% if selected_variant.selling_plan_allocations.first %}
+                      {{ selected_variant.selling_plan_allocations.first.price | money }}
+                    {% else %}
+                      {{ selected_variant.price | money }}
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="buybox-divider-row show">
+              <div class="buybox-subscribe-divider" id="subscribe-divider-onetime"></div>
+            </div> 
+
+            <div class="buybox-frequency-row{% if default_purchase_option == 'subscribe' %} show{% endif %}">
+              <div class="buybox-frequency-selector" id="frequency-selector">
+                <label for="delivery-frequency">Delivery Frequency:</label>
+                <select id="delivery-frequency" name="delivery_frequency">
+                  {% for selling_plan_group in product.selling_plan_groups %}
+                    {% for selling_plan in selling_plan_group.selling_plans %}
+                      {% assign frequency_parts = selling_plan.name | split: ' - ' | last | split: ' and ' | first | split: 'Delivered ' %}
+                      {% assign frequency_full = frequency_parts[1] | default: frequency_parts[0] %}
+                      {% assign frequency_text = frequency_full | split: '.' | first %}
+                      <option value="{{ selling_plan.id }}" 
+                              data-discount="{{ selling_plan.price_adjustments[0].value }}"
+                              {% if forloop.first %}selected{% endif %}>
+                        {{ frequency_text }}
+                      </option>
+                    {% endfor %}
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="buybox-benefits-row show">
+              <ul class="buybox-benefits" id="subscribe-benefits">
+              <li class="subscribe-only-benefit{% if default_purchase_option == 'onetime' %} hide{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M13.3337 4L6.00033 11.3333L2.66699 8" stroke="#35bf86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span><span id="initial-discount">{{ discount_value }}%</span> Off First Order</span>
+              </li>
+              <li class="subscribe-only-benefit{% if default_purchase_option == 'onetime' %} hide{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M13.3337 4L6.00033 11.3333L2.66699 8" stroke="#35bf86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>15% Off Recurring Orders</span>
+              </li>
+              <li class="onetime-benefit{% if default_purchase_option == 'onetime' %} show{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M13.3337 4L6.00033 11.3333L2.66699 8" stroke="#35bf86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span id="onetime-savings-text">You'll Save <strong>$0.00</strong> Today When You Subscribe!</span>
+              </li>
+              <li class="onetime-benefit{% if default_purchase_option == 'onetime' %} show{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M13.3337 4L6.00033 11.3333L2.66699 8" stroke="#35bf86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span><span class="dynamic-first-discount"></span> Off Your First Order, 15% Off Recurring Orders!</span>
+              </li>
+              <li class="subscribe-only-benefit{% if default_purchase_option == 'onetime' %} hide{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M13.3337 4L6.00033 11.3333L2.66699 8" stroke="#35bf86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Pause, Cancel, or Skip Anytime</span>
+              </li>
+              <li class="subscribe-only-benefit{% if default_purchase_option == 'onetime' %} hide{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M13.3337 4L6.00033 11.3333L2.66699 8" stroke="#35bf86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Swap Products or Flavors</span>
+              </li>
+              </ul>
+            </div>
+          </div>
+        </label>
+      {% endif %}
+
+      <label class="buybox-purchase-option onetime-option">
+        <div class="buybox-option-content">
+          <div class="buybox-header-row">
+            <input type="radio" name="purchase_type" value="onetime" {% if default_purchase_option == 'onetime' %}checked{% endif %}>
+            <div class="buybox-option-header">
+              <span class="buybox-option-title">One-Time Purchase</span>
+              <span class="buybox-option-price" id="onetime-price">{{ selected_variant.price | money }}</span>
+            </div>
+          </div>
+        </div>
+      </label>
+    </div>
+
+    <div class="buybox-actions">
+      <div class="buybox-quantity">
+        <button type="button" class="buybox-qty-btn" onclick="updateQuantity(-1)">−</button>
+        <input type="number" name="quantity" value="1" min="1" class="buybox-qty-input" id="quantity-input">
+        <button type="button" class="buybox-qty-btn" onclick="updateQuantity(1)">+</button>
+      </div>
+      
+      <button type="submit" class="buybox-add-to-cart" id="add-to-cart-btn" data-product-title="{{ product.title }}">
+        <i class="fa-sharp fa-solid fa-cart-circle-plus" id="cart-icon"></i>
+        <span id="add-to-cart-text">Add to Cart</span>
+      </button>
+    </div>
+
+    <div class="buybox-payment-options">
+      <div class="buybox-payment-item">
+        <div class="payment-main-group">
+          <span>or 4 payments of </span>
+          <strong id="payment-amount">{{ selected_variant.price | divided_by: 4 | money }}</strong>
+          <span> with </span>
+          <div class="payment-logos-group">
+            <span class="payment-logo-wrapper">
+              {% if series_handle == 'core-series' or 'gladiator' %}
+                <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/sezzle-light.svg?v=1761600001" alt="Sezzle" class="payment-logo" style="height: 18px; width: auto; display: block;">
+              {% else %}
+                <img src="https://media.sezzle.com/branding/2.0/Sezzle_Logo_FullColor.svg" alt="Sezzle" class="payment-logo" style="height: 18px; width: auto; display: block;">
+              {% endif %}
+            </span>
+            <span class="payment-logo-wrapper">
+              {% if series_handle == 'core-series' or 'gladiator'%}
+                <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/Afterpay_logo.svg?v=1763037720" alt="Afterpay" class="payment-logo" style="height: 18px; width: auto; display: block;">
+              {% else %}
+              <svg class="payment-logo" width="98" height="24" viewBox="0 0 98 24" fill="none" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="height: 18px; width: auto; display: block;">
+          <g clip-path="url(#clip0_4312_3421)">
+            <path d="M38.0996 6.1685C38.0591 6.06058 37.9563 5.98914 37.8414 5.98914H35.598C35.4831 5.98914 35.3802 6.06065 35.3398 6.16865L31.0179 17.7084C30.9501 17.8895 31.0834 18.0829 31.2762 18.0829H32.9756C33.0909 18.0829 33.1941 18.0109 33.2343 17.9023L34.1573 15.4048H39.2401L40.1712 17.903C40.2115 18.0112 40.3145 18.0829 40.4296 18.0829H42.1713C42.3641 18.0829 42.4974 17.8894 42.4294 17.7082L38.0996 6.1685ZM34.8953 13.4088L36.6819 8.55779L38.4936 13.4088H34.8953Z" fill="black"></path>
+            <path d="M53.3589 16.2607C53.2032 16.274 53.0553 16.2807 52.8445 16.2807C52.14 16.2807 51.7038 16.188 51.7038 15.4132V11.0759H53.248C53.4004 11.0759 53.5239 10.9519 53.5239 10.7989V9.50859C53.5239 9.35559 53.4004 9.23156 53.248 9.23156H51.7038V6.94832C51.7038 6.79532 51.5803 6.67129 51.4279 6.67129H49.8325C49.6801 6.67129 49.5566 6.79532 49.5566 6.94832V9.23156H46.0759V8.84415C46.0759 7.90088 46.4869 7.67353 47.2502 7.67353C47.3801 7.67353 47.4765 7.67353 47.5705 7.67585C47.7258 7.67966 47.8541 7.55498 47.8541 7.39896V6.0989C47.8541 5.95107 47.7382 5.82897 47.5911 5.82214C47.3792 5.81229 47.2208 5.81229 46.9817 5.81229C44.91 5.81229 43.8951 6.84817 43.8951 8.70094V9.23156H42.9632C42.8108 9.23156 42.6873 9.35559 42.6873 9.50859V10.7989C42.6873 10.9519 42.8108 11.0759 42.9632 11.0759H43.8951V17.8059C43.8951 17.9589 44.0186 18.0829 44.171 18.0829H45.8C45.9523 18.0829 46.0759 17.9589 46.0759 17.8059V11.0759H49.5566V15.8175C49.5566 17.6282 50.4792 18.184 52.2071 18.184C52.6571 18.184 53.0738 18.1506 53.4258 18.0974C53.56 18.0771 53.6582 17.9599 53.6582 17.8237V16.5367C53.6582 16.3745 53.5199 16.247 53.3589 16.2607Z" fill="black"></path>
+            <path d="M58.8332 9.06311C56.3589 9.06311 54.5891 11.0591 54.5891 13.6614C54.5891 16.3986 56.359 18.2682 58.9171 18.2682C60.5737 18.2682 61.9484 17.4562 62.6295 16.0424C62.6998 15.8964 62.6257 15.7211 62.4741 15.6653L61.1531 15.1791C61.0182 15.1294 60.8666 15.1917 60.8081 15.3236C60.4843 16.0537 59.7841 16.4407 58.9256 16.4407C57.701 16.4407 56.837 15.5732 56.6777 14.1415H62.5247C62.6771 14.1415 62.8006 14.0175 62.8006 13.8645V13.4593C62.8006 11.0086 61.4166 9.06311 58.8332 9.06311ZM56.7699 12.5834C57.0635 11.4465 57.8268 10.857 58.8165 10.857C60.0243 10.857 60.603 11.6571 60.6199 12.5834H56.7699Z" fill="black"></path>
+            <path d="M69.2131 9.19165C69.1194 9.18525 69.0162 9.18097 68.8981 9.18097C67.7909 9.18097 66.9018 9.71163 66.516 10.5117V9.50859C66.516 9.35559 66.3925 9.23156 66.2401 9.23156H64.6111C64.4587 9.23156 64.3352 9.35559 64.3352 9.50859V17.8059C64.3352 17.9589 64.4587 18.0829 64.6111 18.0829H66.2401C66.3925 18.0829 66.516 17.9589 66.516 17.8059V13.5099C66.516 12.1203 67.4722 11.3286 68.722 11.3286C68.8903 11.3286 69.0294 11.3345 69.1687 11.3462C69.3299 11.3598 69.4685 11.2328 69.4685 11.0704V9.46792C69.4685 9.32291 69.3572 9.20147 69.2131 9.19165Z" fill="black"></path>
+            <path d="M75.5747 9.06311C74.4508 9.06311 73.6119 9.5095 73.0751 10.1579V9.50859C73.0751 9.35559 72.9516 9.23156 72.7992 9.23156H71.1702C71.0178 9.23156 70.8943 9.35559 70.8943 9.50859V20.821C70.8943 20.974 71.0178 21.098 71.1702 21.098H72.7992C72.9516 21.098 73.0751 20.974 73.0751 20.821V17.165C73.6119 17.8218 74.4508 18.2682 75.5747 18.2682C78.0239 18.2682 79.4329 16.1796 79.4329 13.6614C79.4329 11.1517 78.0239 9.06311 75.5747 9.06311ZM75.0966 16.3733C73.9139 16.3733 73.0248 15.489 73.0248 13.9225V13.4172C73.0248 11.8255 73.9139 10.958 75.0966 10.958C76.4889 10.958 77.2354 12.0613 77.2354 13.6614C77.2354 15.27 76.4889 16.3733 75.0966 16.3733Z" fill="black"></path>
+            <path d="M88.3744 16.4294C88.0344 16.4142 87.8959 16.2397 87.8959 15.8427V12.1287C87.8959 10.0822 86.5875 9.06311 84.4151 9.06311C82.5365 9.06311 81.2664 10.0814 80.7597 11.415C80.6988 11.5754 80.7937 11.7528 80.9611 11.7876L82.4765 12.1031C82.6099 12.1308 82.7443 12.0566 82.7908 11.928C83.0345 11.2533 83.5045 10.9159 84.3312 10.9159C85.3544 10.9159 85.7654 11.4128 85.7654 12.2129V12.356L83.4505 12.8192C81.7142 13.1562 80.3806 13.8973 80.3806 15.6238C80.3806 17.1986 81.6639 18.2345 83.3666 18.2345C84.5158 18.2345 85.4215 17.8724 85.9836 17.2492C86.3076 17.9397 87.0711 18.2412 88.3935 18.1116C88.5345 18.0978 88.6425 17.9778 88.6425 17.8355V16.706C88.6425 16.5563 88.5234 16.4361 88.3744 16.4294ZM85.7654 14.95C85.7654 15.9859 84.7841 16.5333 83.7524 16.5333C83.0143 16.5333 82.5363 16.1628 82.5363 15.5143C82.5363 14.7647 83.1401 14.5036 83.9537 14.3352L85.7654 13.9562V14.95Z" fill="black"></path>
+            <path d="M97.1096 9.23157H95.4829C95.3646 9.23157 95.2595 9.30723 95.2216 9.41967L93.2552 15.2448L91.2396 9.4177C91.201 9.30627 91.0964 9.23157 90.9789 9.23157H89.3006C89.1078 9.23157 88.9745 9.42493 89.0423 9.60606L92.0894 17.7461L91.779 18.5124C91.5106 19.1862 91.1835 19.3631 90.5377 19.3631C90.3916 19.3631 90.2799 19.3578 90.1639 19.3486C90.0037 19.336 89.8667 19.4633 89.8667 19.6247V20.8745C89.8667 21.0171 89.9745 21.1369 90.1158 21.1503C90.281 21.166 90.4419 21.1738 90.739 21.1738C92.6262 21.1738 93.4146 20.2053 93.9514 18.7483L97.3679 9.60592C97.4356 9.4248 97.3023 9.23157 97.1096 9.23157Z" fill="black"></path>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M23.59 3.46525C23.0756 2.04517 21.9564 0.926099 20.5371 0.411806C19.2295 0 18.0402 0 15.6189 0H8.3589L8.35983 0.000924232C5.95336 0.000924232 4.74921 0.000924228 3.46287 0.400726C2.04355 0.91502 0.924351 2.03409 0.410004 3.45509C0 4.75421 0 5.95638 0 8.36349V15.6264C0 18.0464 0 19.2384 0.399848 20.5348C0.9142 21.9548 2.03339 23.0739 3.45271 23.5882C4.75105 24 5.95336 24 8.35983 24H15.6309C18.0402 24 19.2416 24 20.5371 23.5882C21.9574 23.0739 23.0756 21.9548 23.59 20.5348C24 19.2356 24 18.0335 24 15.6264V8.37365C24 5.96377 24 4.7616 23.59 3.46525ZM17.2889 8.21523L15.905 9.3499C15.7848 9.4485 15.6092 9.42698 15.5114 9.30605C14.8081 8.43622 13.7008 7.94464 12.5014 7.94464C11.1647 7.94464 10.3338 8.52259 10.3338 9.3534C10.3338 10.0397 10.9841 10.4009 12.971 10.8344C15.4999 11.3762 16.6559 12.4238 16.6559 14.1938C16.6559 16.4127 14.8489 18.0506 12.028 18.2239L11.7528 19.5364C11.7259 19.6647 11.6127 19.7566 11.4816 19.7566H9.31146C9.13261 19.7566 9.00062 19.5896 9.04192 19.4156L9.39025 17.9479C7.99198 17.5501 6.86683 16.7763 6.21092 15.8211C6.12833 15.7009 6.15573 15.5366 6.27089 15.447L7.78772 14.2674C7.91273 14.1702 8.09194 14.1986 8.18435 14.3272C8.98811 15.4458 10.2212 16.1082 11.7066 16.1082C13.0433 16.1082 14.0548 15.458 14.0548 14.5189C14.0548 13.7964 13.549 13.4713 11.8511 13.1101C8.92488 12.496 7.76884 11.4124 7.76884 9.64237C7.76884 7.58873 9.49497 6.03739 12.0987 5.8359L12.383 4.48034C12.4099 4.35205 12.523 4.26018 12.6541 4.26018H14.7951C14.9717 4.26018 15.1033 4.42323 15.0659 4.59583L14.7367 6.11469C15.8572 6.45953 16.7695 7.07612 17.3373 7.83698C17.4254 7.95492 17.4027 8.12192 17.2889 8.21523Z" fill="black"></path>
+          </g>
+          <defs>
+            <clipPath id="clip0_4312_3421">
+              <rect width="98" height="24" fill="white"></rect>
+            </clipPath>
+          </defs>
+        </svg>
+              {% endif %}
+            </span>
+          </div>
+        </div>
+        <div class="payment-affirm-group">
+          <span class="payment-logo-wrapper">
+            {% if series_handle == 'core-series' or 'gladiator' %}
+              <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/white_logo-solid_bg.svg?v=1762749600" alt="Affirm" class="payment-logo" style="height: 18px; width: auto; display: block;position:relative; top:1px;">
+            {% else %}
+              <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/black_logo-white_bg.svg?v=1762749598" alt="Affirm" class="payment-logo" style="height: 18px; width: auto; display: block;position:relative; top:1px;">
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="pi-mobile-accordions-wrapper" style="--series-featured-color: {{ series_featured_color }}; --series-accent-1: {{ series_accent_1 }}; --series-border: #000;" data-product-id="{{ product.id }}"></div>
+
+<style>
+.buybox-apparel-selector {
+  /*margin-bottom: 24px;*/
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  align-items: flex-start;
+}
+
+.apparel-size-section,
+.apparel-color-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.apparel-size-section {
+  flex: 1;
+}
+
+.apparel-color-section {
+  flex: 1;
+}
+
+.apparel-label {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Acumin Pro', sans-serif;
+  color: var(--series-accent-1, #333);
+}
+
+.is-core .apparel-label {
+  color: #fff;
+}
+
+.size-combobox {
+  --br: 4px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  min-width: 140px;
+  max-width: 300px;
+}
+.size-trigger {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #ddd;
+  border-radius: var(--br);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, border-radius 0.2s ease;
+  height: 52px;
+  box-sizing: border-box;
+}
+.size-combobox[aria-expanded="true"] .size-trigger {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top-color: transparent;
+}
+.size-trigger-text {
+  flex: 1;
+  font-family: 'Acumin Pro', sans-serif;
+  font-size: 16px;
+  color: #333;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.size-combobox .trigger-caret {
+  margin-left: auto;
+  color: #999;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+.size-combobox[aria-expanded="true"] .trigger-caret {
+  transform: rotate(180deg);
+}
+.size-panel {
+  position: absolute;
+  bottom: calc(100% - 1px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 5;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  border-top-left-radius: var(--br);
+  border-top-right-radius: var(--br);
+  max-height: 0;
+  box-shadow: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: max-height 0.28s ease, opacity 0.18s ease;
+}
+.size-combobox[aria-expanded="true"] .size-panel {
+  max-height: 300px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.size-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  display: flex;
+  flex-direction: column-reverse;
+  overflow-y: auto;
+  max-height: 280px;
+}
+.size-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.size-option:hover:not(.is-disabled) {
+  background: #f6f6f6;
+}
+.size-option[aria-selected="true"] {
+  display: none;
+}
+.size-option.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.size-option .option-text {
+  flex: 1;
+  text-align: left;
+  font-size: 16px;
+  color: #333;
+}
+
+.apparel-color-display {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+@media (max-width: 767px) {
+  .buybox-apparel-selector {
+    flex-direction: column;
+        gap: 12px;
+  }
+  .size-combobox {
+  max-width:unset!important;
+width:unset!important;
+min-width: unset!important;
+}
+.color-display-box{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100px;
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 44px;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+  .apparel-size-section {
+    width: 100%;
+    max-width: 100%;
+  }
+  .apparel-color-section {
+    width: 100%;
+  }
+  .apparel-color-display {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 12px 8px;
+  }
+}
+.color-display-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  max-width: 150px;
+}
+.color-display-box:hover:not(.disabled) {
+  background: #f5f5f5;
+}
+.color-display-box.active {
+  border-color: #000 !important;
+  background: #f9f9f9;
+}
+.color-display-box.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.color-display-box .color-swatch-circle {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+.color-name {
+  font-family: 'Acumin Pro', sans-serif;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.apparel-static-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  height: 52px;
+  box-sizing: border-box;
+  font-family: 'Acumin Pro', sans-serif;
+  font-size: 16px;
+  color: #333;
+}
+
+.apparel-static-color-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  min-height: 44px;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  max-width: fit-content; 
+}
+
+.apparel-static-color-display .color-swatch-circle {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+
+.buybox-container {
+  font-family: 'Acumin Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--series-accent-1, #333);
+  padding-top:18px;
+}
+@media screen and (min-width: 1000px) {
+  .buybox-container:has(.buybox-variant-selector) {
+    padding-top: 0px;
+  }
+}
+@media screen and (max-width: 999px) {
+  .buybox-container {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-top:24px;
+  }
+  .buybox-container.is-apparel-or-gear {
+    margin-top: 0px !important;
+  }
+}
+.buybox-add-to-cart {
+  background: var(--series-featured-color, #AE1F24);
+  transition: all 0.3s ease;
+  min-height: 56px;
+  visibility: visible;
+}
+.buybox-add-to-cart[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.buybox-add-to-cart:hover {
+  filter: brightness(1.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.is-core .buybox-add-to-cart {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--series-featured-color, #AE1F24);
+  padding: 16px 32px;
+  border-radius: 4px;
+  font-size: 18px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Gunplay', sans-serif;
+  letter-spacing: 0;
+  color: black;
+  border: 2px solid transparent;
+}
+
+.is-core .buybox-option-badge {
+  left: -2px !important;
+}
+
+.buybox-container.is-core:not(:has(.buybox-variant-selector)) {
+  margin-top: 0px !important;
+}
+
+.is-core .buybox-add-to-cart i {
+  color: black;
+}
+.is-core .buybox-add-to-cart:hover {
+  border: 2px solid var(--series-featured-color) !important;
+  background-color: #000 !important;
+  color: var(--series-featured-color) !important;
+}
+.is-core .buybox-add-to-cart:hover i {
+  color: var(--series-featured-color) !important;
+}
+.buybox-variant-selector[data-variant-count="1"] .flavor-trigger {
+  pointer-events: none;
+  cursor: default;
+}
+.buybox-variant-selector[data-variant-count="1"] .trigger-caret {
+  display: none;
+}
+.buybox-flavor-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 30px;
+  flex-wrap: nowrap;
+  position: relative;
+  z-index: 100;
+}
+@media screen and (max-width: 999px) {
+  .buybox-flavor-header {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+@media (max-width: 767px) {
+  .buybox-flavor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .buybox-variant-selector{
+  margin-top:-24px;
+}
+}
+.buybox-flavor-label {
+  font-size: 16px;
+  font-family: 'Acumin Pro Bold';
+  font-weight: unset;
+  color: var(--series-accent-1, #333);
+  flex-shrink: 0;
+}
+.buybox-container.is-gladiator-series .buybox-flavor-label {
+  color: #fff;
+}
+.buybox-flavor-static {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.buybox-flavor-static .static-swatch {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.buybox-flavor-static .static-text {
+  font-size: 16px;
+  font-family: 'Acumin Pro';
+  color: #333;
+}
+.is-core .buybox-flavor-static .static-text {
+  color: #fff;
+}
+.buybox-container.is-gladiator-series .buybox-flavor-static .static-text {
+  color: #fff;
+}
+.buybox-flavor-static.out-of-stock .static-swatch {
+  filter: grayscale(100%);
+  opacity: 0.5;
+}
+.buybox-flavor-static.out-of-stock .static-text {
+  color: #999;
+}
+.buybox-flavor-static.out-of-stock .static-text span {
+  display: none;
+}
+@media (min-width: 768px) {
+  .buybox-flavor-static {
+    display: flex !important;
+  }
+}
+@media (max-width: 767px) {
+  .buybox-flavor-static {
+    display: none !important;
+  }
+}
+.buybox-variant-grid {
+  display: grid;
+  row-gap: 8px;
+  column-gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+@media (min-width: 768px) {
+  .buybox-variant-grid {
+    grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+    max-width: 100%;
+  }
+  .buybox-variant-grid[data-variant-count="1"] {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    max-width: 120px;
+  }
+  .buybox-variant-grid[data-variant-count="2"] {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    max-width: 248px;
+  }
+  .buybox-variant-grid[data-variant-count="3"] {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    max-width: 376px;
+  }
+}
+@media (max-width: 767px) {
+  .buybox-variant-grid {
+    display: none !important;
+  }
+}
+.flavor-combobox {
+  --br: 8px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  z-index: 100;
+}
+@media (min-width: 768px) {
+  .flavor-combobox {
+    display: none !important;
+  }
+}
+.flavor-trigger {
+  position: relative;
+  z-index: 101;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: var(--br);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, border-radius 0.2s ease;
+}
+.flavor-combobox[aria-expanded="true"] .flavor-trigger {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.trigger-swatch {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  pointer-events: none;
+}
+.trigger-swatch.out-of-stock {
+  filter: grayscale(100%);
+  opacity: 0.5;
+}
+.trigger-text {
+  flex: 1;
+  font-family:'Acumin Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 600;
+}
+.trigger-text.out-of-stock {
+  color: #999;
+}
+.trigger-new-badge {
+  display: none !important;
+  font-size: 14px;
+  font-family: 'Acumin Pro Bold', sans-serif;
+  padding: 4px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  background: var(--swatch-bg, #ed1c24);
+  color: #fff;
+  margin-left: auto;
+  margin-right: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.flavor-option[aria-selected="true"] .dropdown-new-badge {
+  background: #fff !important;
+  color: inherit;
+}
+@media (max-width: 767px) {
+  .trigger-new-badge {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.trigger-caret {
+  margin-left: auto;
+  color: #999;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+.flavor-combobox[aria-expanded="true"] .trigger-caret {
+  transform: rotate(180deg);
+}
+.flavor-panel {
+  position: absolute;
+  bottom: calc(100% - 2px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 9999;
+  overflow: hidden;
+  background: #fff;
+  border: 0;
+  border-bottom: none;
+  border-top-left-radius: var(--br);
+  border-top-right-radius: var(--br);
+  max-height: 0;
+  box-shadow: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: max-height 0.28s ease, opacity 0.18s ease;
+}
+.flavor-combobox[aria-expanded="true"] .flavor-panel {
+  max-height: 420px;
+  border: 2px solid #e0e0e0;
+  border-bottom: none;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.flavor-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  display: flex;
+  flex-direction: column-reverse;
+  overflow-y: auto;
+  max-height: 400px;
+}
+.flavor-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.flavor-option:hover:not(.is-disabled) {
+  background: #f6f6f6;
+}
+.flavor-option[aria-selected="true"] {
+  display: none;
+}
+.flavor-option.is-disabled {
+  opacity: 0.5;
+  cursor: pointer;
+}
+.flavor-option.is-disabled .option-swatch {
+  filter: grayscale(100%);
+}
+.option-swatch {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+.option-text {
+  flex: 1;
+  text-align: left;
+  font-size: 16px;
+  color: #333;
+  transition: font-weight 0.2s ease;
+}
+.flavor-option[aria-selected="true"] .option-text {
+  font-weight: 600;
+}
+.dropdown-new-badge {
+  display: none !important;
+  font-size: 14px;
+  font-family: 'Acumin Pro Bold', sans-serif;
+  padding: 4px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  background: var(--badge-bg, #ed1c24);
+  color: #fff;
+  margin-left: 8px;
+}
+@media (max-width: 767px) {
+  .dropdown-new-badge {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.buybox-divider {
+  height: 1px;
+  background: #e0e0e0;
+}
+.buybox-variant-selector {
+  margin-bottom: 36px;
+}
+.buybox-variant-wrapper {
+  position: relative;
+  --border-color-effective: #e0e0e0;
+}
+.buybox-variant-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: none;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+  pointer-events: none;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+}
+.buybox-variant-option {
+  position: relative;
+  padding: 0;
+  cursor: pointer;
+  min-height: 95px;
+  background: rgb(255 255 255 / 82%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: visible;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+  transition: background 0.2s ease, transform 0.2s ease, border-radius 0.2s ease;
+  border: none;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.06));
+  border-radius: 8px;
+}
+.buybox-variant-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 95px;
+  overflow: hidden;
+  border-radius: 8px;
+  z-index: 1;
+  border: 2px solid #efefef;
+  transition: border-color 0.2s ease;
+}
+.buybox-variant-wrapper:has(.buybox-variant-option:hover:not(.sold-out)):not(:has(.buybox-variant-option.active)) {
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.08));
+}
+.buybox-variant-wrapper:has(.buybox-variant-option.active:not(.sold-out)) {
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));
+}
+.buybox-variant-option:hover:not(.sold-out) {
+  background: var(--swatch-bg, rgba(255, 255, 255, 0.95));
+  border-radius: 8px;
+}
+.is-core .buybox-variant-option:hover:not(.sold-out) {
+  background: #fff;
+}
+.buybox-variant-option:hover:not(.sold-out) .buybox-variant-inner,
+.buybox-variant-option.active:not(.sold-out) .buybox-variant-inner {
+  border-color: color-mix(in srgb, var(--swatch-bg, #efefef) 40%, white);
+  border-radius: 8px;
+}
+.buybox-variant-option.active:not(.sold-out) {
+  background: var(--swatch-bg, rgba(255, 255, 255, 1));
+  border-radius: 8px;
+}
+.buybox-variant-option.sold-out {
+  opacity: 0.6;
+  position: relative;
+}
+.buybox-variant-wrapper {
+  position: relative;
+}
+.buybox-variant-wrapper:has(.buybox-variant-option.sold-out) {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+}
+.buybox-variant-wrapper:has(.buybox-variant-option.sold-out)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 141.4%;
+  height: 2px;
+  background: rgb(217 217 217);
+  transform-origin: top left;
+  transform: rotate(40deg) scaleX(0);
+  pointer-events: none;
+  z-index: 20;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.buybox-variant-wrapper:has(.buybox-variant-option.sold-out):hover::after,
+.buybox-variant-wrapper:has(.buybox-variant-option.sold-out.active)::after {
+  transform: rotate(40deg) scaleX(1);
+}
+.buybox-variant-option.sold-out .buybox-variant-swatch img {
+  filter: grayscale(100%) opacity(0.6);
+}
+.buybox-variant-option.sold-out.active .buybox-variant-swatch img {
+  filter: grayscale(100%) opacity(0.8);
+}
+.buybox-variant-swatch {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 2px 10px 2px;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.2s ease;
+}
+.buybox-variant-swatch img {
+  width: 48px;
+  height: 48px;
+  max-width: 48px;
+  max-height: 48px;
+  object-fit: contain;
+  object-position: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.buybox-swatch-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  color: #999;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+}
+.buybox-variant-info {
+  position: absolute;
+  bottom: 6px;
+  left: 4px;
+  right: 4px;
+  text-align: center;
+  font-size: 11px;
+  font-family: 'Acumin Pro', sans-serif;
+  font-weight: 500;
+  color: #999;
+  padding: 2px 4px;
+  z-index: 2;
+  opacity: 1;
+  transition: bottom 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: none;
+  pointer-events: none;
+}
+.buybox-variant-name-top {
+  position: absolute;
+  top: -40px;
+  left: 4px;
+  right: 4px;
+  text-align: center;
+  font-size: 11px;
+  font-family: 'Acumin Pro', sans-serif;
+  color: #999;
+  padding: 3px 4px;
+  z-index: 20;
+  opacity: 0;
+  transition: top 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: none;
+  pointer-events: none;
+  max-width: 100%;
+  background: transparent;
+}
+.buybox-variant-option:not(.active):not(:hover) .buybox-variant-swatch {
+  transform: translateY(12px) scale(1.05);
+}
+.buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option:not(.active):not(:hover) .buybox-variant-swatch {
+  transform: translateY(8px) scale(1.05);
+}
+.buybox-variant-option:hover:not(.sold-out) .buybox-variant-swatch,
+.buybox-variant-option.active:not(.sold-out) .buybox-variant-swatch {
+  transform: translateY(28px) scale(0.85);
+}
+.buybox-variant-option:hover:not(.sold-out) .buybox-variant-swatch img,
+.buybox-variant-option.active:not(.sold-out) .buybox-variant-swatch img {
+  filter: brightness(0) invert(1) !important;
+}
+
+.is-core .buybox-variant-option:hover:not(.sold-out) .buybox-variant-swatch img {
+  filter: none !important;
+  transform: translateY(-24px) scale(0.85)!important;
+}
+.is-core .buybox-variant-option.active:not(.sold-out):not(:hover) .buybox-variant-swatch img {
+  filter: brightness(0) invert(1) !important;
+}
+.buybox-variant-option:hover:not(.sold-out) .buybox-variant-name-top,
+.buybox-variant-option.active:not(.sold-out) .buybox-variant-name-top {
+  top: 12px;
+  opacity: 1;
+  color: #fff;
+}
+.buybox-variant-option:hover:not(.sold-out) .buybox-variant-info,
+.buybox-variant-option.active:not(.sold-out) .buybox-variant-info {
+  bottom: -26px;
+  opacity: 0;
+}
+.is-core .buybox-variant-option:hover:not(.sold-out) .buybox-variant-name-top {
+  display: none;
+  opacity: 0;
+}
+.is-core .buybox-variant-option.active:not(.sold-out) .buybox-variant-name-top {
+  color: #fff;
+}
+.is-core .buybox-variant-option:hover:not(.sold-out) .buybox-variant-info {
+  bottom: 12px!important;
+  opacity: 1!important;
+  color: var(--swatch-bg, #e0b357);
+}
+.is-core .buybox-variant-option:hover:not(.sold-out) .buybox-variant-swatch {
+  transform: translateY(16px) scale(0.85)!important;
+}
+.is-core .buybox-variant-option.active:not(.sold-out) .buybox-variant-info {
+  bottom: -26px;
+  opacity: 0;
+}
+.buybox-variant-option.sold-out:hover .buybox-variant-swatch,
+.buybox-variant-option.sold-out.active .buybox-variant-swatch {
+  transform: translateY(28px) scale(0.85);
+}
+.buybox-variant-option.sold-out:hover .buybox-variant-name-top,
+.buybox-variant-option.sold-out.active .buybox-variant-name-top {
+  top: 12px;
+  opacity: 1;
+  color: #999;
+}
+.buybox-variant-option.sold-out:hover .buybox-variant-info,
+.buybox-variant-option.sold-out.active .buybox-variant-info {
+  bottom: -26px;
+  opacity: 0;
+}
+.buybox-new-badge {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  z-index: 9999;
+  color: #fff;
+  font-size: 11px;
+  font-family: 'Acumin Pro Bold', sans-serif;
+  padding: 5px 12px;
+  border-radius: 16px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  background: var(--swatch-bg, #AE1F24);
+  animation: pulse-badge 2s ease-in-out infinite;
+  pointer-events: none !important;
+  transition: background 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
+}
+.buybox-variant-wrapper:has(.buybox-variant-option:hover:not(.sold-out)) .buybox-new-badge {
+  background: #fff;
+  color: var(--swatch-bg, #AE1F24);
+  text-shadow: none;
+}
+.is-core .buybox-variant-wrapper:has(.buybox-variant-option:hover:not(.sold-out)) .buybox-new-badge {
+  background: var(--swatch-bg, #AE1F24);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.buybox-variant-wrapper:has(.buybox-variant-option.active) .buybox-new-badge {
+  background: #fff;
+  color: var(--swatch-bg, #AE1F24);
+  text-shadow: none;
+}
+.buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option:hover:not(.sold-out) .buybox-variant-name-top,
+.buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option.active:not(.sold-out) .buybox-variant-name-top {
+  top: 20px;
+}
+.buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option:hover:not(.sold-out) .buybox-variant-swatch,
+.buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option.active:not(.sold-out) .buybox-variant-swatch {
+  transform: translateY(32px) scale(0.85);
+}
+
+.is-core .buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option:hover:not(.sold-out) .buybox-variant-swatch,
+.is-core .buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option.active:not(.sold-out) .buybox-variant-swatch {
+  transform: translateY(32px) scale(1.05)!important;
+}
+.buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option.sold-out:hover .buybox-variant-name-top,
+.buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option.sold-out.active .buybox-variant-name-top {
+  top: 20px;
+}
+.buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option.sold-out:hover .buybox-variant-swatch,
+.buybox-variant-wrapper:has(.buybox-new-badge) .buybox-variant-option.sold-out.active .buybox-variant-swatch {
+  transform: translateY(32px) scale(0.85);
+}
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+.buybox-variant-checkmark {
+  display: none;
+}
+.buybox-purchase-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.buybox-purchase-option {
+  position: relative;
+  cursor: pointer;
+}
+.buybox-purchase-option input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #000;
+  flex-shrink: 0;
+}
+.buybox-purchase-option.subscribe-option input[type="radio"] {
+  margin-top: 6px;
+}
+.buybox-purchase-option input[type="radio"]:checked {
+  accent-color: #000;
+}
+.buybox-option-content {
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0;
+  transition: all 0.2s ease;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  backdrop-filter: blur(4px) saturate(60%);
+}
+.buybox-purchase-option input[type="radio"]:checked + .buybox-option-content {
+  border-color: #e0e0e0;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.08), 0 2px 6px rgba(100, 116, 139, 0.04);
+}
+.buybox-purchase-option.subscribe-option input[type="radio"]:checked + .buybox-option-content {
+  border: 2px solid #e0e0e0;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.08), 0 2px 6px rgba(100, 116, 139, 0.04);
+}
+.buybox-option-badge {
+  position: absolute;
+  top: -16px;
+  background: var(--series-featured-color, #35bf86);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 4px 4px 4px 0;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 20px;
+  box-sizing: border-box;
+}
+.is-core .buybox-option-badge {
+  background: var(--series-featured-color, #35bf86);
+  color: #000;
+}
+.buybox-option-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0;
+  width: 100%;
+  align-items: flex-end;
+}
+.buybox-option-title {
+  font-size: 16px;
+  font-family: 'Acumin Pro Bold', sans-serif;
+  letter-spacing: normal !important;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+@media (max-width: 767px) {
+  .buybox-option-title {
+    font-size: 16px;
+  }
+}
+.buybox-option-price {
+  font-size: 18px;
+  color: #000;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+@media (max-width: 767px) {
+  .buybox-option-price {
+    font-size: 16px;
+  }
+}
+.buybox-subscribe-pricing {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  height: 24px;
+}
+.buybox-discount-badge {
+  background: var(--series-featured-color, #35bf86);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  box-sizing: border-box;
+}
+.buybox-discount-badge-text {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.is-core .buybox-discount-badge {
+  background: var(--series-featured-color, #35bf86);
+  color: #000;
+}
+.is-core .buybox-discount-badge-text {
+  color: #000;
+}
+@media (max-width: 767px) {
+  .buybox-discount-badge {
+    display: none !important;
+  }
+}
+.subscribe-price {
+  color: var(--series-featured-color, #35bf86);
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+}
+.buybox-purchase-option.subscribe-option input[type="radio"]:checked + .buybox-option-content .subscribe-price {
+  color: var(--series-featured-color, #35bf86);
+}
+.mobile-discount {
+  display: none;
+  margin-left: 3px;
+}
+@media (max-width: 767px) {
+  .mobile-discount {
+    display: inline;
+  }
+}
+.buybox-header-row {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.buybox-purchase-option.subscribe-option .buybox-header-row {
+  margin-top: 6px;
+  padding: 16px 16px 5px 16px;
+}
+.buybox-frequency-row {
+  padding: 0 16px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.buybox-frequency-row.show {
+  max-height: 100px;
+  padding: 8px 16px;
+}
+.buybox-frequency-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.buybox-frequency-selector label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  flex-shrink: 0;
+}
+.buybox-frequency-selector select {
+  padding: 8px 32px 4px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  flex: 1;
+  text-transform: capitalize;
+}
+@media screen and (min-width: 700px) {
+  .buybox-frequency-selector select {
+    width: auto;
+    min-width: 150px;
+    flex: initial;
+  }
+}
+.buybox-divider-row {
+  padding: 0 16px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.buybox-divider-row.show {
+  max-height: 50px;
+  padding: 8px 16px;
+}
+.buybox-benefits-row {
+  padding: 0 16px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.buybox-benefits-row.show {
+  max-height: 500px;
+  padding: 8px 16px;
+  margin-bottom: 10px;
+}
+.buybox-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.subscribe-only-benefit {
+  display: flex !important;
+}
+.onetime-benefit {
+  display: none !important;
+}
+.onetime-benefit.show {
+  display: flex !important;
+}
+.subscribe-only-benefit.hide {
+  display: none !important;
+}
+.buybox-subscribe-divider {
+  display: block;
+  height: 1px;
+  background: #e0e0e0;
+}
+.buybox-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #333;
+}
+.buybox-benefits svg {
+  flex-shrink: 0;
+}
+.buybox-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 20px;
+  align-items: stretch;
+}
+@media (max-width: 767px) {
+  .buybox-actions {
+    flex-direction: row !important;
+    gap: 8px;
+    flex-wrap: nowrap !important;
+  }
+}
+.buybox-quantity {
+  display: flex;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 140px;
+}
+@media (max-width: 1024px) and (min-width: 768px) {
+  .buybox-quantity {
+    max-width: 110px;
+    min-width: 110px;
+  }
+}
+@media (max-width: 767px) {
+  .buybox-quantity {
+    max-width: 80px;
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+}
+.buybox-qty-btn {
+  width: 40px;
+  border: none;
+  background: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+}
+@media (max-width: 767px) {
+  .buybox-qty-btn {
+    width: 27px;
+    font-size: 18px;
+    padding: 14px 0;
+  }
+}
+.buybox-qty-btn:hover {
+  background: #f5f5f5;
+}
+.buybox-qty-input {
+  width: 40px;
+  border: none;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  -moz-appearance: textfield;
+  padding: 16px 0;
+}
+@media (max-width: 767px) {
+  .buybox-qty-input {
+    width: 25px;
+    font-size: 14px;
+    padding: 14px 0;
+  }
+}
+.buybox-qty-input::-webkit-outer-spin-button,
+.buybox-qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.buybox-add-to-cart {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--series-featured-color, #AE1F24);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 4px;
+  font-size: 18px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+  font-family: 'Gunplay', sans-serif;
+  letter-spacing: 0;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+.buybox-add-to-cart span,
+.buybox-add-to-cart i,
+.buybox-add-to-cart svg {
+  position: relative;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+.is-core .buybox-add-to-cart {
+  color: #000;
+}
+.is-core .buybox-add-to-cart svg,
+.is-core .buybox-add-to-cart i {
+  color: #000;
+  transition: color 0.3s ease;
+}
+
+.is-core .buybox-add-to-cart:hover {
+  color: #000;
+}
+.is-core .buybox-add-to-cart:hover svg,
+.is-core .buybox-add-to-cart:hover i {
+  color: var(--series-featured-color, #AE1F24);
+}
+@media (max-width: 767px) {
+  .buybox-add-to-cart {
+    padding: 14px 12px;
+    font-size: 16px;
+    gap: 8px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+}
+.buybox-add-to-cart::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  transition: left 0.4s ease;
+  z-index: -1;
+}
+.buybox-add-to-cart:hover::before {
+  left: 0;
+}
+.buybox-add-to-cart:not(:hover)::before {
+  left: -100%;
+  transition: left 0.4s ease;
+}
+.buybox-add-to-cart.adding {
+  background: color-mix(in srgb, var(--series-featured-color, #AE1F24) 60%, white);
+  transition: background 0.3s ease;
+}
+.buybox-add-to-cart::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: #35bf86;
+  z-index: 0;
+  transition: none;
+}
+.buybox-add-to-cart.success::before {
+  display: none !important;
+}
+.buybox-add-to-cart.adding.success {
+  background: color-mix(in srgb, var(--series-featured-color, #AE1F24) 60%, white) !important;
+}
+.buybox-add-to-cart.adding.success::after {
+  z-index: 1;
+  animation: fillSuccess 0.6s ease forwards;
+}
+@keyframes fillSuccess {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 0;
+  }
+}
+.buybox-add-to-cart:hover {
+  color: #fff;
+}
+.buybox-add-to-cart .discount-highlight {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 2px solid white;
+  border-radius: 4px;
+  background: transparent;
+  color: white;
+  transition: all 0.2s ease;
+  margin-left: 4px;
+}
+.is-core .buybox-add-to-cart .discount-highlight {
+  border-color: #000;
+  color: #000;
+}
+.buybox-add-to-cart:hover .discount-highlight {
+  background: none;
+  border-color: var(--series-featured-color, #AE1F24);
+  color: var(--series-featured-color, #AE1F24);
+}
+.is-core .buybox-add-to-cart:hover .discount-highlight {
+  background: var(--series-featured-color, #AE1F24);
+  border-color: var(--series-featured-color, #AE1F24);
+  color: #000;
+}
+.buybox-add-to-cart:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+.buybox-add-to-cart:disabled:hover {
+  background: #999;
+}
+.buybox-add-to-cart:disabled::before,
+.buybox-add-to-cart:disabled::after {
+  display: none;
+}
+.buybox-payment-options {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
+}
+.buybox-payment-options.hide-on-subscribe {
+  display: none;
+}
+.buybox-payment-item {
+  display: flex;
+  align-items: baseline !important;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--series-accent-1, #666);
+}
+.buybox-payment-item .payment-main-group,
+.buybox-payment-item .payment-logos-group,
+.buybox-payment-item .payment-affirm-group {
+  display: flex;
+  align-items: baseline !important;
+  gap: 6px;
+}
+@media (max-width: 767px) {
+  .buybox-payment-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline !important;
+    gap: 6px;
+    row-gap: 8px;
+  }
+  .buybox-payment-item .payment-main-group {
+    display: contents;
+  }
+  .buybox-payment-item .payment-main-group > span:nth-child(1),
+  .buybox-payment-item .payment-main-group > strong,
+  .buybox-payment-item .payment-main-group > span:nth-child(3) {
+    order: 1;
+  }
+  .buybox-payment-item .payment-main-group > span:nth-child(3)::after {
+    content: '';
+    flex-basis: 100%;
+    height: 0;
+  }
+  .buybox-payment-item .payment-main-group .payment-logos-group {
+    order: 2;
+  }
+  .buybox-payment-item > span {
+    display: none !important;
+  }
+  .buybox-payment-item .payment-affirm-group {
+    order: 2;
+  }
+}
+.payment-logo-wrapper {
+  display: flex;
+  align-items: flex-end;
+  line-height: 0;
+}
+.payment-logos-group .payment-logo {
+  position: relative;
+  top: 4px;
+}
+.buybox-payment-item span,
+.buybox-payment-item strong {
+  line-height: 1.2;
+}
+.buybox-payment-item strong {
+  color: #000;
+  font-weight: 600;
+}
+.buybox-container.is-gladiator-series .buybox-payment-item,
+.buybox-container.is-gladiator-series .buybox-payment-item strong {
+  color: #fff;
+}
+.is-core .buybox-payment-item .payment-main-group,
+.is-core .buybox-payment-item .payment-main-group span,
+.is-core .buybox-payment-item .payment-main-group strong {
+  color: #fff;
+}
+.is-core .payment-logos-group .payment-logo-wrapper:nth-child(2) .payment-logo {
+  filter: brightness(0) invert(1);
+}
+.buybox-container.is-gladiator-series .payment-logos-group .payment-logo-wrapper:nth-child(2) .payment-logo {
+  filter: brightness(0) invert(1);
+}
+
+.buybox-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.buybox-quantity {
+  width: clamp(90px, 15%, 120px);
+  flex-shrink: 1;
+}
+
+.buybox-add-to-cart {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+@media screen and (min-width: 700px) and (max-width: 999px) {
+  .buybox-quantity {
+    width: clamp(90px, 20%, 140px);
+  }
+}
+
+@media screen and (max-width: 699px) {
+  .buybox-actions {
+    flex-direction: column;
+    gap: var(--spacing-3, 12px);
+  }
+
+  .payment-logo {
+  display: block;
+  height: 15px!important;
+  width: auto;
+}
+  
+  .buybox-quantity {
+    width: 100%;
+  }
+  
+  .buybox-add-to-cart {
+    width: 100%;
+  }
+}
+@media (max-width:767px){
+  .pi-mobile-accordions{display:block;margin-top:20px}
+  .pi-mobile-static-description{font-family:'Acumin Pro',sans-serif;font-size:16px;line-height:1.5;color:black;margin-bottom:20px;padding-bottom:0}
+  .pi-mobile-accordions.is-gladiator-series .pi-mobile-static-description{color:#fff!important}
+  .pi-accordion-item{margin-bottom:12px;border:2px solid rgb(255 255 255 / 82%)!important;border-radius:4px;overflow:hidden;background:rgb(0 0 0 / 0%)!important}
+  .pi-mobile-accordions.is-core-series .pi-accordion-item{border:2px solid #2323238c!important}
+  .pi-mobile-accordions.is-gladiator-series .pi-accordion-item{border:2px solid #2323238c!important}
+  .pi-accordion-checkbox{display:none}
+  .pi-accordion-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer;font-family:'Acumin Pro Bold',sans-serif;font-size:16px;color:#000;text-transform:none;background:rgb(255 255 255 / 82%);backdrop-filter:blur(3px);transition:none}
+  .pi-mobile-accordions.is-core-series .pi-accordion-header{background:#121212!important;backdrop-filter:blur(3px)!important;color:#fff!important}
+  .pi-mobile-accordions.is-gladiator-series .pi-accordion-header{background:#121212!important;backdrop-filter:blur(3px)!important;color:#fff!important}
+  .pi-accordion-title{flex:1}
+  .pi-mobile-accordions.is-core-series .pi-accordion-title{color:#fff}
+  .pi-mobile-accordions.is-gladiator-series .pi-accordion-title{color:#fff!important}
+  .pi-accordion-icon{font-size:20px;font-weight:bold;color:var(--series-featured-color);transition:transform .3s ease}
+  .pi-accordion-content{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .4s ease;padding:0 20px;background:rgb(0 0 0 / 0%)!important;backdrop-filter:blur(3px)}
+  .pi-accordion-checkbox:checked~.pi-accordion-header{backdrop-filter:blur(3px);background:rgb(255 255 255 / 82%)!important}
+  .pi-mobile-accordions.is-core-series .pi-accordion-checkbox:checked~.pi-accordion-header{background:rgb(0 0 0 / 49%)!important}
+  .pi-mobile-accordions.is-gladiator-series .pi-accordion-checkbox:checked~.pi-accordion-header{background:rgb(0 0 0 / 49%)!important}
+  .pi-accordion-checkbox:checked~.pi-accordion-header .pi-accordion-icon{transform:rotate(45deg)}
+  .pi-accordion-checkbox:checked~.pi-accordion-content{max-height:2000px;padding:20px}
+  .pi-mobile-accordions.is-core-series .ingredient-list-item .ingredient-name-bold{color:#fff!important}
+  .pi-mobile-accordions.is-gladiator-series .ingredient-list-item .ingredient-name-bold{color:#fff!important}
+  .pi-mobile-accordions.is-core-series .info-title{color:#fff}
+  .pi-mobile-accordions.is-gladiator-series .info-title{color:#fff!important}
+  .pi-mobile-accordions.is-core-series .info-text{color:#fff}
+  .pi-mobile-accordions.is-gladiator-series .info-text{color:#fff!important}
+  .pi-mobile-accordions.is-core-series .breakdown-text{color:#fff}
+  .pi-mobile-accordions.is-gladiator-series .breakdown-text{color:#fff}
+  .pi-mobile-accordions.is-core-series .see-additional-caret{color:#fff}
+  .pi-mobile-accordions.is-gladiator-series .see-additional-caret{color:#fff}
+}
+</style>
+
+<script>
+window.productVariants = {{ product.variants | json }};
+
+const DOM = {
+  cache: {},
+  get(id) {
+    return this.cache[id] || (this.cache[id] = document.getElementById(id));
+  }
+};
+
+function selectVariant(element, instantScroll) {
+  if (!element) return;
+  
+  const variantId = element.dataset.variantId;
+  const mediaId = element.dataset.mediaId;
+  
+  if (mediaId) {
+    let mediaIndex = -1;
+    const allMedia = document.querySelectorAll('.product-gallery__media');
+    allMedia.forEach(function(el, idx) {
+      if (mediaIndex === -1 && el.getAttribute('data-media-id') === mediaId) {
+        mediaIndex = idx;
+      }
+    });
+    
+    if (mediaIndex !== -1 && typeof window.selectGalleryByMediaIndex === 'function') {
+      window.selectGalleryByMediaIndex(mediaIndex, instantScroll);
+    }
+  }
+  
+  const currentActive = document.querySelector('.buybox-variant-option.active');
+  if (currentActive) currentActive.classList.remove('active');
+  element.classList.add('active');
+  element.classList.add('user-selected');
+  
+  const container = DOM.get('buybox-container');
+  const seriesFeatured = element.dataset.seriesFeatured;
+  const seriesAccent1  = element.dataset.seriesAccent1;
+  const seriesHandle   = element.dataset.series;
+
+  if (container) {
+    const dfFeat = container.dataset.seriesFeaturedDefault 
+      || getComputedStyle(container).getPropertyValue('--series-featured-color').trim() 
+      || '#AE1F24';
+    const dfAcc1 = container.dataset.seriesAccent1Default 
+      || getComputedStyle(container).getPropertyValue('--series-accent-1').trim() 
+      || '#333';
+
+    const feat = seriesFeatured || dfFeat;
+    const acc1 = seriesAccent1  || dfAcc1;
+
+    container.style.setProperty('--series-featured-color', feat);
+    container.style.setProperty('--series-accent-1', acc1);
+    container.classList.toggle('is-core', (seriesHandle || container.dataset.series || '') === 'core-series');
+    container.dataset.series = seriesHandle || container.dataset.series || '';
+  }
+
+  const triggerText = DOM.get('trigger-text');
+  const triggerSwatch = DOM.get('trigger-swatch');
+  const flavorPanel = DOM.get('flavor-panel');
+  
+  if (triggerText && variantId) {
+    const option = flavorPanel ? flavorPanel.querySelector('[data-variant-id="'+variantId+'"]') : null;
+    if (option) {
+      triggerText.textContent = option.dataset.variantName;
+      if (option.dataset.swatchUrl && triggerSwatch) {
+        triggerSwatch.src = option.dataset.swatchUrl;
+        triggerSwatch.style.display = 'block';
+      }
+      
+      const isOutOfStock = option.classList.contains('is-disabled');
+      if (isOutOfStock) {
+        const variantName = option.dataset.variantName;
+        triggerText.textContent = variantName + ' – Out Of Stock';
+        triggerText.classList.add('out-of-stock');
+        triggerSwatch.classList.add('out-of-stock');
+      } else {
+        triggerText.classList.remove('out-of-stock');
+        triggerSwatch.classList.remove('out-of-stock');
+      }
+      
+      let triggerBadge = document.querySelector('.trigger-new-badge');
+      const optionBadge = option.querySelector('.dropdown-new-badge');
+      const trigger = document.getElementById('flavor-trigger');
+      
+      if (trigger && option.dataset.swatchBg) {
+        trigger.style.setProperty('--swatch-bg', option.dataset.swatchBg);
+      }
+      
+      if (!triggerBadge && optionBadge) {
+        const caret = trigger.querySelector('.trigger-caret');
+        triggerBadge = document.createElement('span');
+        triggerBadge.className = 'trigger-new-badge';
+        triggerBadge.textContent = 'NEW!';
+        trigger.insertBefore(triggerBadge, caret);
+      }
+      
+      if (triggerBadge) {
+        if (optionBadge) {
+          triggerBadge.style.setProperty('display', 'inline-flex', 'important');
+        } else {
+          triggerBadge.style.setProperty('display', 'none', 'important');
+        }
+      }
+      
+      if (flavorPanel) {
+        flavorPanel.querySelectorAll('.flavor-option[aria-selected="true"]').forEach(function(n){
+          n.setAttribute('aria-selected','false');
+        });
+      }
+      option.setAttribute('aria-selected', 'true');
+    }
+  }
+  
+  const variantPrice = element.dataset.variantPrice;
+  const variantAvailable = element.dataset.variantAvailable === 'true';
+  
+  DOM.get('variant-select').value = variantId;
+  DOM.get('selected-variant-id').value = variantId;
+  
+  const variantData = (window.productVariants || []).find(function(v){ return v.id == variantId; });
+  const hasSellingPlans = !!(variantData && variantData.selling_plan_allocations && variantData.selling_plan_allocations.length);
+  
+  const purchaseOptions = document.querySelector('.buybox-purchase-options');
+  const quantitySelector = document.querySelector('.buybox-quantity');
+  const paymentOptions = document.querySelector('.buybox-payment-options');
+  const subscribeOption = document.querySelector('.buybox-purchase-option.subscribe-option');
+  const onetimeOption = document.querySelector('.buybox-purchase-option:not(.subscribe-option)');
+  const subscribeRadio = document.querySelector('input[name="purchase_type"][value="subscribe"]');
+  const onetimeRadio = document.querySelector('input[name="purchase_type"][value="onetime"]');
+  const frequencySelector = document.getElementById('frequency-selector');
+  const sellingPlanInput = document.getElementById('selected-selling-plan-id');
+  const frequencySelect = document.getElementById('delivery-frequency');
+  
+  if (!variantAvailable) {
+    if (purchaseOptions) purchaseOptions.style.display = 'none';
+    if (quantitySelector) quantitySelector.style.display = 'none';
+    if (paymentOptions) {
+      paymentOptions.style.display = 'none';
+      paymentOptions.classList.add('hide-on-subscribe');
+    }
+    
+    const addBtn = DOM.get('add-to-cart-btn');
+    if (addBtn) {
+      addBtn.disabled = true;
+      const cartIcon = document.getElementById('cart-icon');
+      if (cartIcon) cartIcon.style.display = 'none';
+      const btnText = addBtn.querySelector('span');
+      if (btnText) btnText.textContent = 'Out of Stock';
+    }
+  } else {
+    const cartIcon = document.getElementById('cart-icon');
+    if (cartIcon) cartIcon.style.display = 'inline-block';
+    if (purchaseOptions) purchaseOptions.style.display = 'flex';
+    if (quantitySelector) quantitySelector.style.display = 'flex';
+    
+    if (paymentOptions) {
+      paymentOptions.style.display = '';
+    }
+    
+    if (!hasSellingPlans && subscribeOption) {
+      subscribeOption.style.display = 'none';
+      if (onetimeRadio) {
+        onetimeRadio.checked = true;
+        sellingPlanInput.value = '';
+        if (frequencySelector) frequencySelector.classList.remove('show');
+        updatePurchaseTypeUI('onetime');
+      }
+    } else if (subscribeOption) {
+      subscribeOption.style.display = 'block';
+      if (subscribeRadio) {
+        if (!onetimeRadio || !onetimeRadio.checked) {
+          subscribeRadio.checked = true;
+          const planId = frequencySelect ? frequencySelect.value : subscribeRadio.dataset.sellingPlanId;
+          sellingPlanInput.value = planId;
+          if (frequencySelector) frequencySelector.classList.add('show');
+          updatePurchaseTypeUI('subscribe');
+        } else {
+          updatePurchaseTypeUI('onetime');
+        }
+      }
+    }
+    
+    updatePrices(variantPrice);
+    
+    if (onetimeRadio && onetimeRadio.checked) {
+      updateSavingsText();
+    }
+    
+    const addBtn = DOM.get('add-to-cart-btn');
+    if (addBtn) {
+      addBtn.disabled = false;
+      updateButtonText();
+    }
+  }
+  
+  if (mediaId) {
+    const variantChangedEvent = new CustomEvent('variant:changed', {
+      detail: {
+        variantId: variantId,
+        mediaId: mediaId,
+        variantName: element.dataset.variantName
+      },
+      bubbles: true
+    });
+    document.dispatchEvent(variantChangedEvent);
+  }
+  
+  window.dispatchEvent(new CustomEvent('buybox:variant-change', {
+    detail: { id: variantId, variantId: variantId }
+  }));
+}
+
+function updatePrices(basePrice) {
+  const onetimePrice = document.getElementById('onetime-price');
+  const subscribePrice = document.getElementById('subscribe-price');
+  const frequencySelect = document.getElementById('delivery-frequency');
+  const paymentAmount = document.getElementById('payment-amount');
+  const subscribeRadio = document.querySelector('input[name="purchase_type"][value="subscribe"]');
+  
+  if (onetimePrice) {
+    onetimePrice.textContent = formatMoney(basePrice);
+  }
+  
+  let discountedPrice = basePrice;
+  if (subscribePrice && frequencySelect) {
+    const selectedOption = frequencySelect.options[frequencySelect.selectedIndex];
+    const discount = parseFloat(selectedOption.dataset.discount) || 0;
+    discountedPrice = basePrice * (1 - discount / 100);
+    subscribePrice.textContent = formatMoney(discountedPrice);
+  }
+  
+  const isSubscribe = subscribeRadio && subscribeRadio.checked;
+  const priceToUse = isSubscribe ? discountedPrice : basePrice;
+  const quarterPrice = Math.floor(priceToUse / 4);
+  if (paymentAmount) {
+    paymentAmount.textContent = formatMoney(quarterPrice);
+  }
+}
+
+function formatMoney(cents) {
+  return '$' + (cents / 100).toFixed(2);
+}
+
+function updateQuantity(change) {
+  const input = document.getElementById('quantity-input');
+  let value = parseInt(input.value) || 1;
+  value += change;
+  if (value < 1) value = 1;
+  input.value = value;
+}
+
+function updateButtonText() {
+  const btnText = document.getElementById('add-to-cart-text');
+  const addBtn = document.getElementById('add-to-cart-btn');
+  if (!btnText || !addBtn) return;
+  if (addBtn.classList.contains('adding') || addBtn.classList.contains('success')) return;
+  const subscribeRadio = document.querySelector('input[name="purchase_type"][value="subscribe"]');
+  const isSubscription = subscribeRadio && subscribeRadio.checked;
+  const isMobile = window.innerWidth <= 767;
+  if (addBtn.disabled && btnText.textContent === 'Out of Stock') {
+    return;
+  }
+  if (isSubscription) {
+    btnText.textContent = 'Subscribe & Save';
+  } else {
+    btnText.textContent = 'Add to Cart';
+  }
+}
+
+function initializeBuyBox() {
+  const initialActive = document.querySelector('.buybox-variant-option.active');
+  
+  if (initialActive) {
+    const isOutOfStock = initialActive.classList.contains('sold-out');
+    const variantId = initialActive.dataset.variantId;
+    const flavorPanel = document.getElementById('flavor-panel');
+    const option = flavorPanel ? flavorPanel.querySelector('[data-variant-id="'+variantId+'"]') : null;
+    
+    if (isOutOfStock) {
+      const purchaseOptions = document.querySelector('.buybox-purchase-options');
+      const quantitySelector = document.querySelector('.buybox-quantity');
+      const paymentOptions = document.querySelector('.buybox-payment-options');
+      const addBtn = document.getElementById('add-to-cart-btn');
+      const btnText = document.getElementById('add-to-cart-text');
+      const triggerText = document.getElementById('trigger-text');
+      const triggerSwatch = document.getElementById('trigger-swatch');
+      
+      if (purchaseOptions) purchaseOptions.style.display = 'none';
+      if (quantitySelector) quantitySelector.style.display = 'none';
+      if (paymentOptions) paymentOptions.style.display = 'none';
+      if (addBtn) {
+        addBtn.disabled = true;
+        addBtn.setAttribute('data-initialized', 'true');
+        const cartIcon = document.getElementById('cart-icon');
+        if (cartIcon) cartIcon.style.display = 'none';
+        if (btnText) btnText.textContent = 'Out of Stock';
+      }
+      if (triggerText && option) {
+        const variantName = option.dataset.variantName;
+        triggerText.textContent = variantName + ' – Out Of Stock';
+        triggerText.classList.add('out-of-stock');
+      }
+      if (triggerSwatch) triggerSwatch.classList.add('out-of-stock');
+    } else {
+      const addBtn = document.getElementById('add-to-cart-btn');
+      if (addBtn) addBtn.setAttribute('data-initialized', 'true');
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  (function() {
+    const trigger = document.getElementById('flavor-trigger');
+    const panel = document.getElementById('flavor-panel');
+    const combobox = document.getElementById('flavor-combobox');
+    const txt = document.getElementById('trigger-text');
+    const img = document.getElementById('trigger-swatch');
+
+    (function seed() {
+      const active = document.querySelector('.buybox-variant-option.active');
+      if (!active || !panel) return;
+      const li = Array.prototype.slice.call(panel.querySelectorAll('.flavor-option')).find(function(x){
+        return x.dataset.variantId === active.dataset.variantId;
+      });
+      if (li) {
+        txt.textContent = li.dataset.variantName;
+        if (li.dataset.swatchUrl) {
+          img.src = li.dataset.swatchUrl;
+          img.style.display = 'block';
+        }
+        
+        if (li && li.dataset.swatchBg) {
+          trigger.style.setProperty('--swatch-bg', li.dataset.swatchBg);
+        }
+        
+        const staticSwatch = document.getElementById('static-swatch');
+        const staticText = document.getElementById('static-text');
+        
+        if (staticSwatch && staticText) {
+          if (li.dataset.swatchUrl) {
+            staticSwatch.src = li.dataset.swatchUrl;
+          }
+          staticText.textContent = li.dataset.variantName || '';
+        }
+      }
+      
+      const container = document.getElementById('buybox-container');
+      if (active && container) {
+        const dfFeat = container.dataset.seriesFeaturedDefault || '#AE1F24';
+        const dfAcc1 = container.dataset.seriesAccent1Default || '#333';
+        container.style.setProperty('--series-featured-color', active.dataset.seriesFeatured || dfFeat);
+        container.style.setProperty('--series-accent-1', active.dataset.seriesAccent1 || dfAcc1);
+        container.classList.toggle('is-core', (active.dataset.series || container.dataset.series || '') === 'core-series');
+      }
+      
+      const staticSwatch = document.getElementById('static-swatch');
+      const staticText = document.getElementById('static-text');
+      if (active && staticSwatch && staticText) {
+        if (active.dataset.swatchUrl) {
+          staticSwatch.src = active.dataset.swatchUrl;
+        }
+        const variantName = active.dataset.variantName || '';
+        const isAvailable = active.dataset.variantAvailable !== 'false';
+        if (variantName && !variantName.includes('Out of Stock')) {
+          staticText.textContent = isAvailable ? variantName : variantName + ' - Out of Stock';
+        } else {
+          staticText.textContent = variantName;
+        }
+      }
+      
+      window.updateStaticDisplay = function(variantName, swatchUrl, isAvailable) {
+        const sSwatch = document.getElementById('static-swatch');
+        const sText = document.getElementById('static-text');
+        const sDisplay = document.getElementById('flavor-static-display');
+        
+        if (sSwatch && swatchUrl) {
+          sSwatch.src = swatchUrl;
+        }
+        if (sText) {
+          const hasOutOfStockText = variantName && variantName.includes('Out of Stock');
+          if (isAvailable === false || isAvailable === 'false') {
+            sText.textContent = hasOutOfStockText ? variantName : (variantName || '') + ' - Out of Stock';
+          } else {
+            sText.textContent = variantName || '';
+          }
+        }
+        if (sDisplay) {
+          if (isAvailable === false || isAvailable === 'false') {
+            sDisplay.classList.add('out-of-stock');
+          } else {
+            sDisplay.classList.remove('out-of-stock');
+          }
+        }
+      };
+    })();
+    
+    initializeBuyBox();
+
+    function openPanel() {
+      combobox.setAttribute('aria-expanded', 'true');
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+
+    function closePanel() {
+      combobox.setAttribute('aria-expanded', 'false');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    if (trigger && combobox && panel) {
+      trigger.addEventListener('click', function() {
+        const open = combobox.getAttribute('aria-expanded') === 'true';
+        if (open) {
+          closePanel();
+        } else {
+          openPanel();
+        }
+      });
+
+      panel.addEventListener('click', function(e) {
+        const li = e.target.closest('.flavor-option');
+        if (!li) return;
+
+        txt.textContent = li.dataset.variantName;
+        if (li.dataset.swatchUrl) {
+          img.src = li.dataset.swatchUrl;
+          img.style.display = 'block';
+        }
+        
+        if (li.dataset.swatchBg) {
+          trigger.style.setProperty('--swatch-bg', li.dataset.swatchBg);
+        }
+        
+        let newBadge = trigger.querySelector('.trigger-new-badge');
+        if (li.dataset.newBadge === 'true') {
+          if (!newBadge) {
+            newBadge = document.createElement('span');
+            newBadge.className = 'trigger-new-badge';
+            newBadge.textContent = 'NEW!';
+            trigger.insertBefore(newBadge, trigger.querySelector('.trigger-caret'));
+          }
+        } else {
+          if (newBadge) {
+            newBadge.remove();
+          }
+        }
+
+        panel.querySelectorAll('.flavor-option[aria-selected="true"]').forEach(function(n){
+          n.setAttribute('aria-selected', 'false');
+        });
+        li.setAttribute('aria-selected', 'true');
+
+        const target = document.querySelector('.buybox-variant-option[data-variant-id="'+li.dataset.variantId+'"]');
+        if (target) {
+          window.selectVariant(target);
+        }
+
+        closePanel();
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!combobox.contains(e.target)) closePanel();
+      });
+    }
+  })();
+  
+  const subscribeOnlyBenefits = document.querySelectorAll('.subscribe-only-benefit');
+  const onetimeBenefits = document.querySelectorAll('.onetime-benefit');
+  const subscribeDivider = document.getElementById('subscribe-divider-onetime');
+  
+  subscribeOnlyBenefits.forEach(function(el){
+    el.classList.remove('hide');
+    el.style.display = 'flex';
+  });
+  onetimeBenefits.forEach(function(el){
+    el.classList.remove('show');
+    el.style.display = 'none';
+  });
+  if (subscribeDivider) {
+    subscribeDivider.classList.remove('show');
+  }
+  
+  const purchaseOptions = document.querySelectorAll('input[name="purchase_type"]');
+  const sellingPlanInput = document.getElementById('selected-selling-plan-id');
+  const frequencySelect = document.getElementById('delivery-frequency');
+  
+  const subscribeRadio = document.querySelector('input[name="purchase_type"][value="subscribe"]');
+  const frequencySelector = document.getElementById('frequency-selector');
+  
+  const initialVariantId = document.getElementById('selected-variant-id').value;
+  const initialVariantData = (window.productVariants || []).find(function(v){ return v.id == initialVariantId; });
+  const initialHasSellingPlans = !!(initialVariantData && initialVariantData.selling_plan_allocations && initialVariantData.selling_plan_allocations.length);
+  
+  const subscribeOption = document.querySelector('.buybox-purchase-option.subscribe-option');
+  const onetimeRadio = document.querySelector('input[name="purchase_type"][value="onetime"]');
+  
+  if (!initialHasSellingPlans && subscribeOption) {
+    subscribeOption.style.display = 'none';
+    if (onetimeRadio) {
+      onetimeRadio.checked = true;
+      sellingPlanInput.value = '';
+    }
+  } else if (subscribeRadio && subscribeRadio.checked) {
+    const planId = frequencySelect ? frequencySelect.value : subscribeRadio.dataset.sellingPlanId;
+    sellingPlanInput.value = planId;
+    if (frequencySelector) frequencySelector.classList.add('show');
+  }
+  
+  updateButtonText();
+  
+  function updateDynamicDiscounts() {
+    const frequencySelectEl = document.getElementById('delivery-frequency');
+    if (frequencySelectEl) {
+      const selectedOption = frequencySelectEl.options[frequencySelectEl.selectedIndex];
+      const discount = selectedOption ? selectedOption.dataset.discount : '20';
+      const dynamicFirstDiscount = document.querySelector('.dynamic-first-discount');
+      if (dynamicFirstDiscount) {
+        dynamicFirstDiscount.textContent = discount + '%';
+      }
+    }
+  }
+  
+  updateDynamicDiscounts();
+  
+  purchaseOptions.forEach(function(option){
+    option.addEventListener('change', function() {
+      if (this.value === 'subscribe') {
+        const planId = frequencySelect ? frequencySelect.value : this.dataset.sellingPlanId;
+        sellingPlanInput.value = planId;
+        updatePurchaseTypeUI('subscribe');
+        updateDynamicDiscounts();
+      } else {
+        sellingPlanInput.value = '';
+        updatePurchaseTypeUI('onetime');
+      }
+    });
+  });
+  
+  if (frequencySelect) {
+    frequencySelect.addEventListener('change', function() {
+      const subscribeRadioInner = document.querySelector('input[name="purchase_type"][value="subscribe"]');
+      if (subscribeRadioInner && subscribeRadioInner.checked) {
+        sellingPlanInput.value = this.value;
+        
+        const selectedOption = this.options[this.selectedIndex];
+        const discount = selectedOption.dataset.discount;
+        
+        const initialDiscountEl = document.getElementById('initial-discount');
+        if (initialDiscountEl) {
+          initialDiscountEl.textContent = discount + '%';
+        }
+        
+        const discountBadgeText = document.querySelector('.buybox-discount-badge-text');
+        if (discountBadgeText) {
+          discountBadgeText.textContent = 'Save ' + discount + '%';
+        }
+        
+        const mobileDiscount = document.getElementById('mobile-discount');
+        if (mobileDiscount) {
+          mobileDiscount.textContent = discount + '%';
+        }
+        
+        const dynamicFirstDiscount = document.querySelector('.dynamic-first-discount');
+        if (dynamicFirstDiscount) {
+          dynamicFirstDiscount.textContent = discount + '%';
+        }
+        
+        const activeVariant = document.querySelector('.buybox-variant-option.active');
+        if (activeVariant) {
+          updatePrices(activeVariant.dataset.variantPrice);
+        }
+      }
+      updateButtonText();
+    });
+  }
+  
+  const form = document.getElementById('buybox-form');
+  const addBtn = document.getElementById('add-to-cart-btn');
+  const btnText = document.getElementById('add-to-cart-text');
+  const productTitle = addBtn ? addBtn.dataset.productTitle : '';
+  
+  if (form && addBtn && btnText) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const subscribeRadioInner = document.querySelector('input[name="purchase_type"][value="subscribe"]');
+      const isSubscription = subscribeRadioInner && subscribeRadioInner.checked;
+      const originalText = btnText.innerHTML;
+      const isMobile = window.innerWidth <= 767;
+      
+      if (isSubscription) {
+        btnText.textContent = isMobile ? 'Applying...' : 'Locking In Discount';
+      } else {
+        btnText.textContent = 'Adding to Cart!';
+      }
+      addBtn.disabled = true;
+      addBtn.classList.add('adding');
+      
+      const formData = new FormData(form);
+      const sellingPlanField = document.getElementById('selected-selling-plan-id');
+      if (!isSubscription && sellingPlanField) {
+        sellingPlanField.removeAttribute('name');
+      } else if (isSubscription && sellingPlanField) {
+        sellingPlanField.setAttribute('name','selling_plan');
+      }
+      
+      fetch('/cart/add.js', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(function(response){ return response.json(); })
+      .then(function() {
+        addBtn.classList.add('success');
+        const cartIcon = document.getElementById('cart-icon');
+        if (cartIcon) cartIcon.style.display = 'none';
+        if (isSubscription) {
+          btnText.textContent = '✓ Discount Applied';
+        } else {
+          btnText.textContent = '✓ Added to Cart!';
+        }
+        return fetch('/cart.js');
+      })
+      .then(function(resp){ return resp.json(); })
+      .then(function(cartData) {
+        document.dispatchEvent(new CustomEvent('cart:change', { detail: { cart: cartData } }));
+        document.dispatchEvent(new CustomEvent('variant:add', { detail: { cart: cartData } }));
+        document.dispatchEvent(new CustomEvent('cart:refresh'));
+        setTimeout(function() {
+          addBtn.disabled = false;
+          addBtn.classList.remove('adding', 'success');
+          const cartIcon = document.getElementById('cart-icon');
+          if (cartIcon) cartIcon.style.display = 'inline-block';
+          updateButtonText();
+        }, 2000);
+      })
+      .catch(function() {
+        btnText.innerHTML = originalText;
+        addBtn.disabled = false;
+        addBtn.classList.remove('adding', 'success');
+        const cartIcon = document.getElementById('cart-icon');
+        if (cartIcon) cartIcon.style.display = 'inline-block';
+      });
+    });
+  }
+  
+  initializeBuyBox();
+  
+  const apparelSelector = document.querySelector('.buybox-apparel-selector');
+  if (apparelSelector) {
+    document.addEventListener('variant:changed', function(e) {
+      if (!e.detail || !e.detail.variantId) return;
+      
+      const variantId = String(e.detail.variantId);
+      const variantSelect = document.getElementById('variant-select');
+      if (!variantSelect) return;
+      
+      const selectedOption = variantSelect.options[variantSelect.selectedIndex];
+      if (selectedOption && String(selectedOption.value) === variantId) {
+        return;
+      }
+      
+      const variants = window.productVariants || [];
+      const variant = variants.find(v => String(v.id) === variantId);
+      if (!variant) {
+        return;
+      }
+      
+      const variantTitle = variant.title;
+      const parts = variantTitle.split(' / ');
+      
+      const sizeTrigger = document.getElementById('size-trigger-text');
+      const sizeOptions = document.querySelectorAll('.size-option');
+      const colorBoxes = document.querySelectorAll('.color-display-box');
+      
+      parts.forEach(function(part) {
+        let foundSize = false;
+        
+        sizeOptions.forEach(function(option) {
+          if (option.dataset.size === part) {
+            foundSize = true;
+            if (sizeTrigger) sizeTrigger.textContent = part;
+            option.setAttribute('aria-selected', 'true');
+          } else {
+            option.setAttribute('aria-selected', 'false');
+          }
+        });
+        
+        if (!foundSize && colorBoxes.length > 0) {
+          colorBoxes.forEach(function(box) {
+            if (box.dataset.color === part) {
+              box.classList.add('active');
+            } else {
+              box.classList.remove('active');
+            }
+          });
+        }
+      });
+      
+      for (let i = 0; i < variantSelect.options.length; i++) {
+        if (String(variantSelect.options[i].value) === variantId) {
+          variantSelect.selectedIndex = i;
+          const variantIdInput = document.getElementById('selected-variant-id');
+          if (variantIdInput) variantIdInput.value = variantId;
+          if (window.updatePricesForVariant) updatePricesForVariant(variantId);
+          break;
+        }
+      }
+    });
+  }
+  
+  document.addEventListener('variant:changed', function(e) {
+    if (!e.detail || !e.detail.variantId) return;
+    
+    const variantId = String(e.detail.variantId);
+    const sfpOption = document.querySelector('.sfp-flavor-option[data-variant-id="' + variantId + '"]');
+    
+    if (sfpOption) {
+      const variantName = sfpOption.getAttribute('data-variant-name');
+      const swatchUrl = sfpOption.getAttribute('data-swatch-url');
+      const sfpUrl = sfpOption.getAttribute('data-sfp-url');
+      
+      const allSfpOptions = document.querySelectorAll('.sfp-flavor-option');
+      allSfpOptions.forEach(function(opt) {
+        opt.classList.remove('active', 'currently-selected');
+        opt.style.display = '';
+      });
+      sfpOption.classList.add('active', 'currently-selected');
+      sfpOption.style.display = 'none';
+      
+      const sfpTriggerText = document.querySelector('.sfp-trigger-text');
+      const sfpTriggerSwatch = document.querySelector('.sfp-trigger-swatch');
+      if (sfpTriggerText) sfpTriggerText.textContent = variantName;
+      if (sfpTriggerSwatch && swatchUrl) sfpTriggerSwatch.src = swatchUrl;
+      
+      const sfpImage = document.querySelector('.sfp-image');
+      if (sfpImage && sfpUrl) sfpImage.src = sfpUrl;
+    }
+  });
+  
+  var resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      updateButtonText();
+    }, 250);
+  });
+});
+
+function updateSavingsText() {
+  const onetimePrice = document.getElementById('onetime-price');
+  const subscribePrice = document.getElementById('subscribe-price');
+  const savingsText = document.getElementById('onetime-savings-text');
+  
+  if (onetimePrice && subscribePrice && savingsText) {
+    const onetimePriceText = onetimePrice.textContent.replace(/[^0-9.]/g, '');
+    const subscribePriceText = subscribePrice.textContent.replace(/[^0-9.]/g, '');
+    const savings = (parseFloat(onetimePriceText) - parseFloat(subscribePriceText)).toFixed(2);
+    savingsText.innerHTML = "You'll Save <strong>$" + savings + "</strong> Today When You Subscribe!";
+  }
+}
+
+function updatePurchaseTypeUI(type) {
+  const frequencyRow = document.querySelector('.buybox-frequency-row');
+  const dividerRow = document.querySelector('.buybox-divider-row');
+  const benefitsRow = document.querySelector('.buybox-benefits-row');
+  const subscribeOnlyBenefits = document.querySelectorAll('.subscribe-only-benefit');
+  const onetimeBenefits = document.querySelectorAll('.onetime-benefit');
+  const paymentOptions = document.querySelector('.buybox-payment-options');
+  
+  if (type === 'subscribe') {
+    if (frequencyRow) frequencyRow.classList.add('show');
+    if (dividerRow) dividerRow.classList.add('show');
+    if (benefitsRow) benefitsRow.classList.add('show');
+    
+    subscribeOnlyBenefits.forEach(function(el){
+      el.classList.remove('hide');
+      el.style.display = 'flex';
+    });
+    onetimeBenefits.forEach(function(el){
+      el.classList.remove('show');
+      el.style.display = 'none';
+    });
+    
+    if (paymentOptions) paymentOptions.classList.add('hide-on-subscribe');
+  } else {
+    if (frequencyRow) frequencyRow.classList.remove('show');
+    if (dividerRow) dividerRow.classList.add('show');
+    if (benefitsRow) benefitsRow.classList.add('show');
+    
+    updateSavingsText();
+    
+    subscribeOnlyBenefits.forEach(function(el){
+      el.classList.add('hide');
+      el.style.display = 'none';
+    });
+    onetimeBenefits.forEach(function(el){
+      el.classList.add('show');
+      el.style.display = 'flex';
+    });
+    
+    if (paymentOptions) paymentOptions.classList.remove('hide-on-subscribe');
+  }
+  
+  updateButtonText();
+  
+  const active = document.querySelector('.buybox-variant-option.active');
+  if (active && active.dataset.variantPrice) {
+    updatePrices(Number(active.dataset.variantPrice));
+  }
+}
+
+function updateButtonText() {
+  const addBtn = document.getElementById('add-to-cart-btn');
+  const btnText  = document.getElementById('add-to-cart-text');
+  const isMobile = window.innerWidth <= 767;
+  const subscribeRadio = document.querySelector('input[name="purchase_type"][value="subscribe"]');
+  const frequencySelect = document.getElementById('delivery-frequency');
+  
+  if (!addBtn || !btnText) return;
+  if (addBtn.disabled) return;
+  
+  if (subscribeRadio && subscribeRadio.checked) {
+    let discount = '20';
+    if (frequencySelect) {
+      const opt = frequencySelect.options[frequencySelect.selectedIndex];
+      if (opt && opt.dataset.discount) discount = opt.dataset.discount;
+    }
+    if (isMobile) {
+      btnText.textContent = "Add to Cart";
+    } else {
+      btnText.innerHTML = "Add to Cart <span class='discount-highlight'>" + discount + "% Off</span>";
+    }
+  } else {
+    btnText.textContent = 'Add to Cart';
+  }
+}
+</script>
+
+<script>
+(function() {
+  const form = document.getElementById('buybox-form');
+  const sellingPlanInput = document.getElementById('selected-selling-plan-id');
+  const variantInput = document.getElementById('selected-variant-id');
+  const subscribeRadio = form ? form.querySelector('input[name="purchase_type"][value="subscribe"]') : null;
+  const onetimeRadio = form ? form.querySelector('input[name="purchase_type"][value="onetime"]') : null;
+  const frequencySelect = document.getElementById('delivery-frequency');
+
+  function setSellingPlanForSubmit() {
+    if (!sellingPlanInput) return;
+    if (subscribeRadio && subscribeRadio.checked) {
+      const planId = (frequencySelect && frequencySelect.value) || (subscribeRadio && subscribeRadio.dataset.sellingPlanId) || '';
+      sellingPlanInput.value = planId;
+      if (planId) {
+        sellingPlanInput.setAttribute('name', 'selling_plan');
+      } else {
+        sellingPlanInput.removeAttribute('name');
+      }
+    } else {
+      sellingPlanInput.value = '';
+      sellingPlanInput.removeAttribute('name');
+    }
+  }
+
+  window.updateButtonText = function() {
+    const addBtn = document.getElementById('add-to-cart-btn');
+    const btnText  = document.getElementById('add-to-cart-text');
+    const isMobile = window.innerWidth <= 767;
+    if (!addBtn || !btnText) return;
+    if (addBtn.disabled) return;
+    if (subscribeRadio && subscribeRadio.checked) {
+      let discount = '20';
+      const opt = frequencySelect ? frequencySelect.options[frequencySelect.selectedIndex] : null;
+      if (opt && opt.dataset.discount) discount = opt.dataset.discount;
+      if (isMobile) {
+        btnText.textContent = "Add to Cart";
+      } else {
+        btnText.innerHTML = "Add to Cart <span class='discount-highlight'>" + discount + "% Off</span>";
+      }
+    } else {
+      btnText.textContent = 'Add to Cart';
+    }
+  };
+
+  if (subscribeRadio) subscribeRadio.addEventListener('change', function() { setSellingPlanForSubmit(); updatePurchaseTypeUI('subscribe'); });
+  if (onetimeRadio) onetimeRadio.addEventListener('change', function() { setSellingPlanForSubmit(); updatePurchaseTypeUI('onetime'); });
+  if (frequencySelect) frequencySelect.addEventListener('change', function() { setSellingPlanForSubmit(); window.updateButtonText(); });
+
+  if (form) {
+    form.addEventListener('submit', function() {
+      setSellingPlanForSubmit();
+      if (variantInput && !variantInput.value) {
+        const vs = document.getElementById('variant-select');
+        if (vs && vs.value) variantInput.value = vs.value;
+      }
+    }, true);
+  }
+
+  setSellingPlanForSubmit();
+  window.updateButtonText();
+})();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function hydrateInitialState() {
+  const form = document.getElementById('buybox-form');
+  if (!form) return;
+
+  const subscribeOption = form.querySelector('.buybox-purchase-option.subscribe-option');
+  const subscribeRadio = form.querySelector('input[name="purchase_type"][value="subscribe"]');
+  const onetimeRadio = form.querySelector('input[name="purchase_type"][value="onetime"]');
+  const frequencyWrap = document.getElementById('frequency-selector');
+  const frequencySelect = document.getElementById('delivery-frequency');
+  const sellingPlanInput = document.getElementById('selected-selling-plan-id');
+  const addBtn = document.getElementById('add-to-cart-btn');
+
+  if (addBtn && addBtn.disabled) return;
+
+  const variantId = document.getElementById('selected-variant-id') ? document.getElementById('selected-variant-id').value : null;
+  const variantData = (window.productVariants || []).find(function(v){ return String(v.id) === String(variantId); });
+  const hasPlans = !!(variantData && variantData.selling_plan_allocations && variantData.selling_plan_allocations.length);
+  const isAvailable = !variantData || variantData.available !== false;
+
+  if (!isAvailable) return;
+
+  if (!hasPlans) {
+    if (subscribeOption) subscribeOption.style.display = 'none';
+    
+    const buyboxContainer = document.getElementById('buybox-container');
+    const isApparelOrGear = buyboxContainer && (buyboxContainer.dataset.isApparel === 'true' || buyboxContainer.dataset.isGear === 'true');
+    const onetimeOption = document.querySelector('.buybox-purchase-option.onetime-option');
+    
+    if (isApparelOrGear && onetimeOption) {
+      onetimeOption.style.display = 'none';
+    } else {
+      if (onetimeOption) onetimeOption.style.display = 'block';
+      if (onetimeRadio) onetimeRadio.checked = true;
+      updatePurchaseTypeUI('onetime');
+    }
+    
+    if (frequencyWrap) frequencyWrap.classList.remove('show');
+    if (sellingPlanInput) {
+      sellingPlanInput.value = '';
+      sellingPlanInput.removeAttribute('name');
+    }
+    window.updateButtonText();
+    return;
+  }
+
+  if (subscribeOption) subscribeOption.style.display = 'block';
+  
+  const onetimeOption = document.querySelector('.buybox-purchase-option.onetime-option');
+  if (onetimeOption) onetimeOption.style.display = 'block';
+  
+  const isSubscribeChecked = subscribeRadio && subscribeRadio.checked;
+  const isOnetimeChecked = onetimeRadio && onetimeRadio.checked;
+  
+  const dividerRow = document.querySelector('.buybox-divider-row');
+  const benefitsRow = document.querySelector('.buybox-benefits-row');
+  
+  if (isSubscribeChecked) {
+    if (frequencyWrap) frequencyWrap.classList.add('show');
+    if (dividerRow) dividerRow.classList.add('show');
+    if (benefitsRow) benefitsRow.classList.add('show');
+    if (frequencySelect && sellingPlanInput) {
+      const planId = frequencySelect.value || (subscribeRadio ? subscribeRadio.dataset.sellingPlanId : '') || '';
+      sellingPlanInput.value = planId;
+      if (planId) sellingPlanInput.setAttribute('name', 'selling_plan');
+    }
+    updatePurchaseTypeUI('subscribe');
+  } else if (isOnetimeChecked) {
+    if (frequencyWrap) frequencyWrap.classList.remove('show');
+    if (dividerRow) dividerRow.classList.add('show');
+    if (benefitsRow) benefitsRow.classList.add('show');
+    if (sellingPlanInput) {
+      sellingPlanInput.value = '';
+      sellingPlanInput.removeAttribute('name');
+    }
+    updatePurchaseTypeUI('onetime');
+  } else {
+    if (subscribeRadio) subscribeRadio.checked = true;
+    if (frequencyWrap) frequencyWrap.classList.add('show');
+    if (dividerRow) dividerRow.classList.add('show');
+    if (benefitsRow) benefitsRow.classList.add('show');
+    if (frequencySelect && sellingPlanInput) {
+      const planId = frequencySelect.value || (subscribeRadio ? subscribeRadio.dataset.sellingPlanId : '') || '';
+      sellingPlanInput.value = planId;
+      if (planId) sellingPlanInput.setAttribute('name', 'selling_plan');
+    }
+    updatePurchaseTypeUI('subscribe');
+  }
+  
+  window.updateButtonText();
+
+  const active = document.querySelector('.buybox-variant-option.active');
+  if (active && active.dataset.variantPrice) {
+    updatePrices(Number(active.dataset.variantPrice));
+  }
+});
+</script>
+
+<script>
+function updatePricesForVariant(variantId) {
+  const variants = window.productVariants || [];
+  const variant = variants.find(v => String(v.id) === String(variantId));
+  
+  if (variant) {
+    updatePrices(variant.price);
+    
+    const hasPlans = !!(variant.selling_plan_allocations && variant.selling_plan_allocations.length);
+    const subscribeOption = document.querySelector('.buybox-purchase-option.subscribe-option');
+    const onetimeOption = document.querySelector('.buybox-purchase-option.onetime-option');
+    const onetimeRadio = document.querySelector('input[name="purchase_type"][value="onetime"]');
+    const buyboxContainer = document.getElementById('buybox-container');
+    const isApparelOrGear = buyboxContainer && (buyboxContainer.dataset.isApparel === 'true' || buyboxContainer.dataset.isGear === 'true');
+    
+    if (!hasPlans) {
+      if (subscribeOption) {
+        subscribeOption.style.display = 'none';
+      }
+      
+      // For apparel/gear without selling plans, hide both options
+      if (isApparelOrGear && onetimeOption) {
+        onetimeOption.style.display = 'none';
+      } else if (onetimeOption) {
+        onetimeOption.style.display = 'block';
+        if (onetimeRadio) onetimeRadio.checked = true;
+        updatePurchaseTypeUI('onetime');
+      }
+    } else {
+      if (subscribeOption) {
+        subscribeOption.style.display = 'block';
+      }
+      if (onetimeOption) {
+        onetimeOption.style.display = 'block';
+      }
+    }
+  }
+}
+</script>

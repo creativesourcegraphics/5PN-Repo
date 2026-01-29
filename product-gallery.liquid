@@ -1,0 +1,448 @@
+{%- assign default_media = product.selected_or_first_available_variant.featured_media | default: product.featured_media -%}
+{%- capture product_form_id -%}product-form-{{ product.id }}-{{ section.id }}{%- endcapture -%}
+{%- capture product_gallery_id -%}product-gallery-{{ product.id }}-{{ section.id }}{%- endcapture -%}
+{% assign product_sfp_raw = product.metafields.custom.sfp_section.value %}
+{% assign product_sfp = product_sfp_raw | first | default: product_sfp_raw %}
+{% assign product_series = product_sfp.series.value %}
+{% assign series_handle = product_series.handle %}
+{% if series_handle == blank %}
+  {% assign series_name_lower = product_series.series_name | downcase | replace: ' ', '-' %}
+  {% assign series_handle = series_name_lower %}
+{% endif %}
+{% assign is_gladiator_series = false %}
+{% if series_handle contains 'gladiator' %}
+  {% assign is_gladiator_series = true %}
+{% endif %}
+
+{% assign filtered_indexes = null | sort %}
+
+{%- if product.variants.size > 1 -%}
+  {%- for media in product.media -%}
+    {%- if media.alt contains '#' and media.alt != product.title -%}
+      {%- assign alt_parts = media.alt | split: '#' -%}
+      {%- assign media_group_parts = alt_parts.last | split: '_' -%}
+      {%- assign option = product.options_by_name[media_group_parts.first] -%}
+      {%- assign option_value = option.selected_value | downcase -%}
+      {%- assign downcase_group_value = media_group_parts.last | strip | downcase -%}
+      {%- if option_value != downcase_group_value and media != default_media -%}
+        {%- assign media_position = media.position | sort -%}
+        {%- assign filtered_indexes = filtered_indexes | concat: media_position -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+<style>
+@keyframes pulse-ring{0%,100%{transform:scale(1);opacity:.85;filter:blur(0px)}50%{transform:scale(1.15);opacity:.7;filter:blur(3px)}}
+@keyframes pulse-stroke{0%,100%{transform:translate(-50%,-50%) scale(1.05);opacity:1}50%{transform:translate(-50%,-50%) scale(1.2);opacity:.75}}
+@keyframes pulse-button{0%,100%{transform:scale(0.95);opacity:1}50%{transform:scale(1.08);opacity:.85}}
+@keyframes pulse-bg-blur{0%,100%{filter:blur(2.5px)}50%{filter:blur(0px)}}
+@keyframes pulse-overlay{0%,100%{background:#0000009c}50%{background:#0000001a}}
+@keyframes pulse-icon{0%,100%{transform:scale(0.75);stroke:var(--series-bg);stroke-width:30px;fill:var(--series-bg)}50%{transform:scale(0.95);stroke:#fff;stroke-width:30px;fill:#fff}}
+.product-gallery__thumbnail::after{content:"";height:2px;opacity:0;background:currentColor;transition:opacity .15s;display:block;position:absolute;bottom:0}
+.product-gallery__thumbnail[aria-current="true"]::after{opacity:1;background:var(--series-featured,#AE1F24)!important}
+.gallery-nav-arrow{position:absolute;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.95);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;transition:all .2s ease}
+.gallery-nav-arrow:hover{background:#fff;transform:translateY(-50%) scale(1.05)}
+.gallery-nav-arrow.prev{left:0!important}
+.gallery-nav-arrow.next{right:0!important}
+.gallery-nav-arrow svg{width:18px;height:18px;fill:#333}
+.product-gallery__thumbnail-list-wrapper.is-gladiator-series .gallery-nav-arrow{background:rgb(0 0 0 / 49%)!important}
+.product-gallery__thumbnail-list-wrapper.is-gladiator-series .gallery-nav-arrow svg{fill:var(--series-featured-color,#AE1F24);color:var(--series-featured-color,#AE1F24)}
+.product-gallery__thumbnail-list-wrapper.is-gladiator-series .gallery-nav-arrow svg path{stroke:var(--series-featured-color,#AE1F24)}
+.video-play-button{position:absolute;top:50px;right:20px;width:105px;height:105px;border-radius:50%;cursor:pointer;z-index:100;animation:pulse-button 2s ease-in-out infinite}
+.video-play-button::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;padding:0;border-radius:50%;background:var(--series-featured,#8B1419);opacity:.35;animation:pulse-ring 2s ease-in-out infinite;z-index:-1}
+.video-play-button-inner{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;z-index:10}
+.video-play-button-inner::before{content:"";position:absolute;inset:0;background:#0000009c;z-index:2;border-radius:50%;pointer-events:none;animation:pulse-overlay 2s ease-in-out infinite}
+.video-play-button-border{position:absolute;top:50%;left:50%;width:100%;height:100%;transform:translate(-50%,-50%) scale(1.05);border-radius:50%;border:4px solid var(--series-featured,#AE1F24);animation:pulse-stroke 2s ease-in-out infinite;pointer-events:none;z-index:12}
+.video-play-button-bg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);min-width:100%;min-height:100%;width:auto;height:auto;object-fit:cover;opacity:1;pointer-events:none;border-radius:50%;z-index:0;animation:pulse-bg-blur 2s ease-in-out infinite}
+.video-play-button .play-icon{width:24px;height:24px;position:relative;z-index:100;overflow:visible}
+.video-play-button .play-path{animation:pulse-icon 2s ease-in-out infinite;stroke-width: 30px;stroke:white;filter:drop-shadow(0 6px 16px rgba(0,0,0,.65)) drop-shadow( rgba(149, 157, 165, 0.2) 0px 8px 24px);transform-origin:center center}
+.video-play-button{box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.inner-video-play-button-border {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%) scale(1.05);
+    border-radius: 50%;
+    border: 2px solid white;
+    pointer-events: none;
+    z-index: 3;
+    transition: opacity .4s ease-in-out;
+}
+@media (max-width:699px){
+.product-gallery__thumbnail{width:56px;height:56px}
+.video-play-button{width:65px;height:65px;top:0;right:0;overflow:visible}
+.video-play-button i{font-size:16px;margin-left:1px}
+.video-play-button i svg,.video-play-button svg{width:15px!important;height:15px!important}
+.video-play-button-inner{border-width:2px;overflow:hidden}
+.gallery-nav-arrow{display:none}
+}
+@media (min-width:700px){
+.product-gallery__thumbnail{width:64px;height:64px}
+}
+
+.product-gallery__thumbnail-list {
+  overflow: auto hidden;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+}
+
+.product-gallery__thumbnail-list::-webkit-scrollbar {
+  display: none;
+}
+
+.product-gallery__media,
+.product-gallery__media img,
+.product-gallery__media video {
+  transition: none !important;
+  transform: none !important;
+}
+
+@media screen and (max-width: 999px) {
+  .product-gallery__cursor {
+    display: none !important;
+  }
+}
+</style>
+
+<product-gallery form="{{ product_form_id }}"
+  {%- if section.settings.enable_image_zoom -%}allow-zoom="{{ section.settings.max_image_zoom_level }}"{% endif %}
+  class="product-gallery {% if section.settings.mobile_carousel_control contains 'dots' %}product-gallery--mobile-dots{% endif %} {% if section.settings.desktop_media_layout contains 'grid' %}product-gallery--desktop-grid{% else %}product-gallery--desktop-carousel{% endif %} {% if section.settings.desktop_media_layout == 'carousel_thumbnails_left' %}product-gallery--desktop-thumbnails-left{% endif %} {% if section.settings.mobile_media_size == 'expanded' %}product-gallery--mobile-expanded{% endif %} {% if is_gladiator_series %}is-gladiator-series{% endif %}">
+
+  <div class="product-gallery__ar-wrapper">
+    <div class="product-gallery__media-list-wrapper">
+      {%- if section.settings.desktop_media_layout contains 'carousel' and product.media.size > 1 -%}
+        <custom-cursor id="gallery-cursor-prev-{{ section.id }}" class="product-gallery__cursor" data-gallery-action="prev">
+          <div class="circle-button circle-button--fill circle-button--lg">
+            {%- render 'icon' with 'chevron-left' -%}
+          </div>
+        </custom-cursor>
+      {%- endif -%}
+
+      <media-carousel desktop-mode="{{ section.settings.desktop_media_layout }}" adaptive-height initial-index="{{ default_media.position | minus: 1 }}"
+        {% if section.settings.enable_video_autoplay %}autoplay{% endif %}
+        id="{{ product_gallery_id }}"
+        class="product-gallery__media-list {% if section.settings.mobile_media_size == 'expanded' %}full-bleed{% else %}bleed{% endif %} scroll-area md:unbleed">
+
+        {%- for media in product.media -%}
+          <div class="product-gallery__media {% if media.alt contains '@expand' %}product-gallery__media--expand{% endif %} snap-center"
+            data-media-type="{{ media.media_type }}" data-media-id="{{ media.id }}"
+            {% if filtered_indexes contains media.position %}hidden{% endif %}>
+            {%- render 'media', media: media, sizes: sizes, preload: media == default_media, autoplay: section.settings.enable_video_autoplay, loop: section.settings.enable_video_looping, group: 'product' -%}
+            {%- if section.settings.enable_image_zoom and media.media_type == 'image' -%}
+              <div class="product-gallery__zoom hidden md:block">
+                <button type="button" id="zoom-btn-{{ media.id }}-{{ section.id }}" is="product-zoom-button" class="circle-button circle-button--fill ring">
+                  <span class="sr-only">{{ 'product.gallery.zoom' | t }}</span>
+                  {%- render 'icon' with 'image-zoom' -%}
+                </button>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </media-carousel>
+
+      {%- if template.suffix != 'apparel' and template.suffix != blank -%}
+        {%- for sfp_item in product.metafields.custom.sfp_section.value -%}
+          {%- if sfp_item.pdp_mobile_video.value != blank or sfp_item.pdp_desktop_video.value != blank -%}
+            {%- assign video_url = sfp_item.pdp_desktop_video.value | default: sfp_item.pdp_mobile_video.value -%}
+            {%- assign video_id = video_url | split: '/' | last -%}
+            <button id="video-play-btn-{{ section.id }}" class="video-play-button" data-video-mobile="{{ sfp_item.pdp_mobile_video.value }}" data-video-desktop="{{ sfp_item.pdp_desktop_video.value }}">
+              <div class="video-play-button-border"></div>
+              <div class="inner-video-play-button-border"></div>
+              <div class="video-play-button-inner">
+                <img class="video-play-button-bg" src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/5pn-video-prev.gif?v=1763013513" alt="Video Preview" loading="lazy">
+                <svg xmlns="http://www.w3.org/2000/svg" class="play-icon" viewBox="0 0 174.74 199.56">
+                  <path class="play-path" d="M0,7.24v185.08c0,5.57,6.03,9.05,10.85,6.26l160.28-92.54c4.82-2.78,4.82-9.74,0-12.52L10.85.98C6.03-1.8,0,1.68,0,7.24Z"/>
+                </svg>
+              </div>
+            </button>
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if section.settings.desktop_media_layout contains 'carousel' and product.media.size > 1 -%}
+        <custom-cursor id="gallery-cursor-next-{{ section.id }}" class="product-gallery__cursor" data-gallery-action="next">
+          <div class="circle-button circle-button--fill circle-button--lg">
+            {%- render 'icon' with 'chevron-right' -%}
+          </div>
+        </custom-cursor>
+      {%- endif -%}
+    </div>
+  </div>
+</product-gallery>
+
+{%- if product.media.size > 1 -%}
+<scroll-shadow class="product-gallery__thumbnail-list-wrapper{% if is_gladiator_series %} is-gladiator-series{% endif %}">
+  <button id="gallery-nav-prev-{{ section.id }}" class="gallery-nav-arrow prev" data-gallery-action="prev" aria-label="Previous image">
+    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+  </button>
+  <div class="product-gallery__thumbnail-list bleed md:unbleed" id="gallery-thumbnails">
+    {%- for media in product.media -%}
+      <button type="button" id="gallery-thumb-{{ forloop.index0 }}-{{ section.id }}" class="product-gallery__thumbnail" data-media-index="{{ forloop.index0 }}" {% if filtered_indexes contains media.position %}hidden{% endif %} aria-current="{% if media == default_media %}true{% else %}false{% endif %}" aria-label="{{ 'general.accessibility.go_to_item' | t: index: forloop.index | escape }}">
+        {{- media | image_url: width: 300 | image_tag: loading: 'lazy', sizes: '(max-width: 699px) 60px, 80px', widths: '120,160,240,300', class: 'object-contain rounded-sm' -}}
+        {%- unless media.media_type == 'image' -%}
+          <div class="product-gallery__media-badge">
+            {%- if media.media_type == 'model' -%}
+              {%- render 'icon' with 'play-model', width: 10, height: 12 -%}
+            {%- else -%}
+              {%- render 'icon' with 'play-video', width: 7, height: 9 -%}
+            {%- endif -%}
+          </div>
+        {% endunless %}
+      </button>
+    {%- endfor -%}
+  </div>
+  <button id="gallery-nav-next-{{ section.id }}" class="gallery-nav-arrow next" data-gallery-action="next" aria-label="Next image">
+    <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+  </button>
+</scroll-shadow>
+{%- endif -%}
+
+<script>
+let userTouching=false,touchTimer=null,animating=false;
+
+const $$=(s,ctx=document)=>Array.from(ctx.querySelectorAll(s));
+const $=(s,ctx=document)=>ctx.querySelector(s);
+const wrap=(i,n)=>(i%n+n)%n;
+const debounce=(fn,ms=120)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn.apply(null,a),ms)}};
+const rafThrottle=fn=>{let r=null;return(...a)=>{if(r)return;r=requestAnimationFrame(()=>{r=null;fn(...a)})}};
+
+const cache={
+  pg:null,mc:null,all:[],vis:[],tw:null,at:[]
+};
+
+function refreshCache(){
+  cache.pg=$('product-gallery');
+  cache.mc=cache.pg?$('media-carousel',cache.pg):null;
+  cache.all=cache.mc?$$('.product-gallery__media',cache.mc):[];
+  cache.vis=cache.all.filter(m=>!m.hasAttribute('hidden'));
+  cache.tw=document.getElementById('gallery-thumbnails');
+  cache.at=cache.tw?$$('.product-gallery__thumbnail',cache.tw):[];
+}
+
+function scrollCenterTo(el,instant){
+  if(!el||!cache.mc)return;
+  const left=el.offsetLeft-(cache.mc.offsetWidth/2)+(el.offsetWidth/2);
+  if(instant){
+    cache.mc.scrollLeft=left;
+  }else{
+    if('scrollTo'in cache.mc)cache.mc.scrollTo({left:left,behavior:'smooth'});else cache.mc.scrollLeft=left;
+  }
+}
+
+function currentIndex(){
+  if(!cache.mc||!cache.vis.length)return 0;
+  const c=cache.mc.scrollLeft+(cache.mc.offsetWidth/2);
+  let best=0,dist=Infinity;
+  for(let i=0;i<cache.vis.length;i++){
+    const m=cache.vis[i];
+    const mid=m.offsetLeft+(m.offsetWidth/2);
+    const d=Math.abs(mid-c);
+    if(d<dist){best=i;dist=d}
+  }
+  return best;
+}
+
+function setAria(i){
+  cache.vis.forEach((m,ii)=>m.setAttribute('aria-current',ii===i?'true':'false'));
+  cache.at.forEach(t=>t.setAttribute('aria-current','false'));
+  const node=cache.vis[i]; if(!node)return;
+  const real=cache.all.indexOf(node);
+  const t=cache.at.find(x=>parseInt(x.getAttribute('data-media-index'))===real);
+  if(t)t.setAttribute('aria-current','true');
+}
+
+function centerThumbTo(i,instant){
+  if(userTouching||!cache.tw)return;
+  const node=cache.vis[i]; if(!node)return;
+  const real=cache.all.indexOf(node);
+  const t=cache.at.find(x=>parseInt(x.getAttribute('data-media-index'))===real);
+  if(!t||t.hasAttribute('hidden'))return;
+  const left=t.offsetLeft-(cache.tw.offsetWidth/2)+(t.offsetWidth/2);
+  const target=Math.max(0,left);
+  if(instant){
+    cache.tw.scrollLeft=target;
+  }else{
+    if('scrollTo'in cache.tw)cache.tw.scrollTo({left:target,behavior:'smooth'});else cache.tw.scrollLeft=target;
+  }
+}
+
+function maybeUpdateVariant(node){
+  if(!node)return;
+  const id=node.getAttribute('data-media-id'); if(!id)return;
+  const match=document.querySelector(`.buybox-variant-option[data-media-id="${id}"]`);
+  if(match){
+    const r=match.querySelector('input[type="radio"]');
+    if(r&&r.checked)return;
+    const sw=match.querySelector('.buybox-variant-swatch');
+    if(sw&&(sw.classList.contains('selected')||sw.getAttribute('aria-pressed')==='true'))return;
+    if(sw){sw.click()}else if(r){r.checked=true;r.dispatchEvent(new Event('change',{bubbles:true}));r.click()}
+  }else{
+    const variants=window.productVariants||[];
+    const variant=variants.find(v=>v.featured_media&&String(v.featured_media.id)===id);
+    if(variant){
+      const event=new CustomEvent('variant:changed',{detail:{variantId:variant.id,mediaId:id,variantName:variant.title},bubbles:true});
+      document.dispatchEvent(event);
+    }
+  }
+}
+
+function adjustPlay(){
+  const pb=document.querySelector('.video-play-button');
+  if(pb)pb.style.removeProperty('right');
+}
+
+function goToVisible(i){
+  if(!cache.vis.length)return;
+  const idx=wrap(i,cache.vis.length);
+  const node=cache.vis[idx]; if(!node)return;
+  scrollCenterTo(node); setAria(idx); centerThumbTo(idx); maybeUpdateVariant(node); adjustPlay();
+}
+
+function goToArrayIndex(ai){
+  if(!cache.all.length)return;
+  let ri=wrap(ai,cache.all.length);
+  let node=cache.all[ri]; if(!node)return;
+  if(node.hasAttribute('hidden')){
+    let f=ri,b=ri,found=null;
+    while(f<cache.all.length||b>=0){
+      if(f<cache.all.length&&!cache.all[f].hasAttribute('hidden')){found=cache.all[f];break}
+      if(b>=0&&!cache.all[b].hasAttribute('hidden')){found=cache.all[b];break}
+      f++; b--;
+    }
+    if(!found)return;
+    node=found;
+  }
+  const idx=cache.vis.indexOf(node);
+  if(idx>=0)goToVisible(idx);
+}
+
+function scrollGallery(dir){
+  if(animating)return;
+  const step=dir==='prev'?-1:1;
+  goToVisible(currentIndex()+step);
+}
+
+function selectGalleryByMediaIndex(i,instant){
+  const idx=wrap(i,cache.all.length);
+  const node=cache.all[idx];
+  if(!node)return;
+  const visIdx=cache.vis.indexOf(node);
+  if(visIdx>=0){
+    scrollCenterTo(node,instant);
+    setAria(visIdx);
+    centerThumbTo(visIdx,instant);
+    maybeUpdateVariant(node);
+    adjustPlay();
+  }
+}
+
+window.scrollGallery=scrollGallery;
+window.selectGalleryByMediaIndex=selectGalleryByMediaIndex;
+
+document.addEventListener('DOMContentLoaded',function(){
+  if('requestIdleCallback' in window){
+    requestIdleCallback(initGallery,{timeout:500});
+  }else{
+    requestAnimationFrame(initGallery);
+  }
+});
+
+function initGallery(){
+  refreshCache();
+
+  document.addEventListener('click',function(e){
+    const galleryAction=e.target.closest('[data-gallery-action]');
+    if(galleryAction){
+      e.preventDefault();
+      const action=galleryAction.getAttribute('data-gallery-action');
+      if(action)scrollGallery(action);
+      return;
+    }
+    
+    const thumb=e.target.closest('.product-gallery__thumbnail');
+    if(thumb){
+      e.preventDefault();
+      const idx=parseInt(thumb.getAttribute('data-media-index'));
+      if(!isNaN(idx))selectGalleryByMediaIndex(idx);
+      return;
+    }
+    
+    const videoBtn=e.target.closest('.video-play-button');
+    if(videoBtn){
+      e.preventDefault();
+      const mobile=videoBtn.getAttribute('data-video-mobile');
+      const desktop=videoBtn.getAttribute('data-video-desktop');
+      showEmbeddedVideoModal(mobile,desktop);
+    }
+  });
+
+  if(cache.tw){
+    cache.tw.addEventListener('touchstart',()=>{userTouching=true;clearTimeout(touchTimer)},{passive:true});
+    cache.tw.addEventListener('touchend',()=>{clearTimeout(touchTimer);touchTimer=setTimeout(()=>{userTouching=false},500)},{passive:true});
+  }
+
+  if(cache.mc){
+    const onScroll=debounce(()=>{ if(animating)return; const i=currentIndex(); setAria(i); centerThumbTo(i); const node=cache.vis[i]; maybeUpdateVariant(node); adjustPlay() },120);
+    cache.mc.addEventListener('scroll',rafThrottle(onScroll),{passive:true});
+  }
+
+  const vs=document.querySelectorAll('variant-selector');
+  vs.forEach(s=>s.addEventListener('change',function(){
+    refreshCache();
+    const g=document.getElementById('gallery-thumbnails'); if(!g)return;
+    const mm=$$('.product-gallery__media');
+    const th=$$('.product-gallery__thumbnail',g);
+    mm.forEach((m,i)=>{const hid=m.hasAttribute('hidden');const t=th[i];if(t){if(hid)t.setAttribute('hidden','');else t.removeAttribute('hidden')}});
+    const idx=currentIndex();
+    const node=cache.vis[idx];
+    if(node)scrollCenterTo(node,true);
+    setAria(idx);
+    centerThumbTo(idx,true);
+  }));
+
+  requestAnimationFrame(()=>{ setTimeout(()=>{ refreshCache(); if(!cache.tw)return; const defaultThumb=cache.tw.querySelector('[aria-current="true"]'); if(defaultThumb){ const left=defaultThumb.offsetLeft-(cache.tw.offsetWidth/2)+(defaultThumb.offsetWidth/2); cache.tw.scrollLeft=Math.max(0,left) } else { const i=currentIndex(); setAria(i); centerThumbTo(i) } },150) });
+}
+
+function showEmbeddedVideoModal(videoMobile,videoDesktop){
+  const videoUrl=window.innerWidth<768?videoMobile:videoDesktop;
+  if(!videoUrl)return;
+  const embeddedUrl=videoUrl.replace('vimeo.com','player.vimeo.com/video')+'?autoplay=1&muted=0&loop=0';
+  const modalContainer=document.createElement('div');
+  modalContainer.style.position='fixed';
+  modalContainer.style.top='0';
+  modalContainer.style.left='0';
+  modalContainer.style.width='100%';
+  modalContainer.style.height='100%';
+  modalContainer.style.backgroundColor='rgba(0, 0, 0, 0.8)';
+  modalContainer.style.display='flex';
+  modalContainer.style.alignItems='center';
+  modalContainer.style.justifyContent='center';
+  modalContainer.style.zIndex='1000';
+  const videoIframe=document.createElement('iframe');
+  videoIframe.src=embeddedUrl;
+  videoIframe.style.width='80%';
+  videoIframe.style.height='80%';
+  videoIframe.frameBorder='0';
+  videoIframe.allow='autoplay; fullscreen';
+  videoIframe.allowFullscreen=true;
+  const closeButton=document.createElement('button');
+  closeButton.innerText='Close';
+  closeButton.style.position='absolute';
+  closeButton.style.top='20px';
+  closeButton.style.right='20px';
+  closeButton.style.backgroundColor='#fff';
+  closeButton.style.border='none';
+  closeButton.style.padding='10px';
+  closeButton.style.fontSize='16px';
+  closeButton.style.cursor='pointer';
+  closeButton.onclick=function(){document.body.removeChild(modalContainer)};
+  modalContainer.appendChild(videoIframe);
+  modalContainer.appendChild(closeButton);
+  document.body.appendChild(modalContainer)
+}
+</script>
