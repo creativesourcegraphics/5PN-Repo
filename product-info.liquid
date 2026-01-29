@@ -1,0 +1,1384 @@
+{% assign product_info = product.metafields.custom.product_info.value %}
+{% assign product_title = product_info.product_title | default: product.title %}
+{% assign product_sub_header = product_info.product_sub_header %}
+{% assign short_description = product.metafields.product_details.short_description %}
+{% assign short_description_formatted = short_description | replace: '†', '<sup>†</sup>' %}
+
+{% assign product_sfp_raw = product.metafields.custom.sfp_section.value %}
+{% assign product_sfp = product_sfp_raw | first | default: product_sfp_raw %}
+{% assign suggested_use = product_sfp.suggested_use %}
+{% assign storage_info = product_sfp.storage_info %}
+
+{% comment %}Check which tabs have content{% endcomment %}
+{% assign has_description = false %}
+{% if short_description and short_description != blank %}
+  {% assign has_description = true %}
+{% endif %}
+
+{% assign has_ingredients = false %}
+{% assign sfp_list_check = product.metafields.custom.sfp_section.value %}
+{% assign sfp_section_check = sfp_list_check | first %}
+{% if sfp_section_check %}
+  {% assign ingredients_list_check = sfp_section_check.key_ingredients.value %}
+  {% if ingredients_list_check == blank %}
+    {% assign ingredients_list_check = sfp_section_check.key_ingredients %}
+  {% endif %}
+  {% if ingredients_list_check and ingredients_list_check != blank %}
+    {% assign has_ingredients = true %}
+  {% endif %}
+{% endif %}
+
+{% assign has_how_to_use = false %}
+{% assign su_check = suggested_use | strip %}
+{% assign si_check = storage_info | strip %}
+{% if su_check != blank or si_check != blank %}
+  {% assign has_how_to_use = true %}
+{% endif %}
+
+{% assign has_supplement_facts = false %}
+{% assign supplement_facts_image = '' %}
+{% assign current_variant = product.selected_or_first_available_variant %}
+{% if current_variant.metafields.custom.sfp_section and current_variant.metafields.custom.sfp_section.value %}
+  {% assign variant_sfp = current_variant.metafields.custom.sfp_section.value %}
+  {% assign variant_sfp_entry = variant_sfp | first | default: variant_sfp %}
+  {% if variant_sfp_entry.sfp_image != blank %}
+    {% assign supplement_facts_image = variant_sfp_entry.sfp_image | file_url %}
+    {% assign has_supplement_facts = true %}
+  {% endif %}
+{% endif %}
+{% assign product_series = product_sfp.series.value %}
+{% assign series_featured_color = product_series.template_specific_dynamic_featured_color | default: '#AE1F24' %}
+{% assign series_accent_colors = product_series.template_specific_dynamic_featured_color_s | default: product_series.template_specific_accent_color_s %}
+{% if series_accent_colors.first %}
+  {% assign series_accent_1 = series_accent_colors.first %}
+{% elsif series_accent_colors[0] %}
+  {% assign series_accent_1 = series_accent_colors[0] %}
+{% else %}
+  {% assign series_accent_1 = '#333' %}
+{% endif %}
+{% if series_accent_colors[1] %}
+  {% assign series_accent_2 = series_accent_colors[1] %}
+{% else %}
+  {% assign series_accent_2 = series_accent_1 %}
+{% endif %}
+
+{% assign series_handle = product_series.handle %}
+{% if series_handle == blank %}
+  {% assign series_name_lower = product_series.series_name | downcase | replace: ' ', '-' %}
+  {% assign series_handle = series_name_lower %}
+{% endif %}
+
+{% assign is_apparel_or_gear = false %}
+{% assign is_gear = false %}
+{% assign product_type_lower = product.type | downcase %}
+{% if product_type_lower contains 'apparel' or product_type_lower contains 'gear' or product_type_lower contains 'clothing' or product.tags contains 'apparel' or product.tags contains 'gear' %}
+  {% assign is_apparel_or_gear = true %}
+{% endif %}
+{% if product.tags contains 'gear' %}
+  {% unless product.tags contains 'apparel' %}
+    {% assign is_gear = true %}
+  {% endunless %}
+{% endif %}
+
+{% assign has_custom_title = false %}
+{% if product_info.product_title != blank %}
+  {% assign has_custom_title = true %}
+{% endif %}
+
+<div class="product-info-header {% if series_handle == 'core-series' %}is-core-series{% endif %} {% if is_apparel_or_gear %}is-apparel-or-gear{% endif %} {% if has_custom_title %}has-custom-title{% endif %}" style="--series-featured-color: {{ series_featured_color }}; --series-accent-1: {{ series_accent_1 }}; --series-accent-2: {{ series_accent_2 }}; --series-border: #000; --rebuy-product-color: {{ series_featured_color }};">
+  <div class="product-header-row">
+    <div class="product-title-wrapper">
+      <h1 class="product-title">{{ product_title }}</h1>
+      {% if block.settings.show_subheader and product_sub_header != blank %}
+        <span class="product-subheader">{{ product_sub_header }}</span>
+      {% endif %}
+    </div>
+    {% if block.settings.show_rating %}
+      <div class="product-rating product-rating-desktop">
+        <div class="yotpo-widget-instance"
+             data-yotpo-instance-id="{{ block.settings.yotpo_instance_id }}"
+             data-yotpo-product-id="{{ product.id }}"
+             data-yotpo-section-id="product">
+          <div class="yotpo-reviews-star-ratings-widget yotpo-star-ratings-widget-override-css yotpo-device-desktop" id="yotpo-reviews-star-ratings-widget"></div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if is_apparel_or_gear %}
+    <div class="apparel-price-rating-row">
+      <div class="apparel-product-price">{{ product.selected_or_first_available_variant.price | money }}</div>
+      {% if block.settings.show_rating %}
+        <div class="apparel-product-rating">
+          <div class="yotpo-widget-instance"
+               data-yotpo-instance-id="{{ block.settings.yotpo_instance_id }}"
+               data-yotpo-product-id="{{ product.id }}"
+               data-yotpo-section-id="product">
+            <div class="yotpo-reviews-star-ratings-widget yotpo-star-ratings-widget-override-css yotpo-device-desktop" id="yotpo-reviews-star-ratings-widget"></div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+    <div class="apparel-description-block">
+      {% if is_gear %}
+        {% if product.description != blank %}
+          {{ product.description }}
+        {% endif %}
+      {% else %}
+        {% if product.metafields.product_details.short_description != blank %}
+          <p>{{ product.metafields.product_details.short_description }}</p>
+        {% elsif product.metafields.meta.short_description != blank %}
+          <p>{{ product.metafields.meta.short_description }}</p>
+        {% endif %}
+      {% endif %}
+      
+      {% assign size_chart_url = '' %}
+      
+      {% if product.tags contains "hat" and product.tags contains "beanie" %}
+        {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/beanie.jpg?v=1736182864' %}
+      {% elsif product.tags contains "hat" and product.tags contains "snapback" %}
+        {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/snapback-hat.jpg?v=1736289563' %}
+      {% elsif product.tags contains "hat" %}
+        {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/flex-fit-hat.jpg?v=1736182866' %}
+      {% elsif product.tags contains "unisex apparel" %}
+          {% if product.tags contains "t-shirt" and product.tags contains "sleeveless" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/cut-off-tank-top.jpg?v=1736182864' %}
+          {% elsif product.tags contains "tank top" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/unisex-tank-top.jpg?v=1736182864' %}
+          {% elsif product.tags contains "pump cover" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/mens-pump-cover.jpg?v=1736182864' %}
+          {% elsif product.tags contains "longsleeve" and product.tags contains "quarter zip" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/QUARTER-ZIP-LONGSLEEVE-1400x.jpg?v=1738011500' %}
+          {% elsif product.tags contains "longsleeve" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/unisex-longsieeve.jpg?v=1736182864' %}
+          {% elsif product.tags contains "t-shirt" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/unisex-t-shirt.jpg?v=1736182864' %}
+          {% elsif product.tags contains "sweatshirt" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/unisex-crewneck-sweatshirt.jpg?v=1736449369' %}
+          {% elsif product.tags contains "windbreaker" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/unisex-windbreaker.jpg?v=1736182864' %}
+          {% elsif product.tags contains "hoodie" and product.tags contains "military" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/unisex-military-hoodie.jpg?v=1736182864' %}
+          {% elsif product.tags contains "hoodie" and product.tags contains "zip-up" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/unisex-zip-up-hoodie.jpg?v=1736182864' %}
+          {% elsif product.tags contains "hoodie" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/unisex-hoodie.jpg?v=1736182864' %}
+          {% endif %}
+        {% elsif product.tags contains "men's apparel" %}
+          {% if product.tags contains "stringer" and product.tags contains "hoodie" and product.tags contains "2-toned" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/MENS-2-TONE-STRINGER-HOODIE.gif' %}
+          {% elsif product.tags contains "stringer" and product.tags contains "hoodie" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/MENS-STRINGER-HOODIE.gif' %}
+          {% elsif product.tags contains "basketball" and product.tags contains "tank top" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/442134791-sizechart_basketballjersey.jpg?v=1667233959' %}
+          {% elsif product.tags contains "stringer" and product.tags contains "tank top" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/mens-stringer-tank.jpg?v=1736182864' %}
+          {% elsif product.tags contains "tank top" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/mens-tank-top.jpg?v=1736182864' %}
+          {% elsif product.tags contains "joggers" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/mens-joggers.jpg?v=1736182864' %}
+          {% elsif product.tags contains "shorts" and product.tags contains "basketball" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/B0B3KCSVBJ-sizechart_basketballshorts.jpg?v=1667233959' %}
+          {% elsif product.tags contains "shorts" and product.tags contains "lifting" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/mens-lifting-shorts.jpg?v=1736182864' %}
+          {% elsif product.tags contains "shorts" and product.tags contains "running" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/MENS-RUNNING-SHORTS-1400x.jpg?v=1738011500' %}
+          {% elsif product.tags contains "sweatshorts" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/MENS-SWEAT-SHORTS-1400x.jpg?v=1738011500' %}
+          {% elsif product.tags contains "shorts" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/mens-shorts.jpg?v=1736182864' %}
+          {% endif %}
+        {% elsif product.tags contains "women's apparel" %}
+          {% if product.tags contains "cropped" and product.tags contains "t-shirt" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/Womens-cropped-t-shirt-050725.gif?v=1746643475' %}
+          {% elsif product.tags contains "cropped" and product.tags contains "longsleeve" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/Womens-cropped-longsleeved-shirt.gif?v=1746643138' %}
+          {% elsif product.tags contains "cropped" and product.tags contains "tank top" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/womens-cropped-tank.jpg?v=1736182864' %}
+          {% elsif product.tags contains "pump cover" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/womens-pump-cover.jpg?v=1736182864' %}
+          {% elsif product.tags contains "leggings" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/womens-leggings.jpg?v=1736182864' %}
+          {% elsif product.tags contains "sports bra" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/womens-sports-bra.jpg?v=1736182864' %}
+          {% elsif product.tags contains "spandex shorts" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/WOMENS-SPANDEX-SHORTS-1400x.jpg?v=1738011500' %}
+          {% elsif product.tags contains "shorts" %}
+            {% assign size_chart_url = 'https://cdn.shopify.com/s/files/1/0063/4218/0928/files/womens-gym-shorts.jpg?v=1736182864' %}
+          {% endif %}
+        {% endif %}
+      
+      {% if size_chart_url != blank %}
+        <div class="size-chart-link-wrapper" data-size-chart-trigger data-size-chart-url="{{ size_chart_url }}">
+          <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/size.svg" alt="Size Chart Icon" class="size-chart-icon">
+          <span class="size-chart-text">Size Chart</span>
+        </div>
+      {% endif %}
+    </div>
+  {% else %}
+  <div class="product-tabs pi-tabs">
+    <div class="pi-tab-headers">
+      {% if has_description %}
+      <div class="pi-tab-header active" data-pi-tab="description" role="button" tabindex="0">
+        <span class="pi-tab-text">Description</span>
+        <span class="pi-tab-icon">−</span>
+      </div>
+      {% endif %}
+      {% if has_ingredients %}
+      <div class="pi-tab-header{% unless has_description %} active{% endunless %}" data-pi-tab="ingredients" role="button" tabindex="0">
+        <span class="pi-tab-text">Ingredients</span>
+        <span class="pi-tab-icon">{% if has_description %}+{% else %}−{% endif %}</span>
+      </div>
+      {% endif %}
+      {% if has_how_to_use %}
+      <div class="pi-tab-header{% unless has_description or has_ingredients %} active{% endunless %}" data-pi-tab="how-to-use" role="button" tabindex="0">
+        <span class="pi-tab-text">How to Use</span>
+        <span class="pi-tab-icon">{% if has_description or has_ingredients %}+{% else %}−{% endif %}</span>
+      </div>
+      {% endif %}
+      {% comment %}{% if has_supplement_facts %}
+      <div class="pi-tab-header{% unless has_description or has_ingredients or has_how_to_use %} active{% endunless %}" data-pi-tab="supplement-facts" role="button" tabindex="0">
+        <span class="pi-tab-text">Supplement Facts</span>
+        <span class="pi-tab-icon">{% if has_description or has_ingredients or has_how_to_use %}+{% else %}−{% endif %}</span>
+      </div>
+      {% endif %}{% endcomment %}
+    </div>
+
+    {% if has_description %}
+    <div class="pi-tab-content active" id="pi-tab-description">
+      {{ short_description_formatted }}
+    </div>
+    {% endif %}
+
+    {% if has_ingredients %}
+    <div class="pi-tab-content{% unless has_description %} active{% endunless %}" id="pi-tab-ingredients">
+      {% assign sfp_list = product.metafields.custom.sfp_section.value %}
+      {% assign sfp_section = sfp_list | first %}
+      {% if sfp_section %}
+        {% assign ingredients_list = sfp_section.key_ingredients.value %}
+        {% if ingredients_list == blank %}
+          {% assign ingredients_list = sfp_section.key_ingredients %}
+        {% endif %}
+        {% if ingredients_list %}
+          <ul class="ingredient-list">
+            {% assign displayed_count = 0 %}
+            {% for key_ing_entry in ingredients_list %}
+              {% if displayed_count >= 4 %}
+                {% break %}
+              {% endif %}
+              {% assign ing_ref = key_ing_entry.ingredient_name %}
+              {% assign ing_title = '' %}
+              {% if ing_ref and ing_ref != blank %}
+                {% assign ing_val = ing_ref.value | default: ing_ref %}
+                {% assign ing_title = ing_val.display_name | default: ing_val.name | default: ing_val.title | default: ing_ref.display_name %}
+              {% endif %}
+              {% if ing_title == blank %}
+                {% assign ing_title = key_ing_entry.display_name %}
+              {% endif %}
+              {% assign ing_title = ing_title | split: ' - ' | first | split: ' – ' | first | strip %}
+              {% if ing_title != blank %}
+                <li class="ingredient-list-item" data-ingredient-name="{{ ing_title | handleize }}">
+                  <span class="ingredient-name-bold">{{ ing_title }}</span>
+                </li>
+                {% assign displayed_count = displayed_count | plus: 1 %}
+              {% endif %}
+            {% endfor %}
+          </ul>
+          <div class="see-additional-wrapper">
+            <span class="see-additional-text" data-scroll-to-ingredients>
+              <span class="see-additional-caret">›</span> <span class="breakdown-text">Check The Full Breakdown</span>
+            </span>
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if has_how_to_use %}
+    <div class="pi-tab-content{% unless has_description or has_ingredients %} active{% endunless %}" id="pi-tab-how-to-use">
+      {% assign su = suggested_use | strip %}
+      {% assign su_l = su | downcase %}
+      {% assign icon_name = '' %}
+      {% if su_l contains 'scoop' %}
+        {% if su_l contains '1 ' or su_l contains ' one' or su_l contains 'take 1' %}
+          {% assign icon_name = 'scoop-base' %}
+        {% elsif su_l contains '2 ' or su_l contains ' two' %}
+          {% assign icon_name = 'scoops2-base' %}
+        {% elsif su_l contains '3 ' or su_l contains ' three' %}
+          {% assign icon_name = 'scoops3-base' %}
+        {% elsif su_l contains '4 ' or su_l contains ' four' %}
+          {% assign icon_name = 'scoops4-base' %}
+        {% else %}
+          {% assign icon_name = 'scoop-base' %}
+        {% endif %}
+      {% elsif su_l contains 'cap' or su_l contains 'capsule' or su_l contains 'caps' or su_l contains 'softgel' %}
+        {% if su_l contains '1 ' or su_l contains ' one' or su_l contains 'take 1' %}
+          {% assign icon_name = 'capsule-base' %}
+        {% elsif su_l contains '2 ' or su_l contains ' two' %}
+          {% assign icon_name = 'capsule2-base' %}
+        {% elsif su_l contains '3 ' or su_l contains ' three' %}
+          {% assign icon_name = 'capsule3-base' %}
+        {% elsif su_l contains '4 ' or su_l contains ' four' %}
+          {% assign icon_name = 'capsule4-base' %}
+        {% elsif su_l contains '6 ' or su_l contains ' six' %}
+          {% assign icon_name = 'capsule6-base' %}
+        {% else %}
+          {% assign icon_name = 'capsule-base' %}
+        {% endif %}
+      {% endif %}
+      {% if su != blank %}
+        <div class="how-to-use-section">
+          {% if icon_name != '' %}
+            <div class="info-icon-column">
+              <i class="fak fa-{{ icon_name }} info-icon"></i>
+            </div>
+          {% endif %}
+          <div class="info-content-column">
+            <h5 class="info-title">Suggested Use</h5>
+            <p class="info-text">{{ su }}</p>
+          </div>
+        </div>
+      {% endif %}
+      {% if su != blank and storage_info != blank %}
+        <div class="pi-info-divider"></div>
+      {% endif %}
+      {% if storage_info != blank %}
+        <div class="storage-section">
+          <div class="info-icon-column">
+            <i class="fa-sharp fa-solid fa-jar info-icon"></i>
+          </div>
+          <div class="info-content-column">
+            <h5 class="info-title">Storage</h5>
+            <p class="info-text">{{ storage_info }}</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% comment %}{% if has_supplement_facts %}
+    <div class="pi-tab-content{% unless has_description or has_ingredients or has_how_to_use %} active{% endunless %}" id="pi-tab-supplement-facts" data-supplement-facts-content>
+      <div class="supplement-facts-wrapper">
+        {% if supplement_facts_image %}
+          <img src="{{ supplement_facts_image }}" alt="Supplement Facts" class="supplement-facts-image" data-supplement-facts-zoom data-supplement-facts-img>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}{% endcomment %}
+  </div>
+  {% endif %}
+</div>
+
+{% unless is_apparel_or_gear %}
+<div class="pi-mobile-accordions {% if series_handle == 'core-series' %}product-info-header is-core-series{% endif %}" style="--series-featured-color: {{ series_featured_color }}; --series-accent-1: {{ series_accent_1 }}; --series-accent-2: {{ series_accent_2 }}; --series-border: #000;">
+  {% if has_description %}
+  <div class="pi-mobile-static-description">
+    {{ short_description_formatted }}
+  </div>
+  {% endif %}
+
+    {% if has_ingredients %}
+    <div class="pi-accordion-item">
+      <input type="checkbox" id="pi-acc-ingredients-{{ product.id }}" class="pi-accordion-checkbox">
+      <label for="pi-acc-ingredients-{{ product.id }}" class="pi-accordion-header">
+        <span class="pi-accordion-title">Ingredients</span>
+        <span class="pi-accordion-icon">+</span>
+      </label>
+      <div class="pi-accordion-content">
+        {% assign sfp_list = product.metafields.custom.sfp_section.value %}
+        {% assign sfp_section = sfp_list | first %}
+        {% if sfp_section %}
+          {% assign ingredients_list = sfp_section.key_ingredients.value %}
+          {% if ingredients_list == blank %}
+            {% assign ingredients_list = sfp_section.key_ingredients %}
+          {% endif %}
+          {% if ingredients_list %}
+            <ul class="ingredient-list">
+              {% assign displayed_count = 0 %}
+              {% for key_ing_entry in ingredients_list %}
+                {% if displayed_count >= 4 %}
+                  {% break %}
+                {% endif %}
+                {% assign ing_ref = key_ing_entry.ingredient_name %}
+                {% assign ing_title = '' %}
+                {% if ing_ref and ing_ref != blank %}
+                  {% assign ing_val = ing_ref.value | default: ing_ref %}
+                  {% assign ing_title = ing_val.display_name | default: ing_val.name | default: ing_val.title | default: ing_ref.display_name %}
+                {% endif %}
+                {% if ing_title == blank %}
+                  {% assign ing_title = key_ing_entry.display_name %}
+                {% endif %}
+                {% assign ing_title = ing_title | split: ' - ' | first | split: ' – ' | first | strip %}
+                {% if ing_title != blank %}
+                  <li class="ingredient-list-item" data-ingredient-name="{{ ing_title | handleize }}">
+                    <span class="ingredient-name-bold">{{ ing_title }}</span>
+                  </li>
+                  {% assign displayed_count = displayed_count | plus: 1 %}
+                {% endif %}
+              {% endfor %}
+            </ul>
+            <div class="see-additional-wrapper">
+              <span class="see-additional-text" data-scroll-to-ingredients>
+                <span class="see-additional-caret">›</span> <span class="breakdown-text">Check The Full Breakdown</span>
+              </span>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if has_how_to_use %}
+    <div class="pi-accordion-item">
+      <input type="checkbox" id="pi-acc-how-to-use-{{ product.id }}" class="pi-accordion-checkbox">
+      <label for="pi-acc-how-to-use-{{ product.id }}" class="pi-accordion-header">
+        <span class="pi-accordion-title">How to Use</span>
+        <span class="pi-accordion-icon">+</span>
+      </label>
+      <div class="pi-accordion-content">
+        {% assign su = suggested_use | strip %}
+        {% assign su_l = su | downcase %}
+        {% assign icon_name = '' %}
+        {% if su_l contains 'scoop' %}
+          {% if su_l contains '1 ' or su_l contains ' one' or su_l contains 'take 1' %}
+            {% assign icon_name = 'scoop-base' %}
+          {% elsif su_l contains '2 ' or su_l contains ' two' %}
+            {% assign icon_name = 'scoops2-base' %}
+          {% elsif su_l contains '3 ' or su_l contains ' three' %}
+            {% assign icon_name = 'scoops3-base' %}
+          {% elsif su_l contains '4 ' or su_l contains ' four' %}
+            {% assign icon_name = 'scoops4-base' %}
+          {% else %}
+            {% assign icon_name = 'scoop-base' %}
+          {% endif %}
+        {% elsif su_l contains 'cap' or su_l contains 'capsule' or su_l contains 'caps' or su_l contains 'softgel' %}
+          {% if su_l contains '1 ' or su_l contains ' one' or su_l contains 'take 1' %}
+            {% assign icon_name = 'capsule-base' %}
+          {% elsif su_l contains '2 ' or su_l contains ' two' %}
+            {% assign icon_name = 'capsule2-base' %}
+          {% elsif su_l contains '3 ' or su_l contains ' three' %}
+            {% assign icon_name = 'capsule3-base' %}
+          {% elsif su_l contains '4 ' or su_l contains ' four' %}
+            {% assign icon_name = 'capsule4-base' %}
+          {% elsif su_l contains '6 ' or su_l contains ' six' %}
+            {% assign icon_name = 'capsule6-base' %}
+          {% else %}
+            {% assign icon_name = 'capsule-base' %}
+          {% endif %}
+        {% endif %}
+        {% if su != blank %}
+          <div class="how-to-use-section">
+            {% if icon_name != '' %}
+              <div class="info-icon-column">
+                <i class="fak fa-{{ icon_name }} info-icon"></i>
+              </div>
+            {% endif %}
+            <div class="info-content-column">
+              <h5 class="info-title">Suggested Use</h5>
+              <p class="info-text">{{ su }}</p>
+            </div>
+          </div>
+        {% endif %}
+        {% if su != blank and storage_info != blank %}
+          <div class="pi-info-divider"></div>
+        {% endif %}
+        {% if storage_info != blank %}
+          <div class="storage-section">
+            <div class="info-icon-column">
+              <i class="fa-sharp fa-solid fa-jar info-icon"></i>
+            </div>
+            <div class="info-content-column">
+              <h5 class="info-title">Storage</h5>
+              <p class="info-text">{{ storage_info }}</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% comment %}{% if has_supplement_facts %}
+    <div class="pi-accordion-item">
+      <input type="checkbox" id="pi-acc-supplement-facts-{{ product.id }}" class="pi-accordion-checkbox">
+      <label for="pi-acc-supplement-facts-{{ product.id }}" class="pi-accordion-header">
+        <span class="pi-accordion-title">Supplement Facts</span>
+        <span class="pi-accordion-icon">+</span>
+      </label>
+      <div class="pi-accordion-content">
+        <div class="supplement-facts-wrapper">
+          {% if supplement_facts_image %}
+            <img src="{{ supplement_facts_image }}" alt="Supplement Facts" class="supplement-facts-image" data-supplement-facts-zoom data-supplement-facts-img>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}{% endcomment %}
+</div>
+{% endunless %}
+
+<div class="lightbox-overlay" id="sfp-lightbox">
+  <div class="lightbox-image-container">
+    <span class="lightbox-close" id="sfp-closeBtn"><strong>×</strong></span>
+    <img id="sfp-lightboxImage" class="lightbox-image" src="" alt="Supplement Facts">
+  </div>
+</div>
+
+<style>
+.product-info-header{color:var(--series-accent-1,#333)}
+.apparel-price-rating-row{display:flex!important;align-items: stretch!important;justify-content:space-between!important;gap:12px!important;margin-top:6px!important;width:100%!important;margin-bottom:16px!important}
+.apparel-product-price{font-family:'Acumin Pro Condensed',sans-serif!important;font-size:1.5rem!important;line-height:1!important;color:#000!important;flex:0 0 auto!important}
+.product-info-header.is-core-series .apparel-product-price{color:var(--series-featured-color)!important}
+.apparel-product-rating{flex:0 0 auto!important;margin-left:auto!important;display:flex!important;align-items:center!important}
+.product-info-header.is-apparel-or-gear .product-rating-desktop{display:none!important}
+.product-info-header.is-apparel-or-gear .product-header-row{margin-bottom:0!important;border-bottom:none!important;padding-bottom:0!important}
+.product-info-header.is-apparel-or-gear .product-header-row::before{display:none!important}
+.product-info-header.is-apparel-or-gear .apparel-price-rating-row{position:relative!important;border-bottom:solid 2px #d9d9d9!important;/*padding-bottom:8px!important;*/margin-bottom:24px!important}
+.product-info-header.is-apparel-or-gear .apparel-price-rating-row::before{content:""!important;position:absolute!important;background-color:var(--rebuy-product-color)!important;width:100px!important;height:2px!important;bottom:-2px!important;left:0!important}
+.product-info-header.is-apparel-or-gear.has-custom-title .product-header-row{margin-bottom:24px!important;border-bottom:solid 2px #d9d9d9!important;padding-bottom:8px!important}
+.product-info-header.is-apparel-or-gear.has-custom-title .product-header-row::before{content:""!important;position:absolute!important;background-color:var(--rebuy-product-color)!important;width:100px!important;height:2px!important;bottom:-2px!important;left:0!important;display:block!important}
+.product-info-header.is-apparel-or-gear.has-custom-title .apparel-price-rating-row{border-bottom:none!important;margin-bottom:16px!important}
+.product-info-header.is-apparel-or-gear.has-custom-title .apparel-price-rating-row::before{display:none!important}
+.apparel-description-block{font-family:'Acumin Pro',sans-serif;font-size:16px;line-height:1.5;color:#000}
+.product-info-header.is-core-series .apparel-description-block{color:#fff}
+.apparel-description-block p{line-height:1.5}
+.apparel-description-block p:last-child{margin-bottom:0}
+.size-chart-link-wrapper{display:flex;align-items:center;gap:8px;margin-top:16px;cursor:pointer;width:fit-content}
+.size-chart-icon{width:20px;height:20px;display:block}
+.size-chart-text{font-family:'Acumin Pro Bold',sans-serif;font-size:16px;color:#6D6E71;text-decoration:underline;transition:color .3s ease}
+.product-info-header.is-core-series .size-chart-text{color:#fff}
+.size-chart-link-wrapper:hover .size-chart-text{color:var(--series-featured-color,#AE1F24)}
+.product-header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:24px;position:relative;border-bottom:solid 2px #d9d9d9;padding-bottom:8px}
+.product-header-row::before{content:"";position:absolute;background-color:var(--rebuy-product-color);width:100px;height:2px;bottom:-2px;left:0}
+.product-title-wrapper{flex:1;position:relative;min-width:0;overflow:hidden}
+.product-title-wrapper .product-title{color:#000}
+.product-info-header.is-core-series .product-title{color:var(--series-featured-color)}
+.product-title{font-size:2rem;line-height:1.2;font-family:'Gunplay',sans-serif;text-transform:uppercase;text-align:left;display:block;width:100%;position:relative;margin:0;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-subheader{font-family:'acumin-pro',sans-serif;text-transform:capitalize;font-size:1.25rem;display:block;margin:5px 0 0 0;color:#000;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-info-header.is-core-series .product-subheader{color:#fff}
+.product-info-header .pi-tabs{margin-top:12px}
+.product-info-header .pi-tab-headers{display:flex;gap:45px;margin-bottom:16px;justify-content:center;flex-wrap:nowrap;background:rgb(255 255 255 / 82%);backdrop-filter:blur(8px);border-radius:10px;padding:6px 16px;position:relative;--tab-indicator-left:12px;--tab-indicator-width:0}
+.product-info-header .pi-tab-headers::before{content:'';position:absolute;top:6px;left:var(--tab-indicator-left);width:var(--tab-indicator-width);height:calc(100% - 12px);background:#00000003;border-radius:8px;transition:left .35s ease,width .35s ease;z-index:0;box-shadow:0 2px 4px rgba(0,0,0,0.08)}
+.product-info-header.is-core-series .pi-tab-headers::before{border:1px solid var(--series-featured-color);}
+.product-info-header .pi-tab-header{padding:12px 20px;font-family:'Acumin Pro Bold',sans-serif;color:#666;font-size:16px;cursor:pointer;border:none;background:transparent;border-radius:24px;display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:0 0 auto;min-width:0;position:relative;z-index:1;transition:color .3s ease}
+.product-info-header.is-core-series .pi-tab-headers{background:rgb(0 0 0 / 49%)!important;border: 2px solid #2323238c!important;}
+.product-info-header.is-core-series .pi-tab-text{color:#fff}
+.product-info-header.is-core-series .pi-tab-header.active .pi-tab-text{color:var(--series-featured-color)}
+.product-info-header .pi-tab-header:hover{color:var(--series-featured-color)}
+.product-info-header .pi-tab-header:focus-visible{outline:2px solid var(--series-featured-color);outline-offset:2px}
+.product-info-header .pi-tab-text{display:flex;justify-content:center;align-items:center;white-space:nowrap;min-width:0}
+.product-info-header .pi-tab-icon{display:none}
+.product-info-header .pi-tab-header.active{color:var(--series-featured-color)}
+.product-info-header .pi-tab-content{display:none;border-radius:4px;padding:0;font-family:'Acumin Pro',sans-serif;background:none;font-size:16px;line-height:1.5!important;color:#000;overflow:hidden;opacity:0;transition:opacity .3s ease,padding .3s ease}
+#pi-tab-supplement-facts{display:none!important}
+.product-info-header.is-core-series .pi-tab-content{color:#fff}
+.product-info-header .pi-tab-content p,.product-info-header .pi-tab-content>span{padding:0;margin:0;font-size:16px;line-height:1.5!important}
+.product-info-header .pi-tab-content.active{display:block;opacity:1;padding:0;margin-bottom: 24px;}
+.product-info-header .pi-tab-content *{line-height:1.5!important}
+.product-info-header .pi-tab-content>*:first-child{margin-top:0!important;padding-top:0!important}
+.product-info-header .pi-tab-content>p:first-child{margin-top:0!important}
+.product-info-header .pi-tab-content>ul:first-child,.product-info-header .pi-tab-content>ol:first-child,.product-info-header .pi-tab-content>h1:first-child,.product-info-header .pi-tab-content>h2:first-child,.product-info-header .pi-tab-content>h3:first-child,.product-info-header .pi-tab-content>h4:first-child,.product-info-header .pi-tab-content>h5:first-child,.product-info-header .pi-tab-content>h6:first-child{margin-top:0!important;padding-top:0!important}
+.ingredient-list{margin:0;padding:0;list-style:none}
+.ingredient-list-item{display:flex;align-items:flex-start;gap:6px;font-family:'Acumin Pro',sans-serif;font-size:16px;color:inherit;padding:0;margin:0 0 8px 0;cursor:pointer;transition:color .28s ease;box-shadow:none!important;line-height:1.5}
+.ingredient-list-item::before{content:'\f058';font-family:'Font Awesome 5 Pro';font-weight:900;color:var(--series-featured-color);font-size:20px;line-height:1;flex-shrink:0;margin-top:2px;margin-right:4px;}
+.ingredient-list-item:last-child{margin-bottom:0}
+.ingredient-list-item .ingredient-name-bold{display:inline;transition:color .28s ease;font-family:'Acumin Pro',sans-serif;color:black}
+.is-core-series .ingredient-list-item .ingredient-name-bold{transition:color .28s ease;color:white}
+.is-core-series .ingredient-list-item:hover .ingredient-name-bold{color:var(--series-featured-color)}
+.is-core-series .info-text{color:white!important}
+.ingredient-list-item:hover{box-shadow:none!important}
+.ingredient-list-item:hover .ingredient-name-bold{color:var(--series-featured-color)}
+.see-additional-wrapper{display:flex;justify-content:flex-start;align-items:center;cursor:pointer;margin-top:16px;padding-top:0}
+.see-additional-text{font-family:'Acumin Pro Bold',sans-serif;text-transform:capitalize;font-size:16px;color:black;display:flex;align-items:baseline;gap:4px}
+.product-info-header.is-core-series .see-additional-text{color:#fff}
+.see-additional-caret{font-size:24px;color:black;margin-right:4px;display:inline-block;transform:rotate(0deg);transition:transform .3s ease,color .3s ease}
+.see-additional-wrapper:hover .see-additional-caret{transform:translateX(4px);color:var(--series-featured-color,#AE1F24)}
+.product-info-header.is-core-series .see-additional-caret{color:#fff}
+.product-info-header.is-core-series .see-additional-wrapper:hover .see-additional-caret{color:var(--series-featured-color)}
+.see-additional-wrapper.clicking .see-additional-caret{transform:rotate(90deg) scale(1.2)}
+.supplement-facts-wrapper{display:flex;justify-content:center;align-items:center;padding:0}
+.supplement-facts-image{max-width:400px;width:100%;height:auto;cursor:pointer;display:block;margin:0 auto}
+.pi-mobile-accordions{display:none}
+#sfp-lightbox{position:fixed!important;top:0!important;left:0!important;width:100%!important;height:100%!important;background-color:#000000bd!important;display:none!important;backdrop-filter: blur(3px);justify-content:center!important;align-items:center!important;z-index:2147483647!important;overflow:hidden!important}
+#sfp-lightbox.active{display:flex!important}
+body.sfp-lightbox-open header,body.sfp-lightbox-open nav,body.sfp-lightbox-open .header,body.sfp-lightbox-open .navigation,body.sfp-lightbox-open [class*="header"],body.sfp-lightbox-open [class*="nav"],body.sfp-lightbox-open section,body.sfp-lightbox-open .section,body.sfp-lightbox-open main,body.sfp-lightbox-open .main,body.sfp-lightbox-open aside,body.sfp-lightbox-open .sidebar,body.sfp-lightbox-open [role="banner"],body.sfp-lightbox-open [role="navigation"]{z-index:1!important;position:relative!important}
+body.sfp-lightbox-open>*:not(#sfp-lightbox){position:relative!important;z-index:1!important}
+body.sfp-lightbox-open a[href^="#"]:not(#sfp-lightbox a),body.sfp-lightbox-open .skip-to-content,body.sfp-lightbox-open [class*="skip"],body.sfp-lightbox-open .visually-hidden:focus{opacity:0!important;pointer-events:none!important;display:none!important}
+#sfp-lightbox .lightbox-image-container{position:relative!important;max-width:600px!important;width:90%!important;transform:scale(.8)!important;opacity:0!important;transition:all .3s ease!important;z-index:999999999!important}
+#sfp-lightbox.active .lightbox-image-container{transform:scale(1)!important;opacity:1!important}
+#sfp-lightbox .lightbox-image{width:100%!important;height:auto!important;display:block!important;border-radius:4px!important;max-width:none!important;margin:0!important;padding:0!important;border:none!important;box-shadow:none!important}
+#sfp-lightbox .lightbox-close{position:absolute!important;width:24px!important;height:24px!important;top:-20px!important;right:-20px!important;font-size:24px!important;color:#fff!important;cursor:pointer!important;padding:5px!important;box-sizing:border-box!important;line-height:11px!important;z-index:999999999!important}
+.how-to-use-section,.storage-section{display:flex;gap:16px;align-items:flex-start;flex-direction: row-reverse}
+svg.svg-inline--fa.fa-scoop-base.fak.info-icon {
+    font-size: 1.75rem !important;
+}
+.storage-section{margin-bottom:16px}
+.storage-section:last-child{margin-bottom:0}
+.pi-info-divider{width:100%;height:1px;background:#d9d9d9;margin:16px 0}
+.info-icon-column{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:40px;min-width:40px;max-width:40px;height:40px;border:3px solid var(--series-featured-color);border-radius:50%;box-sizing:content-box}
+.info-icon{font-size:1.5rem!important;color:var(--series-featured-color)!important;line-height:1!important}
+/*.info-icon.fa-scoop-base,.info-icon.fa-scoops2-base,.info-icon.fa-scoops3-base,.info-icon.fa-scoops4-base{transform:scaleX(-1)}*/
+.info-content-column{flex:1;align-self:flex-start}
+.info-title{font-family:'Gunplay',sans-serif;font-size:16px;line-height:1.5!important;margin:0;padding:0;color:black;text-transform:uppercase;text-align:left}
+.product-info-header.is-core-series .info-title{color:#fff}
+.info-text{font-family:'Acumin Pro',sans-serif;font-size:16px;line-height:1.5!important;margin:0;padding:0;color:black}
+@media (min-width:768px) and (max-width:1200px){
+  .product-title{font-size:1.75rem}
+  .product-subheader{font-size:1.125rem}
+}
+@media (max-width:1400px){
+  .product-header-row{gap:12px}
+  .product-info-header .yotpo-widget-instance{width:auto!important;max-width:none!important}
+  .product-info-header .yotpo-widget-instance .yotpo-reviews-star-ratings-widget{display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:2px!important;margin:0!important;justify-content:flex-start!important}
+  .product-info-header .yotpo-widget-instance .yotpo-widget-clear{display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:2px!important}
+  .product-info-header .yotpo-widget-instance button.yotpo-sr-bottom-line-summary{display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:4px!important;padding:0!important;margin:0!important;border:none!important;background:none!important;cursor:pointer!important;position:relative!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-summary>span:first-child{display:flex!important;flex-direction:row!important;align-items:center!important;gap:4px!important;cursor:default!important;position:relative!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-summary>span:first-child>span[aria-hidden]{display:flex!important;flex-direction:row!important;align-items:center!important;height:auto!important;gap:0!important;margin:0!important;padding:0!important}
+  .product-info-header .yotpo-widget-instance svg.star-container{margin-inline-end:1px!important;width:11px!important;height:11px!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-vertical-border{display:none!important;visibility:hidden!important;width:0!important;height:0!important;margin:0!important;padding:0!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-left-panel{display:none!important;visibility:hidden!important;width:0!important;height:0!important;margin:0!important;padding:0!important;font-size:0!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-right-panel{display:none!important;visibility:hidden!important;width:0!important;height:0!important;margin:0!important;padding:0!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-score{display:none!important;visibility:hidden!important;width:0!important;height:0!important;margin:0!important;padding:0!important;font-size:0!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-text,
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-text--right-panel{display:none!important;visibility:hidden!important;width:0!important;height:0!important;margin:0!important;padding:0!important;font-size:0!important}
+  .product-info-header .yotpo-widget-instance .rating-dropdown-caret{display:inline-block!important;width:4px!important;height:4px!important;border-left:1.5px solid var(--series-featured-color)!important;border-bottom:1.5px solid var(--series-featured-color)!important;transform:rotate(-45deg)!important;cursor:pointer!important;margin-left:2px!important;margin-bottom:1px!important;transition:transform 0.2s ease!important}
+  .product-info-header .yotpo-widget-instance .rating-dropdown-caret.active{transform:rotate(135deg)!important;margin-bottom:-2px!important;margin-top:2px!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary{display:none!important;font-size:0!important;line-height:1!important;margin:0!important;padding:4px 8px!important;color:#000!important;white-space:nowrap!important;font-family:'Acumin Pro',sans-serif!important;font-weight:400!important;background:#fff!important;border:1px solid #ddd!important;border-radius:4px!important;box-shadow:0 2px 4px rgba(0,0,0,0.15)!important;position:absolute!important;top:calc(100% + 2px)!important;right:0!important;z-index:10!important;min-width:max-content!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary.show{display:inline-block!important;white-space:nowrap!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary *{display:inline!important;font-size:11px!important;white-space:nowrap!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary .rating-number{color:var(--series-featured-color)!important}
+  .product-info-header.is-core-series .yotpo-widget-instance .yotpo-mobile-summary{color:#fff!important}
+}
+@media (max-width:767px){
+  .product-info-header .product-header-row{display:flex;flex-direction:row;align-items:flex-start;gap:8px;margin-bottom:0;padding-bottom:0!important;flex-wrap:wrap;border-bottom:none!important}
+  .product-info-header .product-header-row::before{display:none!important}
+  .product-title-wrapper{display:contents}
+  .product-title{font-size:1.5rem;line-height:1.1;margin:0!important;padding:0!important;display:block;flex:1 1 0;order:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .product-subheader{font-size:16px;display:block;width:100%!important;position:relative;padding:0 0 8px 0!important;line-height:1.2;order:3;flex:0 0 100%;border-bottom:solid 2px #d9d9d9;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;overflow:visible}
+  .product-subheader::before{content:"";position:absolute;background-color:var(--rebuy-product-color);width:100px;height:2px;bottom:-2px;left:0;}
+  .product-rating{flex:0 0 auto;width:auto;margin:0!important;padding:0!important;align-self:flex-start;margin-left:auto!important;order:2}
+  
+  /* Apparel/Gear specific mobile styles */
+  .product-info-header.is-apparel-or-gear .product-title{flex:0 0 100%!important;order:1!important;position:relative!important}
+  .product-info-header.is-apparel-or-gear .apparel-price-rating-row{padding-bottom:8px!important}
+  .product-info-header.is-apparel-or-gear .product-rating{display:none!important}
+  .product-info-header.is-apparel-or-gear .apparel-product-price{font-size:1.25rem!important}
+  
+  /* Hide underlines on mobile for apparel/gear with custom titles */
+  .product-info-header.is-apparel-or-gear.has-custom-title .product-subheader{border-bottom:none!important;padding-bottom:0!important}
+  .product-info-header.is-apparel-or-gear.has-custom-title .product-subheader::before{display:none!important}
+  .product-info-header.is-apparel-or-gear.has-custom-title .apparel-price-rating-row{border-bottom:none!important;padding-bottom:0!important;margin-bottom:16px!important}
+  .product-info-header.is-apparel-or-gear.has-custom-title .apparel-price-rating-row::before{display:none!important}
+  .product-info-header .yotpo-widget-instance .rating-dropdown-caret{display:inline-block!important;width:4px!important;height:4px!important;border-left:1.5px solid var(--series-featured-color)!important;border-bottom:1.5px solid var(--series-featured-color)!important;transform:rotate(-45deg)!important;cursor:pointer!important;margin-left:2px!important;margin-bottom:1px!important;transition:transform 0.2s ease!important}
+  .product-info-header .yotpo-widget-instance .rating-dropdown-caret.active{transform:rotate(135deg)!important;margin-bottom:-2px!important;margin-top:2px!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary{display:none!important;font-size:0!important;line-height:1!important;margin:0!important;padding:4px 8px!important;color:#000!important;white-space:nowrap!important;font-family:'Acumin Pro',sans-serif!important;font-weight:400!important;background:#fff!important;border:1px solid #ddd!important;border-radius:4px!important;box-shadow:0 2px 4px rgba(0,0,0,0.15)!important;position:absolute!important;top:calc(100% + 2px)!important;right:0!important;z-index:10!important;min-width:max-content!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary.show{display:inline-block!important;white-space:nowrap!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary *{display:inline!important;font-size:11px!important;white-space:nowrap!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary .rating-number{color:var(--series-featured-color)!important}
+  .product-info-header .pi-tabs{display:none!important}
+  .pi-mobile-accordions{display:block;margin-top:20px}
+  .buybox-divider{display:none}
+  .pi-mobile-static-description{font-family:'Acumin Pro',sans-serif;font-size:16px;line-height:1.5;color:black;margin-bottom:20px;padding-bottom:0}
+  .pi-accordion-item{margin-bottom:12px;border:2px solid rgb(255 255 255 / 82%)!important;border-radius:4px;overflow:hidden;background:rgb(0 0 0 / 0%)!important}
+  .pi-mobile-accordions.is-core-series .pi-accordion-item{border:2px solid #2323238c!important}
+  .pi-accordion-checkbox{display:none}
+  .pi-accordion-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer;font-family:'Acumin Pro Bold',sans-serif;font-size:16px;color:#000;text-transform:none;background:rgb(255 255 255 / 82%);backdrop-filter:blur(3px);transition:none}
+  .pi-mobile-accordions.is-core-series .pi-accordion-header{background:#121212!important;backdrop-filter:blur(3px)!important;color:#fff!important}
+  .pi-accordion-title{flex:1}
+  .pi-mobile-accordions.is-core-series .pi-accordion-title{color:#fff}
+  .pi-accordion-icon{font-size:20px;font-weight:bold;color:var(--series-featured-color);transition:transform .3s ease}
+  .pi-accordion-content{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .4s ease;padding:0 20px;background:rgb(0 0 0 / 0%)!important;backdrop-filter:blur(3px)}
+  .pi-accordion-checkbox:checked~.pi-accordion-header{backdrop-filter:blur(3px);background:rgb(255 255 255 / 82%)!important}
+  .pi-mobile-accordions.is-core-series .pi-accordion-checkbox:checked~.pi-accordion-header{background:rgb(0 0 0 / 49%)!important}
+  .pi-accordion-checkbox:checked~.pi-accordion-header .pi-accordion-icon{transform:rotate(45deg)}
+  .pi-accordion-checkbox:checked~.pi-accordion-content{max-height:2000px;padding:20px}
+  .pi-mobile-accordions.is-core-series .ingredient-list-item .ingredient-name-bold{color:#fff!important;}
+  .pi-mobile-accordions.is-core-series .info-title{color:#fff}
+  .pi-mobile-accordions.is-core-series .info-text{color:#fff}
+  .pi-mobile-accordions.is-core-series .breakdown-text{color:#fff}
+  .pi-mobile-accordions.is-core-series .see-additional-caret{color:#fff}
+  .product-info-header .yotpo-widget-instance{width:auto!important;max-width:none!important}
+  .product-info-header .yotpo-widget-instance .yotpo-reviews-star-ratings-widget{display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:2px!important;margin:0!important;justify-content:flex-start!important}
+  .product-info-header .yotpo-widget-instance .yotpo-widget-clear{display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:2px!important}
+  .product-info-header .yotpo-widget-instance button.yotpo-sr-bottom-line-summary{display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:4px!important;padding:0!important;margin:0!important;border:none!important;background:none!important;cursor:pointer!important;position:relative!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-summary>span:first-child{display:flex!important;flex-direction:row!important;align-items:center!important;gap:4px!important;cursor:default!important;position:relative!important}
+  .product-info-header .pi-tab-content{font-size:16px;line-height:1.5}
+  .product-info-header .pi-tab-content.active{padding:16px 0 0 0}
+  .product-info-header .pi-tabs{margin-top:20px}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-summary>span:first-child>span[aria-hidden]{display:flex!important;flex-direction:row!important;align-items:center!important;height:auto!important;gap:0!important;margin:0!important;padding:0!important}
+  .product-info-header .yotpo-widget-instance svg.star-container{margin-inline-end:1px!important;width:11px!important;height:11px!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-vertical-border{display:none!important;visibility:hidden!important;width:0!important;height:0!important;margin:0!important;padding:0!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-left-panel{display:none!important;visibility:hidden!important;width:0!important;height:0!important;margin:0!important;padding:0!important;font-size:0!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-right-panel{display:none!important;visibility:hidden!important;width:0!important;height:0!important;margin:0!important;padding:0!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-score{display:none!important;visibility:hidden!important;width:0!important;height:0!important;margin:0!important;padding:0!important;font-size:0!important}
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-text,
+  .product-info-header .yotpo-widget-instance .yotpo-sr-bottom-line-text--right-panel{display:none!important;visibility:hidden!important;width:0!important;height:0!important;margin:0!important;padding:0!important;font-size:0!important}
+  .product-info-header .yotpo-widget-instance .rating-dropdown-caret{display:inline-block!important;width:4px!important;height:4px!important;border-left:1.5px solid var(--series-featured-color)!important;border-bottom:1.5px solid var(--series-featured-color)!important;transform:rotate(-45deg)!important;cursor:pointer!important;margin-left:2px!important;margin-bottom:1px!important;transition:transform 0.2s ease!important}
+  .product-info-header .yotpo-widget-instance .rating-dropdown-caret.active{transform:rotate(135deg)!important;margin-bottom:-2px!important;margin-top:2px!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary{display:none!important;font-size:0!important;line-height:1!important;margin:0!important;padding:4px 8px!important;color:#000!important;white-space:nowrap!important;font-family:'Acumin Pro',sans-serif!important;font-weight:400!important;background:#fff!important;border:1px solid #ddd!important;border-radius:4px!important;box-shadow:0 2px 4px rgba(0,0,0,0.15)!important;position:absolute!important;top:calc(100% + 2px)!important;right:0!important;z-index:10!important;min-width:max-content!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary.show{display:inline-block!important;white-space:nowrap!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary *{display:inline!important;font-size:11px!important;white-space:nowrap!important}
+  .product-info-header .yotpo-widget-instance .yotpo-mobile-summary .rating-number{color:var(--series-featured-color)!important}
+  .product-info-header.is-core-series .yotpo-widget-instance .yotpo-mobile-summary{color:#fff!important}
+  .how-to-use-section,.storage-section{display:flex!important;flex-wrap:wrap!important;align-items:flex-start!important;gap:0!important}
+  .info-icon-column{order:unset!important;border:none!important;width:auto!important;min-width:auto!important;max-width:none!important;height:auto!important;background:none!important;padding:0!important;margin-left:auto!important}
+  .info-icon{font-size:1.5rem!important}
+  .info-title{order:1!important;flex:1!important;margin-bottom:0!important;padding-right:8px!important}
+  .info-text{order:3!important;flex-basis:100%!important;margin-top:8px!important}
+  .info-content-column{display:contents!important}
+}
+
+@media (min-width:768px) and (max-width:1200px){
+  .product-info-header .pi-tab-header{padding:12px 18px;font-size:14px}
+  .product-info-header .pi-tab-headers{gap:3px;padding:6px 10px}
+}
+@media (min-width:768px) and (max-width:1000px){
+  .product-info-header .pi-tab-header{padding:10px 16px;font-size:13px}
+  .product-info-header .pi-tab-headers{gap:3px;padding:6px 8px}
+}
+@media (min-width:768px) and (max-width:900px){
+  .product-info-header .pi-tab-header{padding:10px 14px;font-size:12px}
+  .product-info-header .pi-tab-headers{gap:2px;padding:6px 8px}
+}
+@media (min-width:768px) and (max-width:850px){
+  .product-info-header .pi-tab-header{padding:8px 12px;font-size:11px}
+  .product-info-header .pi-tab-headers{gap:2px;padding:6px 6px}
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var containers=document.querySelectorAll('.product-info-header');
+  containers.forEach(function(container){
+    var headers=container.querySelectorAll('.pi-tab-header');
+    var contents=container.querySelectorAll('.pi-tab-content');
+    var tabHeadersContainer=container.querySelector('.pi-tab-headers');
+    
+    function moveTabIndicator(activeTab){
+      if(!tabHeadersContainer||!activeTab) return;
+      var containerRect=tabHeadersContainer.getBoundingClientRect();
+      var tabRect=activeTab.getBoundingClientRect();
+      var extraPadding=8;
+      var leftPosition=tabRect.left-containerRect.left-extraPadding;
+      var tabWidth=activeTab.offsetWidth+(extraPadding*2);
+      if(tabHeadersContainer){
+        tabHeadersContainer.style.setProperty('--tab-indicator-left',leftPosition+'px');
+        tabHeadersContainer.style.setProperty('--tab-indicator-width',tabWidth+'px');
+      }
+    }
+    
+    
+    function activate(name){
+      headers.forEach(function(h){h.classList.remove('active');var i=h.querySelector('.pi-tab-icon');if(i){i.textContent='+';}});
+      contents.forEach(function(c){c.classList.remove('active');});
+      var th=container.querySelector('.pi-tab-header[data-pi-tab="'+name+'"]');
+      var tc=container.querySelector('#pi-tab-'+name);
+      if(th){
+        th.classList.add('active');
+        moveTabIndicator(th);
+        var ai=th.querySelector('.pi-tab-icon');
+        if(ai){ai.textContent='−';}
+      }
+      if(tc){tc.classList.add('active');}
+    }
+    
+    headers.forEach(function(h){
+      h.addEventListener('click',function(){
+        var t=this.getAttribute('data-pi-tab');
+        if(!t) return;
+        if(t==='supplement-facts'){
+          headers.forEach(function(hdr){hdr.classList.remove('active');});
+          this.classList.add('active');
+          moveTabIndicator(this);
+          var sfpImage=document.querySelector('[data-supplement-facts-img]');
+          var lightbox=document.getElementById('sfp-lightbox');
+          var lightboxImage=document.getElementById('sfp-lightboxImage');
+          if(sfpImage&&lightbox&&lightboxImage){
+            lightboxImage.src=sfpImage.src;
+            lightbox.classList.add('active');
+            document.body.classList.add('sfp-lightbox-open');
+            document.body.style.overflow='hidden';
+            document.documentElement.style.overflow='hidden';
+          }
+        }else{
+          activate(t);
+        }
+      });
+      h.addEventListener('keydown',function(e){
+        if(e.key==='Enter'||e.key===' '){
+          e.preventDefault();
+          var t=this.getAttribute('data-pi-tab');
+          if(!t) return;
+          if(t==='supplement-facts'){
+            headers.forEach(function(hdr){hdr.classList.remove('active');});
+            this.classList.add('active');
+            moveTabIndicator(this);
+            var sfpImage=document.querySelector('[data-supplement-facts-img]');
+            var lightbox=document.getElementById('sfp-lightbox');
+            var lightboxImage=document.getElementById('sfp-lightboxImage');
+            if(sfpImage&&lightbox&&lightboxImage){
+              lightboxImage.src=sfpImage.src;
+              lightbox.classList.add('active');
+              document.body.classList.add('sfp-lightbox-open');
+              document.body.style.overflow='hidden';
+              document.documentElement.style.overflow='hidden';
+            }
+          }else{
+            activate(t);
+          }
+        }
+      });
+    });
+    
+    var activeTab=container.querySelector('.pi-tab-header.active');
+    if(activeTab){moveTabIndicator(activeTab);}
+    
+    window.addEventListener('resize',function(){
+      var currentActiveTab=container.querySelector('.pi-tab-header.active');
+      if(currentActiveTab){moveTabIndicator(currentActiveTab);}
+    });
+    
+    document.addEventListener('activate-first-tab',function(e){
+      if(e.detail&&e.detail.container===container&&e.detail.tabName){
+        activate(e.detail.tabName);
+      }
+    });
+
+    var ingredientList=container.querySelector('.ingredient-list');
+    if(ingredientList){
+      ingredientList.addEventListener('click',function(e){
+        var item=e.target.closest('.ingredient-list-item'); if(!item) return;
+        var ingredientName=item.getAttribute('data-ingredient-name'); if(!ingredientName) return;
+        var keyIngredientsSection=document.querySelector('[id^="description-"]'); if(!keyIngredientsSection) return;
+        keyIngredientsSection.scrollIntoView({behavior:'smooth',block:'start'});
+        setTimeout(function(){
+          var readMoreButton=keyIngredientsSection.querySelector('[data-read-more-trigger]');
+          var readMoreContent=keyIngredientsSection.querySelector('[data-read-more-content]');
+          if(readMoreButton&&readMoreContent){
+            var contentHeight=readMoreContent.style.height;
+            var isOpen=contentHeight&&contentHeight!=='0px'&&contentHeight!=='';
+            if(!isOpen){readMoreButton.click();}
+          }
+          setTimeout(function(){
+            var targetIngredient=keyIngredientsSection.querySelector('[data-ingredient-name="'+ingredientName+'"]');
+            if(targetIngredient){
+              var toggler=targetIngredient.querySelector('[data-accordion-trigger]');
+              if(toggler&&toggler.getAttribute('aria-expanded')!=='true'){
+                toggler.click();
+                setTimeout(function(){targetIngredient.scrollIntoView({behavior:'smooth',block:'center'});},400);
+              }
+            }
+          },600);
+        },800);
+      });
+    }
+
+    var seeAdditionalWrapper=container.querySelector('.see-additional-wrapper');
+    if(seeAdditionalWrapper){
+      seeAdditionalWrapper.addEventListener('click',function(e){
+        e.preventDefault();
+        this.classList.add('clicking');
+        var wrapper=this;
+        setTimeout(function(){wrapper.classList.remove('clicking');},300);
+        var keyIngredientsSection=document.querySelector('[id^="description-"]'); if(!keyIngredientsSection) return;
+        keyIngredientsSection.scrollIntoView({behavior:'smooth',block:'start'});
+        setTimeout(function(){
+          var readMoreButton=keyIngredientsSection.querySelector('[data-read-more-trigger]');
+          var readMoreContent=keyIngredientsSection.querySelector('[data-read-more-content]');
+          if(readMoreButton&&readMoreContent){
+            var contentHeight=readMoreContent.style.height;
+            var isOpen=contentHeight&&contentHeight!=='0px'&&contentHeight!=='';
+            if(!isOpen){readMoreButton.click();}
+          }
+        },800);
+      });
+    }
+  });
+
+  function yotpoMobileSummary(){
+    try{
+      var inst=document.querySelector('.product-info-header .yotpo-widget-instance');
+      if(!inst) return;
+      
+      var container=inst.querySelector('button.yotpo-sr-bottom-line-summary');
+      if(!container) container=inst.querySelector('.yotpo-sr-bottom-line');
+      if(!container) return;
+      
+      var existingSummary=container.querySelector('.yotpo-mobile-summary');
+      var existingCaret=container.querySelector('.rating-dropdown-caret');
+      
+      // Simple width check first - if wide enough, always remove mobile elements
+      if(window.innerWidth>1400){
+        if(existingSummary) existingSummary.remove();
+        if(existingCaret) existingCaret.remove();
+        return;
+      }
+      
+      // Below 1400px - check if we need mobile view
+      // Force a layout recalculation
+      var productTitle=document.querySelector('.product-title');
+      var productSubheader=document.querySelector('.product-subheader');
+      
+      // Trigger reflow to get accurate measurements
+      if(productTitle) void productTitle.offsetWidth;
+      if(productSubheader) void productSubheader.offsetWidth;
+      
+      var isTruncating=false;
+      if(productTitle&&productTitle.scrollWidth>productTitle.clientWidth+1){
+        isTruncating=true;
+      }
+      if(productSubheader&&productSubheader.scrollWidth>productSubheader.clientWidth+1){
+        isTruncating=true;
+      }
+      
+      // If not truncating at this narrow width, remove mobile elements
+      if(!isTruncating){
+        if(existingSummary) existingSummary.remove();
+        if(existingCaret) existingCaret.remove();
+        return;
+      }
+      
+      // Mobile mode needed - only create if doesn't already exist
+      if(existingSummary&&existingCaret){
+        return; // Don't create duplicates
+      }
+      
+      // Create mobile summary
+      var ariaLabel=container.getAttribute('aria-label')||'';
+      var rating,count;
+      
+      if(ariaLabel){
+        var m=ariaLabel.match(/([0-5](?:\.\d)?)\s+out.*?(\d{1,})\s+review/i);
+        if(m){
+          rating=m[1];
+          count=m[2];
+        }
+      }
+      
+      if(!rating||!count){
+        var txt=container.textContent||'';
+        var m2=txt.replace(/\s+/g,' ').match(/([0-5](?:\.\d)?)\D+(\d+)/);
+        if(!m2) return;
+        rating=m2[1];
+        count=m2[2];
+      }
+      
+      if(!rating||!count) return;
+      
+      // Create caret icon
+      var caret=document.createElement('span');
+      caret.className='rating-dropdown-caret';
+      
+      // Create dropdown
+      var summary=document.createElement('div');
+      summary.className='yotpo-mobile-summary';
+      
+      var ratingSpan=document.createElement('span');
+      ratingSpan.className='rating-number';
+      ratingSpan.textContent=rating;
+      
+      var reviewText=document.createElement('span');
+      reviewText.textContent=' | '+count+' Reviews';
+      
+      summary.appendChild(ratingSpan);
+      summary.appendChild(reviewText);
+      
+      // Add to DOM
+      var firstChild=container.querySelector('span:first-child');
+      if(firstChild){
+        firstChild.appendChild(caret);
+        firstChild.style.position='relative';
+        firstChild.appendChild(summary);
+        
+        // Toggle dropdown on caret click (use once to prevent multiple listeners)
+        if(!caret.hasAttribute('data-initialized')){
+          caret.setAttribute('data-initialized','true');
+          
+          caret.addEventListener('click',function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            var isVisible=summary.classList.contains('show');
+            summary.classList.toggle('show',!isVisible);
+            caret.classList.toggle('active',!isVisible);
+          });
+          
+          // Close on click outside (attach once to container, not document)
+          document.addEventListener('click',function closeHandler(e){
+            if(!firstChild.contains(e.target)){
+              summary.classList.remove('show');
+              caret.classList.remove('active');
+            }
+          });
+        }
+      }
+    }catch(e){
+      // Silently handle Yotpo errors
+    }
+  }
+  
+  setTimeout(function(){
+    yotpoMobileSummary();
+    var attempts=0;
+    var interval=setInterval(function(){
+      attempts++;
+      yotpoMobileSummary();
+      if(attempts>=5) clearInterval(interval);
+    },1000);
+  },500);
+  
+  function autoResizeSubheader(){
+    if(window.innerWidth>767) return;
+    var subheader=document.querySelector('.product-subheader');
+    if(!subheader) return;
+    subheader.style.fontSize='';
+    subheader.style.whiteSpace='';
+    var baseFontSize=16;
+    var minFontSize=11;
+    var currentFontSize=baseFontSize;
+    subheader.style.fontSize=currentFontSize+'px';
+    while(subheader.scrollWidth>subheader.clientWidth&&currentFontSize>minFontSize){
+      currentFontSize-=0.5;
+      subheader.style.fontSize=currentFontSize+'px';
+    }
+    if(currentFontSize<=minFontSize){
+      subheader.style.whiteSpace='normal';
+    }
+  }
+  
+  setTimeout(autoResizeSubheader,100);
+  
+  var resizeTimer;
+  window.addEventListener('resize',function(){
+    clearTimeout(resizeTimer);
+    yotpoMobileSummary();
+    autoResizeSubheader();
+    resizeTimer=setTimeout(function(){
+      yotpoMobileSummary();
+      autoResizeSubheader();
+    },100);
+  });
+
+  var lightbox=document.getElementById('sfp-lightbox');
+  var lightboxImage=document.getElementById('sfp-lightboxImage');
+  var imageToOpen=document.querySelectorAll('[data-supplement-facts-zoom]');
+  var closeBtn=document.getElementById('sfp-closeBtn');
+  
+  function resetToFirstTab(){
+    var firstContainer=document.querySelector('.product-info-header');
+    if(firstContainer){
+      var firstTab=firstContainer.querySelector('.pi-tab-header:first-child');
+      if(firstTab){
+        var firstTabName=firstTab.getAttribute('data-pi-tab');
+        if(firstTabName){
+          var activateEvent=new CustomEvent('activate-first-tab',{detail:{tabName:firstTabName,container:firstContainer}});
+          document.dispatchEvent(activateEvent);
+        }
+      }
+    }
+  }
+  
+  if(lightbox&&lightboxImage&&closeBtn){
+    imageToOpen.forEach(function(img){
+      img.addEventListener('click',function(){
+        lightboxImage.src=this.src;
+        lightbox.classList.add('active');
+        document.body.classList.add('sfp-lightbox-open');
+        document.body.style.overflow='hidden';
+        document.documentElement.style.overflow='hidden';
+      });
+    });
+    
+    closeBtn.addEventListener('click',function(){
+      lightbox.classList.remove('active');
+      document.body.classList.remove('sfp-lightbox-open');
+      document.body.style.overflow='';
+      document.documentElement.style.overflow='';
+      resetToFirstTab();
+    });
+    
+    lightbox.addEventListener('click',function(e){
+      if(e.target===lightbox){
+        lightbox.classList.remove('active');
+        document.body.classList.remove('sfp-lightbox-open');
+        document.body.style.overflow='';
+        document.documentElement.style.overflow='';
+        resetToFirstTab();
+      }
+    });
+    
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&lightbox.classList.contains('active')){
+        lightbox.classList.remove('active');
+        document.body.classList.remove('sfp-lightbox-open');
+        document.body.style.overflow='';
+        document.documentElement.style.overflow='';
+        resetToFirstTab();
+      }
+    });
+    
+    var sizeChartTriggers=document.querySelectorAll('[data-size-chart-trigger]');
+    sizeChartTriggers.forEach(function(trigger){
+      trigger.addEventListener('click',function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var sizeChartUrl=this.getAttribute('data-size-chart-url');
+        console.log('Size chart URL:', sizeChartUrl);
+        if(sizeChartUrl&&lightboxImage){
+          lightboxImage.setAttribute('src',sizeChartUrl);
+          lightboxImage.setAttribute('alt','Size Chart');
+          console.log('Lightbox image src set to:', lightboxImage.src);
+          lightbox.classList.add('active');
+          document.body.classList.add('sfp-lightbox-open');
+          document.body.style.overflow='hidden';
+          document.documentElement.style.overflow='hidden';
+        }
+      });
+    });
+  }
+
+  var ingredientLists=document.querySelectorAll('.ingredient-list');
+  ingredientLists.forEach(function(ingredientList){
+    ingredientList.addEventListener('click',function(e){
+      var item=e.target.closest('.ingredient-list-item');
+      if(!item) return;
+      var ingredientName=item.getAttribute('data-ingredient-name');
+      console.log('Clicked ingredient:', ingredientName);
+      if(!ingredientName) return;
+      
+      // Check which ingredients section exists on this page
+      var crIngredientsSection=document.querySelector('.cr-ingredients-sfp-section');
+      var keyIngredientsSection=document.querySelector('[id^="description-"]');
+      
+      console.log('CR Ingredients section found:', crIngredientsSection);
+      console.log('Key Ingredients section found:', keyIngredientsSection);
+      
+      // Handle cr-ingredients section if it exists
+      if(crIngredientsSection){
+        console.log('Scrolling to CR Ingredients section');
+        crIngredientsSection.scrollIntoView({behavior:'smooth',block:'start'});
+        setTimeout(function(){
+          var targetIngredient=crIngredientsSection.querySelector('[data-ingredient-name="'+ingredientName+'"]');
+          console.log('Target ingredient in CR section:', targetIngredient);
+          if(targetIngredient){
+            var toggler=targetIngredient.querySelector('[data-cr-ing-accordion-trigger]');
+            console.log('Toggler found:', toggler);
+            if(toggler&&toggler.getAttribute('aria-expanded')!=='true'){
+              console.log('Clicking toggler');
+              toggler.click();
+              setTimeout(function(){targetIngredient.scrollIntoView({behavior:'smooth',block:'center'});},400);
+            }
+          }
+        },600);
+        return;
+      }
+      
+      // Handle key-ingredients section if it exists
+      if(keyIngredientsSection){
+        keyIngredientsSection.scrollIntoView({behavior:'smooth',block:'start'});
+        setTimeout(function(){
+          var readMoreButton=keyIngredientsSection.querySelector('[data-read-more-trigger]');
+          var readMoreContent=keyIngredientsSection.querySelector('[data-read-more-content]');
+          if(readMoreButton&&readMoreContent){
+            var contentHeight=readMoreContent.style.height;
+            var isOpen=contentHeight&&contentHeight!=='0px'&&contentHeight!=='';
+            if(!isOpen){readMoreButton.click();}
+          }
+          setTimeout(function(){
+            var targetIngredient=keyIngredientsSection.querySelector('[data-ingredient-name="'+ingredientName+'"]');
+            if(targetIngredient){
+              var toggler=targetIngredient.querySelector('[data-accordion-trigger]');
+              if(toggler&&toggler.getAttribute('aria-expanded')!=='true'){
+                toggler.click();
+                setTimeout(function(){targetIngredient.scrollIntoView({behavior:'smooth',block:'center'});},400);
+              }
+            }
+          },500);
+        },600);
+        return;
+      }
+    });
+  });
+
+  var mobileSeeAdditionalWrappers=document.querySelectorAll('.pi-mobile-accordions .see-additional-wrapper');
+  mobileSeeAdditionalWrappers.forEach(function(seeAdditionalWrapper){
+    seeAdditionalWrapper.addEventListener('click',function(e){
+      e.preventDefault();
+      this.classList.add('clicking');
+      var wrapper=this;
+      setTimeout(function(){wrapper.classList.remove('clicking');},300);
+      
+      // Check which ingredients section exists
+      var crIngredientsSection=document.querySelector('.cr-ingredients-sfp-section');
+      var keyIngredientsSection=document.querySelector('[id^="description-"]');
+      
+      var headerOffset=100;
+      
+      // Handle cr-ingredients section if it exists
+      if(crIngredientsSection){
+        var elementPosition=crIngredientsSection.getBoundingClientRect().top;
+        var offsetPosition=elementPosition+window.pageYOffset-headerOffset;
+        window.scrollTo({top:offsetPosition,behavior:'smooth'});
+        return;
+      }
+      
+      // Handle key-ingredients section if it exists
+      if(keyIngredientsSection){
+        var elementPosition=keyIngredientsSection.getBoundingClientRect().top;
+        var offsetPosition=elementPosition+window.pageYOffset-headerOffset;
+        window.scrollTo({top:offsetPosition,behavior:'smooth'});
+        setTimeout(function(){
+          var readMoreButton=keyIngredientsSection.querySelector('[data-read-more-trigger]');
+          var readMoreContent=keyIngredientsSection.querySelector('[data-read-more-content]');
+          if(readMoreButton&&readMoreContent){
+            var contentHeight=readMoreContent.style.height;
+            var isOpen=contentHeight&&contentHeight!=='0px'&&contentHeight!=='';
+            if(!isOpen){readMoreButton.click();}
+          }
+        },800);
+        return;
+      }
+    });
+  });
+
+  var sfpImageMap={
+    {% assign sfp_first_written=false %}
+    {% for variant in product.variants %}
+      {% if variant.metafields.custom.sfp_section and variant.metafields.custom.sfp_section.value %}
+        {% assign v_sfp_raw=variant.metafields.custom.sfp_section.value %}
+        {% assign v_sfp_entry=v_sfp_raw | first | default: v_sfp_raw %}
+        {% if v_sfp_entry.sfp_image != blank %}
+          {% if sfp_first_written %},{% endif %}"{{ variant.id }}":"{{ v_sfp_entry.sfp_image | file_url }}"
+          {% assign sfp_first_written=true %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  };
+
+  window.addEventListener('buybox:variant-change',function(e){
+    if(!e.detail) return;
+    var vid=String(e.detail.id||e.detail.variantId||e.detail.variant_id);
+    if(sfpImageMap[vid]){
+      var sfpImages=document.querySelectorAll('[data-supplement-facts-img]');
+      sfpImages.forEach(function(img){
+        img.src=sfpImageMap[vid];
+      });
+    }
+  });
+
+  window.addEventListener('variant:change',function(e){
+    if(!e.detail||!e.detail.variant) return;
+    var vid=String(e.detail.variant.id);
+    if(sfpImageMap[vid]){
+      var sfpImages=document.querySelectorAll('[data-supplement-facts-img]');
+      sfpImages.forEach(function(img){
+        img.src=sfpImageMap[vid];
+      });
+    }
+    
+    // Update apparel price if it exists
+    var apparelPrice=document.querySelector('.apparel-product-price');
+    if(apparelPrice&&e.detail.variant.price){
+      var price=e.detail.variant.price;
+      var formattedPrice='$'+(price/100).toFixed(2);
+      apparelPrice.textContent=formattedPrice;
+    }
+  });
+  
+  // Also listen for variant:changed event (with 'd')
+  document.addEventListener('variant:changed',function(e){
+    if(!e.detail||!e.detail.variantId) return;
+    var apparelPrice=document.querySelector('.apparel-product-price');
+    if(apparelPrice&&window.productVariants){
+      var variant=window.productVariants.find(function(v){return String(v.id)===String(e.detail.variantId);});
+      if(variant&&variant.price){
+        var price=variant.price;
+        var formattedPrice='$'+(price/100).toFixed(2);
+        apparelPrice.textContent=formattedPrice;
+      }
+    }
+  });
+
+  var mobileAccordionsSource=document.querySelector('.pi-mobile-accordions');
+  var mobileAccordionsTarget=document.querySelector('.pi-mobile-accordions-wrapper');
+  if(mobileAccordionsSource&&mobileAccordionsTarget){
+    while(mobileAccordionsSource.firstChild){
+      mobileAccordionsTarget.appendChild(mobileAccordionsSource.firstChild);
+    }
+    if(mobileAccordionsSource.classList.contains('is-core-series')){
+      mobileAccordionsTarget.classList.add('is-core-series');
+    }
+    if(mobileAccordionsSource.classList.contains('product-info-header')){
+      mobileAccordionsTarget.classList.add('product-info-header');
+    }
+    mobileAccordionsSource.remove();
+    mobileAccordionsTarget.classList.add('pi-mobile-accordions');
+  }
+
+  if(lightbox&&lightbox.parentElement!==document.body){
+    document.body.appendChild(lightbox);
+  }
+  
+  // Auto-shrink product title on mobile if it's too long
+  function adjustProductTitleSize(){
+    var productTitle=document.querySelector('.product-title');
+    if(!productTitle) return;
+    
+    var isMobile=window.innerWidth<=767;
+    
+    // Reset desktop styles
+    if(!isMobile){
+      productTitle.style.fontSize='';
+      productTitle.style.whiteSpace='';
+      productTitle.style.overflow='';
+      productTitle.style.textOverflow='';
+      return;
+    }
+    
+    // Mobile only from here
+    var baseFontSize=24; // 1.5rem = 24px
+    var minFontSize=14;
+    
+    // Always keep single line
+    productTitle.style.whiteSpace='nowrap';
+    productTitle.style.overflow='hidden';
+    productTitle.style.textOverflow='ellipsis';
+    productTitle.style.fontSize=baseFontSize+'px';
+    
+    // Force reflow and get actual allocated width
+    void productTitle.offsetHeight;
+    var containerWidth=productTitle.offsetWidth;
+    
+    // If it fits at base size, we're done
+    if(productTitle.scrollWidth<=containerWidth){
+      return;
+    }
+    
+    // Try shrinking down to minimum size
+    var currentFontSize=baseFontSize-1;
+    while(currentFontSize>=minFontSize){
+      productTitle.style.fontSize=currentFontSize+'px';
+      void productTitle.offsetHeight; // Force reflow
+      
+      if(productTitle.scrollWidth<=containerWidth){
+        return;
+      }
+      
+      currentFontSize--;
+    }
+    
+    // At minimum size, keep single line with ellipsis
+    productTitle.style.fontSize=minFontSize+'px';
+  }
+  
+  // Run after a short delay to ensure layout is ready
+  setTimeout(adjustProductTitleSize,150);
+  
+  // Also run when fonts are loaded
+  if(document.fonts&&document.fonts.ready){
+    document.fonts.ready.then(function(){
+      setTimeout(adjustProductTitleSize,50);
+    });
+  }
+  
+  window.addEventListener('resize',adjustProductTitleSize);
+});
+</script>

@@ -1,0 +1,1481 @@
+{% assign _sid = section.id %}
+{% if section.settings.use_series_colors %}
+  {% assign sfp_list = product.metafields.custom.sfp_section.value %}
+  {% assign sfp_section = sfp_list | first %}
+  {% assign product_series = sfp_section.series.value %}
+  {% if product_series %}
+    {% assign featured_color = product_series.template_specific_dynamic_featured_color | default: section.settings.bg_color %}
+    {% assign accent_colors = product_series.template_specific_accent_color_s %}
+    {% assign accent_1 = accent_colors[0] | default: section.settings.fallback_accent_1 %}
+    {% assign accent_2 = accent_colors[1] | default: section.settings.fallback_accent_2 %}
+    {% assign accent_3 = accent_colors[2] | default: section.settings.fallback_accent_3 %}
+  {% else %}
+    {% assign featured_color = section.settings.bg_color %}
+    {% assign accent_1 = section.settings.fallback_accent_1 %}
+    {% assign accent_2 = section.settings.fallback_accent_2 %}
+    {% assign accent_3 = section.settings.fallback_accent_3 %}
+  {% endif %}
+{% else %}
+  {% assign featured_color = section.settings.bg_color %}
+  {% assign accent_1 = section.settings.fallback_accent_1 %}
+  {% assign accent_2 = section.settings.fallback_accent_2 %}
+  {% assign accent_3 = section.settings.fallback_accent_3 %}
+{% endif %}
+
+{% case section.settings.grunge_border_color_source %}
+  {% when 'featured' %}{% assign grunge_color = featured_color %}
+  {% when 'accent_1' %}{% assign grunge_color = accent_1 %}
+  {% when 'accent_2' %}{% assign grunge_color = accent_2 %}
+  {% when 'accent_3' %}{% assign grunge_color = accent_3 %}
+  {% else %}{% assign grunge_color = featured_color %}
+{% endcase %}
+{% assign grunge_color = grunge_color | default: section.settings.fallback_accent_1 %}
+
+{% if section.settings.use_grunge_as_bg %}
+  {% assign section_bg_color = grunge_color %}
+{% elsif section.settings.section_bg_color and section.settings.section_bg_color != blank %}
+  {% assign section_bg_color = section.settings.section_bg_color %}
+{% else %}
+  {% assign section_bg_color = section.settings.bg_color %}
+{% endif %}
+
+{% if section.settings.text_color_source and section.settings.text_color_source != blank %}
+  {% case section.settings.text_color_source %}
+    {% when 'featured' %}{% assign dynamic_text_color = featured_color %}
+    {% when 'accent_1' %}{% assign dynamic_text_color = accent_1 %}
+    {% when 'accent_2' %}{% assign dynamic_text_color = accent_2 %}
+    {% when 'accent_3' %}{% assign dynamic_text_color = accent_3 %}
+    {% else %}{% assign dynamic_text_color = section.settings.text_color %}
+  {% endcase %}
+{% else %}
+  {% assign dynamic_text_color = section.settings.text_color %}
+{% endif %}
+
+{% assign current_variant = product.selected_or_first_available_variant %}
+{% assign variant_sfp = blank %}
+{% assign glb_model_url = '' %}
+{% assign sfp_image_url = '' %}
+
+{% if current_variant.metafields.custom.sfp_section and current_variant.metafields.custom.sfp_section.value %}
+  {% assign variant_sfp = current_variant.metafields.custom.sfp_section.value %}
+  {% assign variant_sfp_entry = variant_sfp | first | default: variant_sfp %}
+  {% if variant_sfp_entry.glb_3d_render != blank %}
+    {% assign glb_model_url = variant_sfp_entry.glb_3d_render %}
+  {% endif %}
+  {% if variant_sfp_entry.sfp_image != blank %}
+    {% assign sfp_image_url = variant_sfp_entry.sfp_image | file_url %}
+  {% endif %}
+{% endif %}
+
+{% assign has_any_glb = false %}
+{% for v in product.variants %}
+  {% if v.metafields.custom.sfp_section and v.metafields.custom.sfp_section.value %}
+    {% assign vsfp = v.metafields.custom.sfp_section.value %}
+    {% assign vsfp_entry = vsfp | first | default: vsfp %}
+    {% if vsfp_entry.glb_3d_render != blank %}
+      {% assign has_any_glb = true %}
+      {% break %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% assign sfp_list = product.metafields.custom.sfp_section.value %}
+{% assign sfp_section = sfp_list | first %}
+{% assign pdp_desktop_video = '' %}
+{% assign pdp_mobile_video = '' %}
+
+{% if sfp_section %}
+  {% if sfp_section.pdp_desktop_video != blank %}
+    {% assign pdp_desktop_video = sfp_section.pdp_desktop_video.value | default: sfp_section.pdp_desktop_video %}
+  {% endif %}
+  {% if sfp_section.pdp_mobile_video != blank %}
+    {% assign pdp_mobile_video = sfp_section.pdp_mobile_video.value | default: sfp_section.pdp_mobile_video %}
+  {% endif %}
+{% endif %}
+
+{% if pdp_desktop_video == blank and product.metafields.meta.video != blank %}
+  {% assign pdp_desktop_video = product.metafields.meta.video %}
+{% endif %}
+{% if pdp_mobile_video == blank and product.metafields.meta.video_mobile != blank %}
+  {% assign pdp_mobile_video = product.metafields.meta.video_mobile %}
+{% endif %}
+
+<style>
+#threed-ingredients-{{ _sid }} {
+  --bg: {{ section_bg_color }};
+  --text: {{ dynamic_text_color }};
+  --series-bg: {{ featured_color }};
+  --accent-1: {{ accent_1 }};
+  --accent-2: {{ accent_2 }};
+  --accent-3: {{ accent_3 }};
+  --inactive-tab: {{ accent_2 }};
+  background: var(--bg);
+  position: relative;
+  z-index: {{ section.settings.section_z_index | default: 2 }};
+  color: var(--text);
+}
+#threed-ingredients-{{ _sid }} .inner-wrapper {
+  {% if section.settings.section_max_width and section.settings.section_max_width != blank %}
+  max-width: {{ section.settings.section_max_width }}px;
+  margin-left: auto;
+  margin-right: auto;
+  {% endif %}
+}
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} {
+    {% if section.settings.show_grunge_borders %}
+    padding-top: {{ section.settings.padding_top_mobile }}px;
+    padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+    {% else %}
+      {% if section.settings.both_adjacent_grunge %}
+      padding-top: calc({{ section.settings.padding_top_mobile }}px + 50px);
+      padding-bottom: calc({{ section.settings.padding_bottom_mobile }}px + 50px);
+      {% else %}
+        {% if section.settings.prev_section_has_grunge %}
+        padding-top: calc({{ section.settings.padding_top_mobile }}px + 50px);
+        {% else %}
+        padding-top: {{ section.settings.padding_top_mobile }}px;
+        {% endif %}
+        {% if section.settings.next_section_has_grunge %}
+        padding-bottom: calc({{ section.settings.padding_bottom_mobile }}px + 50px);
+        {% else %}
+        padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+        {% endif %}
+      {% endif %}
+    {% endif %}
+    margin-top: {{ section.settings.margin_top_mobile }}px;
+    margin-bottom: {{ section.settings.margin_bottom_mobile }}px;
+    {% if section.settings.hide_on_mobile %}display:none;{% endif %}
+  }
+}
+@media (min-width: 768px) {
+  #threed-ingredients-{{ _sid }} {
+    {% if section.settings.show_grunge_borders %}
+    padding-top: {{ section.settings.padding_top_desktop }}px;
+    padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+    {% else %}
+      {% if section.settings.both_adjacent_grunge %}
+      padding-top: calc({{ section.settings.padding_top_desktop }}px + 90px);
+      padding-bottom: calc({{ section.settings.padding_bottom_desktop }}px + 90px);
+      {% else %}
+        {% if section.settings.prev_section_has_grunge %}
+        padding-top: calc({{ section.settings.padding_top_desktop }}px + 90px);
+        {% else %}
+        padding-top: {{ section.settings.padding_top_desktop }}px;
+        {% endif %}
+        {% if section.settings.next_section_has_grunge %}
+        padding-bottom: calc({{ section.settings.padding_bottom_desktop }}px + 90px);
+        {% else %}
+        padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+        {% endif %}
+      {% endif %}
+    {% endif %}
+    margin-top: {{ section.settings.margin_top_desktop }}px;
+    margin-bottom: {{ section.settings.margin_bottom_desktop }}px;
+  }
+}
+#threed-ingredients-{{ _sid }} .top-row { margin: 0 auto; padding: 0 40px; }
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} .top-row {
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+#threed-ingredients-{{ _sid }} .sfp-glb-row {
+  max-width: 1400px;
+  margin: 0 auto 120px auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  align-items: center;
+}
+#threed-ingredients-{{ _sid }} .sfp-glb-row.sfp-only { grid-template-columns: 1fr; max-width: 650px; }
+@media (max-width: 1024px) { #threed-ingredients-{{ _sid }} .sfp-glb-row { grid-template-columns: 1fr; gap: 0; margin-bottom: 80px; } }
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} .sfp-glb-row {
+    display: contents;
+  }
+}
+
+#threed-ingredients-{{ _sid }} .video-ingredients-row {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: center;
+}
+#threed-ingredients-{{ _sid }} .video-ingredients-row.video-only { grid-template-columns: 1fr; max-width: 1200px; }
+@media (max-width: 1024px) { #threed-ingredients-{{ _sid }} .video-ingredients-row { gap: 60px; } }
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} .video-ingredients-row {
+    display: contents;
+  }
+}
+
+#threed-ingredients-{{ _sid }} .glb-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  padding: 20px 0;
+  box-sizing: border-box;
+}
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} .glb-col {
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    order: 2;
+    margin-top: 20px;
+    margin-bottom: 40px;
+  }
+}
+@media (min-width: 768px) {
+  #threed-ingredients-{{ _sid }} .glb-col {
+    top: 15px;
+    left: 15px;
+  }
+}
+
+#threed-ingredients-{{ _sid }} .ingredients-column { width: 100%; display: flex; flex-direction: column; }
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} .ingredients-column { order: 4; }
+}
+
+#threed-ingredients-{{ _sid }} .sfp-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+#threed-ingredients-{{ _sid }} .sfp-inner {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  #threed-ingredients-{{ _sid }} .sfp-col { padding: 0 50px; }
+}
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} .sfp-col { order: 3; }
+  #threed-ingredients-{{ _sid }} .sfp-inner { max-width: 100%; }
+}
+
+#threed-ingredients-{{ _sid }} .sfp-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  margin: 0 auto;
+}
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} .sfp-image {
+    max-height: none;
+    object-fit: contain;
+  }
+}
+
+#threed-ingredients-{{ _sid }} .video-wrapper,
+.mobile-video-container-{{ _sid }} .video-wrapper {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+  background: #000;
+}
+@media (min-width: 768px) {
+  #threed-ingredients-{{ _sid }} .video-wrapper {
+    border-radius: 16px;
+  }
+}
+@media (max-width: 767px) {
+  .mobile-video-container-{{ _sid }} .video-wrapper {
+    box-shadow: none;
+  }
+}
+#threed-ingredients-{{ _sid }} .video-wrapper iframe,
+.mobile-video-container-{{ _sid }} .video-wrapper iframe {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; z-index: 1;
+}
+
+#threed-ingredients-{{ _sid }} .embedded-iframe,
+.mobile-video-container-{{ _sid }} .embedded-iframe {
+  padding: 56.25% 0 0; position: relative; overflow: hidden;
+}
+@media (min-width: 768px) {
+  #threed-ingredients-{{ _sid }} .embedded-iframe { border-radius: 16px; }
+}
+#threed-ingredients-{{ _sid }} .embedded-iframe iframe,
+.mobile-video-container-{{ _sid }} .embedded-iframe iframe {
+  height: 100%; left: 0; position: absolute; top: 0; width: 100%; border: 0;
+}
+#threed-ingredients-{{ _sid }} .embedded-iframe__mobile { display: none; }
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} .embedded-iframe__desktop { display: none; }
+  #threed-ingredients-{{ _sid }} .embedded-iframe__mobile { display: block; }
+  #threed-ingredients-{{ _sid }} .embedded-iframe--mobile-padding,
+  .mobile-video-container-{{ _sid }} .embedded-iframe--mobile-padding { padding: 100% 0 0; margin-top:-60px; padding-bottom:80px; z-index:2; }
+}
+
+#threed-ingredients-{{ _sid }} .sfp-variant-selector { width: 100%; margin: 0 auto 18px auto; position: relative; }
+#threed-ingredients-{{ _sid }} .sfp-flavor-combobox { position: relative; width: 100%; }
+#threed-ingredients-{{ _sid }} .sfp-flavor-trigger {
+  width: 100%; min-height: 48px; padding: 12px 40px 12px 14px; background: #fff; border: 2px solid #e5e5e5;
+  border-radius: 6px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s ease;
+  font-family: 'Acumin Pro', sans-serif; font-size: 14px; font-weight: 500; color: #1a1a1a; text-align: left;
+}
+#threed-ingredients-{{ _sid }} .sfp-flavor-trigger.out-of-stock .sfp-trigger-swatch { filter: grayscale(100%); }
+#threed-ingredients-{{ _sid }} .sfp-flavor-trigger.out-of-stock .sfp-trigger-text { color: #999; }
+#threed-ingredients-{{ _sid }} .sfp-flavor-trigger:hover { border-color: #999; background: #fafafa; }
+#threed-ingredients-{{ _sid }} .sfp-trigger-swatch { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+#threed-ingredients-{{ _sid }} .sfp-trigger-text { flex: 1; text-align: left; }
+#threed-ingredients-{{ _sid }} .sfp-trigger-caret { position: absolute; right: 12px; transition: transform 0.2s ease; color: #888; width: 16px; height: 16px; }
+#threed-ingredients-{{ _sid }} .sfp-flavor-combobox.open .sfp-trigger-caret { transform: rotate(180deg); }
+#threed-ingredients-{{ _sid }} .sfp-flavor-panel {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1px solid #e5e5e5;
+  border-radius: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); max-height: 340px; overflow-y: auto; z-index: 100; display: none;
+}
+#threed-ingredients-{{ _sid }} .sfp-flavor-combobox.open .sfp-flavor-panel { display: block; }
+#threed-ingredients-{{ _sid }} .sfp-flavor-list { list-style: none; margin: 0; padding: 4px; }
+#threed-ingredients-{{ _sid }} .sfp-flavor-option {
+  padding: 11px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-family: 'Acumin Pro', sans-serif;
+  font-size: 14px; color: #1a1a1a; transition: background 0.15s ease; border-bottom: 1px solid #f5f5f5;
+}
+#threed-ingredients-{{ _sid }} .sfp-flavor-option:last-child { border-bottom: none; }
+#threed-ingredients-{{ _sid }} .sfp-flavor-option.active { background: #f8f8f8; font-weight: 600; }
+#threed-ingredients-{{ _sid }} .sfp-flavor-option.out-of-stock .sfp-option-swatch { filter: grayscale(100%); }
+#threed-ingredients-{{ _sid }} .sfp-flavor-option.out-of-stock .sfp-option-text { color: #999; }
+#threed-ingredients-{{ _sid }} .sfp-option-swatch { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+#threed-ingredients-{{ _sid }} .sfp-option-text { flex: 1; }
+
+#threed-ingredients-{{ _sid }} .section-container { max-width: {{ section.settings.section_max_width | default: 1900 }}px; margin: 0 auto; padding: 0 40px; }
+@media (max-width: 767px) { #threed-ingredients-{{ _sid }} .section-container { padding: 0 16px; } }
+
+#threed-ingredients-{{ _sid }} .video-col { width: 100%; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; }
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} .video-col { display: none; }
+}
+
+.mobile-video-container-{{ _sid }} {
+  display: none;
+}
+@media (max-width: 767px) {
+  .mobile-video-container-{{ _sid }} {
+    display: block;
+    width: 100vw;
+    margin-top: -60px;
+    margin-bottom: 40px;
+  }
+}
+#threed-ingredients-{{ _sid }} .section-header { margin-bottom: 32px; }
+#threed-ingredients-{{ _sid }} .ingredients-column .section-header { margin-bottom: 40px; }
+#threed-ingredients-{{ _sid }} .section-title { font-family: 'Gunplay', sans-serif; font-size: 2rem; line-height: 1.2; text-transform: uppercase; margin: 0 0 10px 0; }
+@media (max-width: 767px) { #threed-ingredients-{{ _sid }} .section-title { font-size: 1.5rem; } }
+#threed-ingredients-{{ _sid }} .section-description { font-family: 'Acumin Pro', sans-serif; font-size: 16px; line-height: 1.6; margin: 0; }
+
+#threed-ingredients-{{ _sid }} .ingredients-accordion { margin: 0; padding: 0; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion details { border-top: 1px solid rgba(255,255,255,0.2); padding: 18px 0; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion details:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 30px; outline: none; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion summary::-webkit-details-marker { display: none; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-title { text-align: left; font-family: 'Acumin Pro Bold', sans-serif; font-size: 16px; line-height: 26px; margin: 0; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-amount { color: var(--accent-2); }
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-amount .unit { font-variant: all-small-caps; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-icon { font-size: 20px; line-height: 1; margin-left: 1rem; transition: transform 0.32s ease, color 0.32s ease; color: var(--inactive-tab); }
+#threed-ingredients-{{ _sid }} .ingredients-accordion details[open] .ingredient-icon { transform: rotate(45deg); color: var(--series-bg); }
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-content { overflow: hidden; height: 0; transition: height 320ms ease; will-change: height; padding-right: 35px; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-content-inner { padding-top: 15px; line-height: 1.6; text-align: left; font-family: 'Acumin Pro', sans-serif; font-size: 16px; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-content-inner p { margin: 0 0 10px 0; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-content-inner b { display: block; padding-top: 18px; padding-bottom: 10px; font-weight: 700; line-height: 1.5; font-size: 15px; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-content-inner b:first-child { padding-top: 4px; }
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-content-inner ul,
+#threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-content-inner ol { margin: 0 0 10px 0; padding-left: 20px; }
+@media (max-width: 767px) { #threed-ingredients-{{ _sid }} .ingredients-accordion .ingredient-content { padding-right: 0; } }
+
+#threed-ingredients-{{ _sid }} .model-viewer-container {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+#threed-ingredients-{{ _sid }} canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 700px !important;
+  max-height: none !important;
+  display: block !important;
+  outline: none !important;
+  touch-action: none !important;
+  aspect-ratio: 1 / 1 !important;
+}
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }} .model-viewer-container { width: 100%; position: relative; }
+  #threed-ingredients-{{ _sid }} canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+}
+#threed-ingredients-{{ _sid }} .loading-spinner {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px;
+  border: 3px solid rgba(255,255,255,0.12); border-top-color: var(--series-bg); border-radius: 50%;
+  animation: spin-{{ _sid }} 1s linear infinite; z-index: 10; pointer-events: none;
+}
+@keyframes spin-{{ _sid }} { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+{% if section.settings.show_grunge_borders and section.settings.show_top_grunge and section.settings.top_grunge_image %}
+#threed-ingredients-{{ _sid }}::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: {{ section.settings.top_grunge_height_desktop }}px;
+  top: {{ section.settings.top_grunge_offset_desktop }}px;
+  background-color: {{ grunge_color }};
+  -webkit-mask-image: url('{{ section.settings.top_grunge_image | img_url: 'master' }}');
+  mask-image: url('{{ section.settings.top_grunge_image | img_url: 'master' }}');
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-size: cover; mask-size: cover;
+  -webkit-mask-position: center; mask-position: center;
+  z-index: -1; pointer-events: none;
+}
+@media (max-width: 767px) {
+  #threed-ingredients-{{ _sid }}::before {
+    display: none;
+  }
+}
+{% endif %}
+
+{% if section.settings.show_grunge_borders and section.settings.show_bottom_grunge and section.settings.bottom_grunge_image %}
+#threed-ingredients-{{ _sid }}::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: {{ section.settings.bottom_grunge_height }}px;
+  bottom: {{ section.settings.bottom_grunge_offset }}px;
+  background-color: {{ grunge_color }};
+  -webkit-mask-image: url('{{ section.settings.bottom_grunge_image | img_url: 'master' }}');
+  mask-image: url('{{ section.settings.bottom_grunge_image | img_url: 'master' }}');
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-size: cover; mask-size: cover;
+  -webkit-mask-position: center; mask-position: center;
+  z-index: -1; pointer-events: none;
+}
+{% endif %}
+</style>
+
+{% if pdp_desktop_video != blank or pdp_mobile_video != blank %}
+<div id="mobile-video-{{ _sid }}" class="mobile-video-container-{{ _sid }}">
+  {% if pdp_desktop_video contains 'vimeo.com' %}
+    {% assign desktop_video_id = pdp_desktop_video | split: '/' | last | split: '?' | first %}
+    {% assign mobile_video_id = pdp_mobile_video | split: '/' | last | split: '?' | first %}
+    {% if mobile_video_id == blank %}{% assign mobile_video_id = desktop_video_id %}{% endif %}
+    <div class="embedded-iframe embedded-iframe--mobile-padding">
+      <iframe
+        src="https://player.vimeo.com/video/{{ mobile_video_id }}?autoplay=0"
+        width="100%"
+        height="100%"
+        frameborder="0"
+        allow="fullscreen; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+  {% else %}
+    <div class="video-wrapper">
+      <iframe src="{{ pdp_desktop_video }}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<div id="threed-ingredients-{{ _sid }}">
+  <div class="inner-wrapper">
+    <div class="top-row">
+      <div class="sfp-glb-row{% unless glb_model_url and glb_model_url != blank %} sfp-only{% endunless %}" id="sfp-glb-row-{{ _sid }}">
+        <div class="sfp-col">
+          <div class="sfp-inner">
+            {% if product.variants.size > 1 %}
+            <div class="sfp-variant-selector">
+              <div class="sfp-flavor-combobox" id="sfp-flavor-combobox-{{ _sid }}">
+                <button type="button" class="sfp-flavor-trigger" id="sfp-flavor-trigger-{{ _sid }}" aria-haspopup="listbox" aria-expanded="false">
+                  {% assign cur_vsfp = current_variant.metafields.custom.sfp_section.value %}
+                  {% assign cur_vsfp_entry = cur_vsfp | first | default: cur_vsfp %}
+                  {% assign cur_swatch_obj = cur_vsfp_entry.flavor_swatch_image.value %}
+                  {% assign cur_swatch = cur_swatch_obj.swatch_image.value %}
+                  <img class="sfp-trigger-swatch" id="sfp-trigger-swatch-{{ _sid }}" src="{{ cur_swatch | image_url: width: 28 }}" alt="">
+                  <span class="sfp-trigger-text" id="sfp-trigger-text-{{ _sid }}">{{ current_variant.title | replace: ' / US', '' }}</span>
+                  <svg class="sfp-trigger-caret" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="sfp-flavor-panel" id="sfp-flavor-panel-{{ _sid }}" role="listbox">
+                  <ul class="sfp-flavor-list">
+                    {% for variant in product.variants %}
+                      {% if variant.metafields.custom.sfp_section and variant.metafields.custom.sfp_section.value %}
+                        {% assign v_sfp_raw = variant.metafields.custom.sfp_section.value %}
+                        {% assign v_sfp = v_sfp_raw | first | default: v_sfp_raw %}
+                        {% assign swatch_obj = v_sfp.flavor_swatch_image.value %}
+                        {% assign swatch_image = swatch_obj.swatch_image.value %}
+                        {% assign v_name = variant.title | replace: ' / US', '' %}
+                        {% assign v_glb = v_sfp.glb_3d_render %}
+                        {% assign v_sfp_img = v_sfp.sfp_image | file_url %}
+                        <li class="sfp-flavor-option {% if variant.id == current_variant.id %}active currently-selected{% endif %} {% unless variant.available %}out-of-stock{% endunless %}"
+                            role="option"
+                            data-variant-id="{{ variant.id }}"
+                            data-variant-name="{{ v_name }}"
+                            data-swatch-url="{{ swatch_image | image_url: width: 28 }}"
+                            data-glb-url="{{ v_glb }}"
+                            data-sfp-url="{{ v_sfp_img }}"
+                            data-available="{{ variant.available }}"
+                            {% if variant.id == current_variant.id %}style="display:none"{% endif %}>
+                          <img class="sfp-option-swatch" src="{{ swatch_image | image_url: width: 28 }}" alt="">
+                          <span class="sfp-option-text">{{ v_name }}{% unless variant.available %} – Out Of Stock{% endunless %}</span>
+                        </li>
+                      {% endif %}
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% if sfp_image_url != blank %}
+              <img src="{{ sfp_image_url }}" id="sfp-image-{{ _sid }}" alt="Supplement Facts" class="sfp-image">
+            {% endif %}
+          </div>
+        </div>
+
+        {% if has_any_glb %}
+        <div class="glb-col" id="glb-col-{{ _sid }}" {% if glb_model_url == blank %}style="display:none"{% endif %}>
+          <div class="model-viewer-container">
+            <div class="loading-spinner" id="model-loading-{{ _sid }}"></div>
+            <canvas
+              id="babylon-canvas-{{ _sid }}"
+              data-model-url="{{ glb_model_url }}"
+              data-variant-id="{{ current_variant.id }}">
+            </canvas>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="video-ingredients-row{% unless section.settings.show_key_ingredients %} video-only{% endunless %}">
+        {% if pdp_desktop_video != blank or pdp_mobile_video != blank %}
+        <div class="video-col">
+          {% if pdp_desktop_video contains 'vimeo.com' %}
+            {% assign desktop_video_id = pdp_desktop_video | split: '/' | last | split: '?' | first %}
+            {% assign mobile_video_id = pdp_mobile_video | split: '/' | last | split: '?' | first %}
+            {% if mobile_video_id == blank %}{% assign mobile_video_id = desktop_video_id %}{% endif %}
+            <div class="embedded-iframe embedded-iframe--mobile-padding">
+              {% if pdp_desktop_video != blank %}
+              <iframe
+                data-vimeo-desktop
+                class="embedded-iframe__desktop"
+                src="https://player.vimeo.com/video/{{ desktop_video_id }}?autoplay=0"
+                width="100%"
+                height="100%"
+                frameborder="0"
+                allow="fullscreen; picture-in-picture"
+                allowfullscreen>
+              </iframe>
+              {% endif %}
+              {% if pdp_mobile_video != blank %}
+              <iframe
+                data-vimeo-mobile
+                class="embedded-iframe__mobile"
+                src="https://player.vimeo.com/video/{{ mobile_video_id }}?autoplay=0"
+                width="100%"
+                height="100%"
+                frameborder="0"
+                allow="fullscreen; picture-in-picture"
+                allowfullscreen>
+              </iframe>
+              {% endif %}
+            </div>
+          {% elsif pdp_desktop_video contains 'youtube.com' or pdp_desktop_video contains 'youtu.be' %}
+            <div class="video-wrapper">
+              <iframe src="{{ pdp_desktop_video }}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+            </div>
+          {% else %}
+            <div class="video-wrapper">
+              <iframe src="{{ pdp_desktop_video }}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+            </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {% if section.settings.show_key_ingredients %}
+        <div class="ingredients-column">
+          {% if section.settings.show_section_title %}
+          <div class="section-header">
+            <h2 class="section-title">{{ section.settings.section_title }}</h2>
+            {% if section.settings.section_description != blank %}
+            <div class="section-description">{{ section.settings.section_description }}</div>
+            {% endif %}
+          </div>
+          {% endif %}
+          <div class="ingredients-accordion">
+            {% assign sfp_list = product.metafields.custom.sfp_section.value %}
+            {% assign sfp_section = sfp_list | first %}
+            {% if sfp_section %}
+              {% assign ingredients_list = sfp_section.key_ingredients.value | default: sfp_section.key_ingredients %}
+              {% if ingredients_list %}
+                {% for key_ing_entry in ingredients_list %}
+                  {% assign ing_amount = key_ing_entry.ingredient_amount %}
+                  {% assign ing_ref = key_ing_entry.ingredient_name %}
+                  {% assign ing_description = key_ing_entry.ingredient_write_up %}
+                  {% assign ing_title = '' %}
+                  {% if ing_ref and ing_ref != blank %}
+                    {% assign ing_val = ing_ref.value | default: ing_ref %}
+                    {% assign ing_title = ing_val.display_name | default: ing_val.name | default: ing_val.title | default: ing_ref.display_name %}
+                  {% endif %}
+                  {% if ing_title == blank %}
+                    {% assign ing_title = key_ing_entry.display_name %}
+                  {% endif %}
+                  {% assign ing_title = ing_title | split: ' - ' | first | split: ' – ' | first | strip %}
+                  {% if ing_title != blank %}
+                    <details data-ingredient-item>
+                      <summary>
+                        <span class="ingredient-title">
+                          {{ ing_title }}
+                          {% if ing_amount != blank %}
+                            &nbsp;|&nbsp;
+                            <span class="ingredient-amount">
+                              {% assign amount_raw = ing_amount | append: '' | strip %}
+                              {% assign amount_low = amount_raw | downcase %}
+                              {% assign unit = '' %}
+                              {% assign numeric = amount_raw %}
+                              {% assign known_units = 'fl oz,mcg,mg,g,kg,iu,ml,l,oz' | split: ',' %}
+                              {% for u in known_units %}
+                                {% assign u_trim = u | strip %}
+                                {% assign u_low = u_trim | downcase %}
+                                {% assign cut = amount_low.size | minus: u_low.size %}
+                                {% if amount_low != blank and cut >= 0 %}
+                                  {% assign suffix = amount_low | slice: cut, u_low.size %}
+                                  {% if suffix == u_low %}
+                                    {% assign numeric = amount_raw | slice: 0, cut | strip %}
+                                    {% assign unit = u_trim %}
+                                    {% break %}
+                                  {% endif %}
+                                {% endif %}
+                              {% endfor %}
+                              {% if unit != '' %}
+                                {{ numeric }}<span class="unit"> {{ unit }}</span>
+                              {% else %}
+                                {{ amount_raw }}
+                              {% endif %}
+                            </span>
+                          {% endif %}
+                        </span>
+                        <i class="fa-solid fa-plus ingredient-icon"></i>
+                      </summary>
+                      <div class="ingredient-content" data-ingredient-content>
+                        <div class="ingredient-content-inner">
+                          {% assign clean_desc = ing_description | replace: '</b>-', '</b>' | replace: '</b> -', '</b>' | replace: '</b>–', '</b>' | replace: '</b> –', '</b>' | replace: '</b>—', '</b>' | replace: '</b> —', '</b>' | replace: '</b>*', '</b>' | replace: '</b> *', '</b>' | replace: '</b>:', '</b>' | replace: '</b> :', '</b>' | strip %}
+                          {{ clean_desc }}
+                        </div>
+                      </div>
+                    </details>
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.babylonjs.com/babylon.js" defer></script>
+<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  (function () {
+    var sectionId = '{{ _sid }}';
+    var canvas = document.getElementById('babylon-canvas-{{ _sid }}');
+    var spinner = document.getElementById('model-loading-{{ _sid }}');
+    var glbCol = document.getElementById('glb-col-{{ _sid }}');
+    var row = document.getElementById('sfp-glb-row-{{ _sid }}');
+
+    var glbMap = {
+      {% assign first_written = false %}
+      {% for v in product.variants %}
+        {% if v.metafields.custom.sfp_section and v.metafields.custom.sfp_section.value %}
+          {% assign vsfp = v.metafields.custom.sfp_section.value %}
+          {% assign vsfp_entry = vsfp | first | default: vsfp %}
+          {% if vsfp_entry.glb_3d_render != blank %}
+            {% if first_written %},{% endif %}"{{ v.id }}":"{{ vsfp_entry.glb_3d_render | escape }}"
+            {% assign first_written = true %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    };
+
+    if (!canvas) { if (spinner) spinner.style.display = 'none'; return; }
+
+    var BAB = window.BABYLON;
+    var engine = new BAB.Engine(canvas, true, {
+      preserveDrawingBuffer: true,
+      stencil: true,
+      antialias: true,
+      adaptToDeviceRatio: false,
+      powerPreference: 'high-performance'
+    });
+
+    var scene = new BAB.Scene(engine);
+    scene.clearColor = new BAB.Color4(0,0,0,0);
+    scene.useRightHandedSystem = true;
+
+    var camera = new BAB.ArcRotateCamera(
+      "cam_"+sectionId,
+      BAB.Tools.ToRadians(-25),
+      BAB.Tools.ToRadians(100),
+      12,
+      new BAB.Vector3(0,1,0),
+      scene
+    );
+    camera.inputs.clear();
+    camera.panningSensibility = 0;
+    camera.lowerRadiusLimit = 0.01;
+    camera.upperRadiusLimit = 1000;
+    camera.lowerAlphaLimit = camera.alpha;
+    camera.upperAlphaLimit = camera.alpha;
+    camera.lowerBetaLimit  = camera.beta;
+    camera.upperBetaLimit  = camera.beta;
+    camera.fov  = BAB.Tools.ToRadians(35);
+    camera.minZ = 0.01;
+    camera.maxZ = 5000;
+
+    function sizeEngineToColumn(){
+      var col = glbCol;
+      if(!col || !engine) return;
+      var w = col.clientWidth;
+      if (!w || w <= 0) {
+        w = canvas.clientWidth || 400;
+      }
+      var s = Math.min(w, 700);
+      if (s < 250) s = 250;
+      engine.setSize(s, s);
+    }
+    sizeEngineToColumn();
+    window.addEventListener('resize', sizeEngineToColumn);
+    if (window.ResizeObserver && row) new ResizeObserver(sizeEngineToColumn).observe(row);
+
+    var env = BAB.CubeTexture.CreateFromPrefilteredData("https://assets.babylonjs.com/environments/environmentSpecular.env", scene);
+    env.rotationY = BAB.Tools.ToRadians(90);
+    scene.environmentTexture = env;
+    scene.environmentIntensity = 0.8;
+    scene.imageProcessingConfiguration.exposure = 1.0;
+    scene.imageProcessingConfiguration.contrast = 1.0;
+    scene.imageProcessingConfiguration.toneMappingEnabled = true;
+    scene.imageProcessingConfiguration.toneMappingType = BAB.ImageProcessingConfiguration.TONEMAPPING_ACES;
+
+    new BAB.DirectionalLight("key", new BAB.Vector3(-0.3,-0.9,-0.5), scene).intensity = 1.0;
+    new BAB.DirectionalLight("fill", new BAB.Vector3(0.6,-0.4,0.7), scene).intensity = 0.35;
+    new BAB.HemisphericLight("hemi", new BAB.Vector3(0,1,0), scene).intensity = 0.3;
+
+    var ground = BAB.MeshBuilder.CreateDisc("shadow", { radius: 0.65 * 6.2, tessellation: 64 }, scene);
+    ground.rotation.x = Math.PI/2;
+    ground.position.y = 0;
+    var groundMat = new BAB.StandardMaterial("shadowMat", scene);
+    groundMat.diffuseColor = new BAB.Color3(0,0,0);
+    groundMat.specularColor = new BAB.Color3(0,0,0);
+    groundMat.emissiveColor = new BAB.Color3(0,0,0);
+    groundMat.alpha = 0.16;
+    ground.material = groundMat;
+
+    var tiltContainer = new BAB.TransformNode("tilt_"+sectionId, scene);
+    var liftContainer = new BAB.TransformNode("lift_"+sectionId, scene);
+    liftContainer.parent = tiltContainer;
+
+    tiltContainer.rotation.x = BAB.Tools.ToRadians(-2);
+    tiltContainer.rotation.z = BAB.Tools.ToRadians(8);
+    tiltContainer.position.set(0,0,0);
+
+    var importRoot = null;
+    var assetContainer = null;
+    var currentUrl = null;
+    var spinObserver = null;
+    var loadingToken = 0;
+
+    function disposeCurrent() {
+      if (spinObserver) { scene.onBeforeRenderObservable.remove(spinObserver); spinObserver = null; }
+      if (assetContainer) { assetContainer.removeAllFromScene(); assetContainer.dispose(); assetContainer = null; }
+      if (importRoot) { importRoot.dispose(); importRoot = null; }
+      tiltContainer.position.set(0,0,0);
+      tiltContainer.rotation.set(BAB.Tools.ToRadians(-2),0,BAB.Tools.ToRadians(8));
+      tiltContainer.scaling.set(1,1,1);
+      liftContainer.position.set(0,0,0);
+      liftContainer.rotation.set(0,0,0);
+      liftContainer.scaling.set(1,1,1);
+    }
+
+    function normalizeAndFrame(root) {
+      var BAB = BABYLON;
+
+      root.getChildMeshes().forEach(function(m){
+        m.scaling.x = Math.abs(m.scaling.x);
+        m.scaling.y = Math.abs(m.scaling.y);
+        m.scaling.z = Math.abs(m.scaling.z);
+        if (m.material && m.material.backFaceCulling === false) m.material.backFaceCulling = true;
+      });
+
+      var bounds = root.getHierarchyBoundingVectors(true);
+      var min = bounds.min, max = bounds.max;
+      var size = max.subtract(min);
+      var center = BAB.Vector3.Center(min, max);
+
+      root.position = center.scale(-1);
+
+      var targetMax = 7.4;
+      var maxDim = Math.max(size.x, size.y, size.z);
+      var s = maxDim > 0 ? (targetMax / maxDim) : 1;
+      liftContainer.scaling.set(s, s, s);
+
+      var minYc = min.y - center.y;
+      var maxYc = max.y - center.y;
+      var heightWorld = (maxYc - minYc) * s;
+
+      var baseY = (-minYc) * s;
+      liftContainer.position.set(0, baseY, 0);
+
+      var verticalPad = 1.15;
+      var neededRadius = ((heightWorld * verticalPad) / 2) / Math.tan(camera.fov / 2);
+      camera.radius = neededRadius;
+      camera.lowerRadiusLimit = camera.radius;
+      camera.upperRadiusLimit = camera.radius;
+
+      var targetY = baseY + (heightWorld * 0.06);
+      camera.target = new BAB.Vector3(0, targetY, 0);
+    }
+
+    function loadGLB(url) {
+      if (!url) {
+        disposeCurrent();
+        if (glbCol) glbCol.style.display = 'none';
+        if (row) row.classList.add('sfp-only');
+        return;
+      }
+      if (url === currentUrl) return;
+      currentUrl = url;
+      if (spinner) spinner.style.display = 'block';
+      if (glbCol) glbCol.style.display = '';
+      if (row) row.classList.remove('sfp-only');
+      disposeCurrent();
+      var token = ++loadingToken;
+
+      var parts = url.split('/');
+      var file = parts.pop();
+      var rootUrl = parts.join('/') + '/';
+
+      BAB.SceneLoader.LoadAssetContainer(rootUrl, file, scene, function(container) {
+        if (token !== loadingToken) { container.dispose(); if (spinner) spinner.style.display = 'none'; return; }
+        assetContainer = container;
+        container.addAllToScene();
+        if (container.animationGroups && container.animationGroups.length) {
+          container.animationGroups.forEach(function(g){ try { g.stop(); } catch(e){} });
+        }
+
+        importRoot = new BAB.TransformNode("importRoot_"+sectionId, scene);
+        container.meshes.forEach(function(m){ if (!m.parent) m.parent = importRoot; });
+        container.transformNodes && container.transformNodes.forEach(function(n){ if (!n.parent) n.parent = importRoot; });
+        importRoot.parent = liftContainer;
+        importRoot.position.set(0,0,0);
+        importRoot.rotation.set(0,0,0);
+        importRoot.scaling.set(1,1,1);
+
+        normalizeAndFrame(importRoot);
+
+        if (spinObserver) { scene.onBeforeRenderObservable.remove(spinObserver); }
+        var startAngle = BAB.Tools.ToRadians(85);
+        var spinDuration = 9000;
+        var pause = 1200;
+        var initialDelay = 2000;
+        var cycle = spinDuration + pause;
+        var start = performance.now() + initialDelay;
+
+        importRoot.rotation.set(0, startAngle, 0);
+
+        spinObserver = scene.onBeforeRenderObservable.add(function () {
+          var elapsed = performance.now() - start;
+          if (elapsed < 0) {
+            importRoot.rotation.y = startAngle;
+            return;
+          }
+          var t = elapsed % cycle;
+          if (t <= spinDuration) {
+            var p = t / spinDuration;
+            var eased = p * p * (3 - 2 * p);
+            importRoot.rotation.y = startAngle + eased * Math.PI * 2;
+          } else {
+            importRoot.rotation.y = startAngle;
+          }
+        });
+
+        if (spinner) spinner.style.display = 'none';
+        sizeEngineToColumn();
+      }, null, function(){
+        if (spinner) spinner.style.display = 'none';
+      });
+    }
+
+    function handleVariantChange(variantId){
+      if (!variantId) return;
+      var id = String(variantId);
+      if (!glbMap.hasOwnProperty(id)) return;
+      var url = glbMap[id];
+      loadGLB(url);
+    }
+
+    window.addEventListener('buybox:variant-change', function(e){
+      var vid = e.detail && (e.detail.id || e.detail.variantId || e.detail.variant_id);
+      handleVariantChange(vid);
+    });
+    window.addEventListener('variant:change', function(e){
+      var v = e.detail && e.detail.variant;
+      if (v) handleVariantChange(v.id);
+    });
+
+    var initialId = canvas.getAttribute('data-variant-id');
+    if (initialId && glbMap[String(initialId)]) {
+      handleVariantChange(initialId);
+    } else {
+      disposeCurrent();
+      if (glbCol) glbCol.style.display = 'none';
+      if (row) row.classList.add('sfp-only');
+    }
+
+    engine.runRenderLoop(function(){ scene.render(); });
+    window.addEventListener('beforeunload', function(){ engine && engine.dispose(); });
+  })();
+});
+</script>
+
+<script>
+(function() {
+  var sectionId = '{{ _sid }}';
+  var combobox = document.getElementById('sfp-flavor-combobox-' + sectionId);
+  if (!combobox) return;
+
+  var trigger = document.getElementById('sfp-flavor-trigger-' + sectionId);
+  var panel = document.getElementById('sfp-flavor-panel-' + sectionId);
+  var triggerSwatch = document.getElementById('sfp-trigger-swatch-' + sectionId);
+  var triggerText = document.getElementById('sfp-trigger-text-' + sectionId);
+  var sfpImage = document.getElementById('sfp-image-' + sectionId);
+  var options = panel.querySelectorAll('.sfp-flavor-option');
+
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var isOpen = combobox.classList.contains('open');
+    combobox.classList.toggle('open');
+    trigger.setAttribute('aria-expanded', !isOpen);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!combobox.contains(e.target)) {
+      combobox.classList.remove('open');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  options.forEach(function(option) {
+    option.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var variantId = option.dataset.variantId;
+      var variantName = option.dataset.variantName;
+      var swatchUrl = option.dataset.swatchUrl;
+      var sfpUrl = option.dataset.sfpUrl;
+
+      options.forEach(function(opt) {
+        opt.classList.remove('active', 'currently-selected');
+        opt.style.display = '';
+      });
+      option.classList.add('active', 'currently-selected');
+      option.style.display = 'none';
+
+      triggerSwatch.src = swatchUrl;
+
+      var isAvailable = option.dataset.available === 'true';
+      if (isAvailable) {
+        trigger.classList.remove('out-of-stock');
+        triggerText.textContent = variantName;
+      } else {
+        trigger.classList.add('out-of-stock');
+        triggerText.textContent = variantName + ' – Out Of Stock';
+      }
+
+      if (sfpImage && sfpUrl) {
+        sfpImage.src = sfpUrl;
+      }
+
+      combobox.classList.remove('open');
+      trigger.setAttribute('aria-expanded', 'false');
+
+      updateBuyBox(variantId);
+
+      setTimeout(function () {
+        window.dispatchEvent(new CustomEvent('buybox:variant-change', {
+          detail: { id: variantId, variantId: variantId }
+        }));
+      }, 200);
+    });
+  });
+
+  function updateBuyBox(variantId) {
+    var buyboxOptions = document.querySelectorAll('.buybox-variant-option');
+    var targetOption = null;
+    buyboxOptions.forEach(function(opt) {
+      if (opt.dataset.variantId === variantId) targetOption = opt;
+    });
+    if (targetOption) {
+      targetOption.click();
+      if (window.updateStaticDisplay) {
+        window.updateStaticDisplay(
+          targetOption.dataset.variantName,
+          targetOption.dataset.swatchUrl,
+          targetOption.dataset.variantAvailable
+        );
+      }
+    }
+  }
+
+  window.addEventListener('buybox:variant-change', function(e) {
+    if (!e.detail) return;
+    var vid = String(e.detail.id || e.detail.variantId || e.detail.variant_id);
+    options.forEach(function(opt) {
+      if (opt.dataset.variantId === vid) {
+        triggerSwatch.src = opt.dataset.swatchUrl;
+        var isAvailable = opt.dataset.available === 'true';
+        if (isAvailable) {
+          trigger.classList.remove('out-of-stock');
+          triggerText.textContent = opt.dataset.variantName;
+        } else {
+          trigger.classList.add('out-of-stock');
+          triggerText.textContent = opt.dataset.variantName + ' – Out Of Stock';
+        }
+        if (sfpImage && opt.dataset.sfpUrl) {
+          sfpImage.src = opt.dataset.sfpUrl;
+        }
+        options.forEach(function(o) {
+          o.classList.remove('active', 'currently-selected');
+          o.style.display = '';
+        });
+        opt.classList.add('active', 'currently-selected');
+        opt.style.display = 'none';
+      }
+    });
+  });
+
+  window.addEventListener('variant:change', function(e) {
+    if (!e.detail || !e.detail.variant) return;
+    var vid = String(e.detail.variant.id);
+    options.forEach(function(opt) {
+      if (opt.dataset.variantId === vid) {
+        triggerSwatch.src = opt.dataset.swatchUrl;
+        var isAvailable = opt.dataset.available === 'true';
+        if (isAvailable) {
+          trigger.classList.remove('out-of-stock');
+          triggerText.textContent = opt.dataset.variantName;
+        } else {
+          trigger.classList.add('out-of-stock');
+          triggerText.textContent = opt.dataset.variantName + ' – Out Of Stock';
+        }
+        if (sfpImage && opt.dataset.sfpUrl) {
+          sfpImage.src = opt.dataset.sfpUrl;
+        }
+        options.forEach(function(o) {
+          o.classList.remove('active', 'currently-selected');
+          o.style.display = '';
+        });
+        opt.classList.add('active', 'currently-selected');
+        opt.style.display = 'none';
+      }
+    });
+  });
+
+  var currentlySelected = panel.querySelector('.sfp-flavor-option.currently-selected');
+  if (currentlySelected) {
+    var isAvailable = currentlySelected.dataset.available === 'true';
+    if (!isAvailable) {
+      trigger.classList.add('out-of-stock');
+      var currentText = triggerText.textContent;
+      if (currentText && !currentText.includes('Out Of Stock')) {
+        triggerText.textContent = currentText + ' – Out Of Stock';
+      }
+    }
+  }
+})();
+</script>
+
+
+{% schema %}
+{
+  "name": "Key Ingredients Block",
+  "class": "shopify-section-threed-ingredients",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Main Section Controls"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anchor Tag Value",
+      "info": "Add an anchor ID for linking to this section"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_series_colors",
+      "label": "Use Dynamic Product Series Colors Globally in Section",
+      "default": true,
+      "info": "When enabled, colors will be pulled from the Product Series metaobject"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_grunge_borders",
+      "label": "Show Grunge Borders",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "prev_section_has_grunge",
+      "label": "Previous Section Has Grunge Borders",
+      "default": false,
+      "info": "Enable if the section above has grunge borders. Adds top padding to compensate."
+    },
+    {
+      "type": "checkbox",
+      "id": "next_section_has_grunge",
+      "label": "Next Section Has Grunge Borders",
+      "default": false,
+      "info": "Enable if the section below has grunge borders. Adds bottom padding to compensate."
+    },
+    {
+      "type": "checkbox",
+      "id": "both_adjacent_grunge",
+      "label": "Both Adjacent Sections Have Grunge Borders",
+      "default": false,
+      "info": "Enable if BOTH sections above AND below have grunge borders. Adds padding to top and bottom."
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_mobile",
+      "label": "Hide on Mobile",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "section_z_index",
+      "label": "Section Z-Index (Layer Order)",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 2,
+      "info": "Controls stacking order. Higher numbers appear on top and bottom. Adjust if grunge borders overlap incorrectly."
+    },
+    {
+      "type": "range",
+      "id": "section_max_width",
+      "label": "Section Max Width (px)",
+      "min": 1000,
+      "max": 2000,
+      "step": 50,
+      "default": 1900,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "container_max_width",
+      "label": "Container Max Width (px)",
+      "min": 1000,
+      "max": 1600,
+      "step": 50,
+      "default": 1400,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Section Header"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_section_title",
+      "label": "Show Section Title",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "Key Ingredients"
+    },
+    {
+      "type": "richtext",
+      "id": "section_description",
+      "label": "Section Description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_key_ingredients",
+      "label": "Show Key Ingredients Accordion",
+      "default": true,
+      "info": "Toggle to show or hide the key ingredients accordion section"
+    },
+    {
+      "type": "header",
+      "content": "Grunge Borders"
+    },
+    {
+      "type": "select",
+      "id": "grunge_border_color_source",
+      "label": "Grunge Border Color",
+      "default": "accent_1",
+      "options": [
+        {
+          "value": "featured",
+          "label": "Featured (5150:Red, Kill It:Gold, CT:Red)"
+        },
+        {
+          "value": "accent_1",
+          "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)"
+        },
+        {
+          "value": "accent_2",
+          "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)"
+        },
+        {
+          "value": "accent_3",
+          "label": "Accent 3 (All:Black)"
+        }
+      ],
+      "info": "Color tint for grunge border SVG"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_grunge_as_bg",
+      "label": "Use Grunge Border Color as Section Background",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_top_grunge",
+      "label": "Show Top Grunge Border",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "top_grunge_image",
+      "label": "Top Grunge Border Image"
+    },
+    {
+      "type": "range",
+      "id": "top_grunge_height_mobile",
+      "label": "Top Grunge Height (Mobile)",
+      "min": 20,
+      "max": 300,
+      "step": 4,
+      "default": 52,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "top_grunge_height_desktop",
+      "label": "Top Grunge Height (Desktop)",
+      "min": 20,
+      "max": 300,
+      "step": 4,
+      "default": 52,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "top_grunge_offset_mobile",
+      "label": "Top Grunge Offset (Mobile)",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "default": -40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "top_grunge_offset_desktop",
+      "label": "Top Grunge Offset (Desktop)",
+      "min": -300,
+      "max": 300,
+      "step": 10,
+      "default": -50,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_grunge",
+      "label": "Show Bottom Grunge Border",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "bottom_grunge_image",
+      "label": "Bottom Grunge Border Image"
+    },
+    {
+      "type": "range",
+      "id": "bottom_grunge_height",
+      "label": "Bottom Grunge Height",
+      "min": 20,
+      "max": 300,
+      "step": 4,
+      "default": 64,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "bottom_grunge_offset",
+      "label": "Bottom Grunge Offset",
+      "min": -300,
+      "max": 300,
+      "step": 10,
+      "default": -50,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding/Margins"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_desktop",
+      "label": "Margin Top (Desktop)",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_desktop",
+      "label": "Margin Bottom (Desktop)",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin Top (Mobile)",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin Bottom (Mobile)",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Padding Top (Desktop)",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "default": 60,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "label": "Padding Bottom (Desktop)",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "default": 60,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding Top (Mobile)",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding Bottom (Mobile)",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Fallback Colors (When No Series Detected)"
+    },
+    {
+      "type": "paragraph",
+      "content": "These colors are only used when a product has no series assigned."
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Featured/Hero Color",
+      "default": "#AE1F24"
+    },
+    {
+      "type": "color",
+      "id": "fallback_accent_1",
+      "label": "Accent 1 Light",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "fallback_accent_2",
+      "label": "Accent 2 Neutral",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "fallback_accent_3",
+      "label": "Accent 3 Dark",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Default Text Color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Key Ingredients Block"
+    }
+  ]
+}
+{% endschema %}

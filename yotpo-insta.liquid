@@ -1,0 +1,375 @@
+{% assign _sid = section.id %}
+
+{%- assign is_apparel_or_gear = false -%}
+{%- assign product_type_lower = product.type | downcase -%}
+{%- if product_type_lower contains 'apparel' or product_type_lower contains 'gear' or product_type_lower contains 'clothing' or product.tags contains 'apparel' or product.tags contains 'gear' -%}
+  {%- assign is_apparel_or_gear = true -%}
+{%- endif -%}
+
+{%- if section.settings.use_series_colors -%}
+  {%- assign sfp_list = product.metafields.custom.sfp_section.value -%}
+  {%- assign sfp_section = sfp_list | first -%}
+  {%- assign product_series = sfp_section.series.value -%}
+
+  {%- if product_series -%}
+    {%- assign series_handle = product_series.handle -%}
+    {%- if series_handle == blank -%}
+      {%- assign series_name_lower = product_series.series_name | downcase | replace: ' ', '-' -%}
+      {%- assign series_handle = series_name_lower -%}
+    {%- endif -%}
+    {%- assign featured_color = product_series.template_specific_dynamic_featured_color | default: section.settings.bg_color -%}
+    {%- assign accent_colors = product_series.template_specific_accent_color_s -%}
+    {%- assign accent_1 = accent_colors[0] | default: section.settings.fallback_accent_1 -%}
+    {%- assign accent_2 = accent_colors[1] | default: section.settings.fallback_accent_2 -%}
+    {%- assign accent_3 = accent_colors[2] | default: section.settings.fallback_accent_3 -%}
+  {%- else -%}
+    {%- assign series_handle = '' -%}
+    {%- assign featured_color = section.settings.bg_color -%}
+    {%- assign accent_1 = section.settings.fallback_accent_1 -%}
+    {%- assign accent_2 = section.settings.fallback_accent_2 -%}
+    {%- assign accent_3 = section.settings.fallback_accent_3 -%}
+  {%- endif -%}
+{%- else -%}
+  {%- assign series_handle = '' -%}
+  {%- assign featured_color = section.settings.bg_color -%}
+  {%- assign accent_1 = section.settings.fallback_accent_1 -%}
+  {%- assign accent_2 = section.settings.fallback_accent_2 -%}
+  {%- assign accent_3 = section.settings.fallback_accent_3 -%}
+{%- endif -%}
+
+{%- comment -%}Override with Flagship colors for apparel/gear products{%- endcomment -%}
+{%- if is_apparel_or_gear -%}
+  {%- assign series_handle = 'flagship-series' -%}
+  {%- assign featured_color = '#AE1F24' -%}
+  {%- assign accent_1 = '#FFFFFF' -%}
+  {%- assign accent_2 = '#999999' -%}
+  {%- assign accent_3 = '#000000' -%}
+{%- endif -%}
+
+{%- if section.settings.text_color_source and section.settings.text_color_source != blank -%}
+  {%- case section.settings.text_color_source -%}
+    {%- when 'featured' -%}{%- assign dynamic_text_color = featured_color -%}
+    {%- when 'accent_1' -%}{%- assign dynamic_text_color = accent_1 -%}
+    {%- when 'accent_2' -%}{%- assign dynamic_text_color = accent_2 -%}
+    {%- when 'accent_3' -%}{%- assign dynamic_text_color = accent_3 -%}
+    {%- else -%}{%- assign dynamic_text_color = section.settings.text_color -%}
+  {%- endcase -%}
+{%- else -%}
+  {%- assign dynamic_text_color = section.settings.text_color -%}
+{%- endif -%}
+
+{%- if section.settings.underline_color_source and section.settings.underline_color_source != blank -%}
+  {%- case section.settings.underline_color_source -%}
+    {%- when 'featured' -%}{%- assign underline_color = featured_color -%}
+    {%- when 'accent_1' -%}{%- assign underline_color = accent_1 -%}
+    {%- when 'accent_2' -%}{%- assign underline_color = accent_2 -%}
+    {%- when 'accent_3' -%}{%- assign underline_color = accent_3 -%}
+    {%- else -%}{%- assign underline_color = featured_color -%}
+  {%- endcase -%}
+{%- else -%}
+  {%- assign underline_color = featured_color -%}
+{%- endif -%}
+
+{%- case section.settings.grunge_border_color_source -%}
+  {%- when 'featured' -%}{%- assign grunge_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign grunge_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign grunge_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign grunge_color = accent_3 -%}
+  {%- else -%}{%- assign grunge_color = featured_color -%}
+{%- endcase -%}
+{%- assign grunge_color = grunge_color | default: section.settings.fallback_accent_1 -%}
+
+{%- if section.settings.use_grunge_as_bg -%}
+  {%- assign section_bg_color = grunge_color -%}
+{%- elsif section.settings.section_bg_color and section.settings.section_bg_color != blank -%}
+  {%- assign section_bg_color = section.settings.section_bg_color -%}
+{%- else -%}
+  {%- assign section_bg_color = section.settings.bg_color -%}
+{%- endif -%}
+
+{% unless product.metafields.meta.instagram_feed == blank %}
+  {% if section.settings.anchor_id != blank %}<a name="{{ section.settings.anchor_id }}"></a>{% endif %}
+  <section id="five-nation-{{ _sid }}" class="fivenation-section section-{{ _sid }}{% if section.settings.hide_on_mobile %} hide_mobile{% endif %}{% if series_handle == 'core-series' %} is-core-series{% endif %}">
+    <style>
+      #five-nation-{{ _sid }}{
+        --bg: {{ section_bg_color }};
+        --text: {{ dynamic_text_color }};
+        --series-bg: {{ underline_color }};
+        --featured: {{ featured_color }};
+        --series-featured-color: {{ featured_color }};
+        --accent-1: {{ accent_1 }};
+        --accent-2: {{ accent_2 }};
+        --accent-3: {{ accent_3 }};
+        --pl: {{ section.settings.padding_left_desktop | default: 0 }}px;
+        --pr: {{ section.settings.padding_right_desktop | default: 0 }}px;
+        --pl_m: {{ section.settings.padding_left_mobile | default: 0 }}px;
+        --pr_m: {{ section.settings.padding_right_mobile | default: 0 }}px;
+        background: var(--bg);
+        color: var(--text);
+        position: relative;
+        z-index: {{ section.settings.section_z_index | default: 2 }};
+      }
+
+      #five-nation-{{ _sid }} button.yotpo-hover-cta {
+        background: var(--series-featured-color) !important;
+        font-family: 'Gunplay Regular' !important;
+        font-weight: unset !important;
+        text-transform: uppercase !important;
+        color: var(--bg) !important;
+      }
+      
+      #five-nation-{{ _sid }}.is-core-series button.yotpo-hover-cta {
+        color: var(--accent-3) !important;
+      }
+      
+      @media (max-width: 767px) {
+        #five-nation-{{ _sid }} {
+          {% if section.settings.show_grunge_borders %}
+          padding-top: {{ section.settings.padding_top_mobile }}px;
+          padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+          {% else %}
+            {% if section.settings.both_sections_have_grunge %}
+            padding-top: calc({{ section.settings.padding_top_mobile }}px + 50px);
+            padding-bottom: calc({{ section.settings.padding_bottom_mobile }}px + 50px);
+            {% else %}
+              {% if section.settings.previous_section_has_grunge %}
+              padding-top: calc({{ section.settings.padding_top_mobile }}px + 50px);
+              {% else %}
+              padding-top: 0px;
+              {% endif %}
+              {% if section.settings.next_section_has_grunge %}
+              padding-bottom: calc({{ section.settings.padding_bottom_mobile }}px + 50px);
+              {% else %}
+              padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          margin-top: {{ section.settings.margin_top_mobile }}px;
+          margin-bottom: {{ section.settings.margin_bottom_mobile }}px;
+        }
+      }
+      
+      @media (min-width: 768px) {
+        #five-nation-{{ _sid }} {
+          {% if section.settings.show_grunge_borders %}
+          padding-top: {{ section.settings.padding_top_desktop }}px;
+          padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+          {% else %}
+            {% if section.settings.both_sections_have_grunge %}
+            padding-top: calc({{ section.settings.padding_top_desktop }}px + 90px);
+            padding-bottom: calc({{ section.settings.padding_bottom_desktop }}px + 90px);
+            {% else %}
+              {% if section.settings.previous_section_has_grunge %}
+              padding-top: calc({{ section.settings.padding_top_desktop }}px + 90px);
+              {% else %}
+              padding-top: 0px;
+              {% endif %}
+              {% if section.settings.next_section_has_grunge %}
+              padding-bottom: calc({{ section.settings.padding_bottom_desktop }}px + 90px);
+              {% else %}
+              padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          margin-top: {{ section.settings.margin_top_desktop }}px;
+          margin-bottom: {{ section.settings.margin_bottom_desktop }}px;
+        }
+      }
+      #five-nation-{{ _sid }} .t-center{ text-align:center }
+      #five-nation-{{ _sid }} .text-uppercase{ text-transform:uppercase }
+      #five-nation-{{ _sid }} .product-h2{ font-size:1.5rem; line-height:34px; font-family:'Gunplay' }
+      #five-nation-{{ _sid }} .full-underline{ padding-left:30px; padding-right:30px; display:inline-block }
+      #five-nation-{{ _sid }} .full-underline:before {
+        background-color: var(--series-bg) !important;
+      }
+      #five-nation-{{ _sid }} .product-h2 {
+        margin-bottom: {{ section.settings.header_spacing_mobile }}px;
+      }
+      @media (min-width: 768px) {
+        #five-nation-{{ _sid }} .product-h2 {
+          margin-bottom: {{ section.settings.header_spacing_desktop }}px;
+        }
+      }
+      #five-nation-{{ _sid }} .instagram-links{ font-size:16px; line-height:26px; font-family:Acumin-Pro; margin-top:5px; margin-bottom:5px; text-transform:lowercase }
+      #five-nation-{{ _sid }} .fivenation-gallery{ padding-left:var(--pl); padding-right:var(--pr); position:relative; z-index:2 }
+      {% if section.settings.show_grunge_borders and section.settings.show_before %}
+      #five-nation-{{ _sid }}::before{
+        content:"";
+        position:absolute;
+        left:50%;
+        transform:translateX(-50%);
+        width:100vw;
+        {% if section.settings.before_image %}
+        background-color: {{ grunge_color }};
+        -webkit-mask-image: url({{ section.settings.before_image | img_url: 'master' }});
+        mask-image: url({{ section.settings.before_image | img_url: 'master' }});
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: cover;
+        mask-size: cover;
+        -webkit-mask-position: center;
+        mask-position: center;
+        {% endif %}
+        top: {{ section.settings.before_offset_top_mobile }}px;
+        height: {{ section.settings.before_height_mobile }}px;
+        z-index: 0;
+        display:block;
+      }
+      {% endif %}
+      {% if section.settings.show_grunge_borders and section.settings.show_after %}
+      #five-nation-{{ _sid }}::after{
+        content:"";
+        position:absolute;
+        left:50%;
+        transform:translateX(-50%);
+        width:100vw;
+        {% if section.settings.after_image %}
+        background-color: {{ grunge_color }};
+        -webkit-mask-image: url({{ section.settings.after_image | img_url: 'master' }});
+        mask-image: url({{ section.settings.after_image | img_url: 'master' }});
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: cover;
+        mask-size: cover;
+        -webkit-mask-position: center;
+        mask-position: center;
+        {% endif %}
+        bottom: {{ section.settings.after_offset_bottom }}px;
+        height: {{ section.settings.after_height }}px;
+        z-index: 0;
+        display:block;
+      }
+      {% endif %}
+      @media screen and (max-width:1024px){
+        #five-nation-{{ _sid }} .product-h2{ font-size:1.5rem }
+        #five-nation-{{ _sid }} .fivenation-gallery{ padding-left:var(--pl_m); padding-right:var(--pr_m) }
+      }
+      @media screen and (min-width:1025px){
+        #five-nation-{{ _sid }} .product-h2{ font-size:2rem }
+      }
+      {% if section.settings.show_grunge_borders and section.settings.show_before %}
+      @media (min-width:768px){
+        #five-nation-{{ _sid }}::before{
+          top: {{ section.settings.before_offset_top_desktop }}px;
+          height: {{ section.settings.before_height_desktop }}px;
+        }
+      }
+      {% endif %}
+    </style>
+
+    {% if section.settings.enable_header %}
+      <div class="text-uppercase product-h2 t-center">
+        {% if section.settings.enable_full_underline %}
+          <div class="full-underline" style="text-align:center!important;">
+            {{ section.settings.header_richtext }}
+            {% if section.settings.subheader_richtext != blank %}
+              <div class="t-center instagram-links">{{ section.settings.subheader_richtext }}</div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div style="text-align:center!important;">
+            {{ section.settings.header_richtext }}
+            {% if section.settings.subheader_richtext != blank %}
+              <div class="t-center instagram-links">{{ section.settings.subheader_richtext }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="fivenation-gallery">
+      <div class="yotpo yotpo-pictures-widget" data-gallery-id="{{ section.settings.gallery_id }}" data-product-id="{{ product.id }}"></div>
+    </div>
+  </section>
+{% endunless %}
+
+{% schema %}
+{
+  "name": "Five Nation / Instagram",
+  "tag": "section",
+  "class": "section-five-nation",
+  "settings": [
+    { "type": "header", "content": "Main Section Controls" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor Tag Value", "info": "Add an anchor ID for linking to this section", "default": "5NationSection" },
+    { "type": "checkbox", "id": "use_series_colors", "label": "Use Dynamic Product Series Colors Globally In Section", "default": true, "info": "When enabled, colors will be pulled from the Product Series metaobject" },
+    { "type": "checkbox", "id": "show_grunge_borders", "label": "Show Grunge Borders", "default": true, "info": "Master toggle for all grunge borders. When disabled, top and bottom grunge borders will be hidden." },
+    { "type": "checkbox", "id": "previous_section_has_grunge", "label": "Previous Section Has Grunge Borders", "default": false, "info": "Enable if the section above has grunge borders. Adds top padding to compensate." },
+    { "type": "checkbox", "id": "next_section_has_grunge", "label": "Next Section Has Grunge Borders", "default": false, "info": "Enable if the section below has grunge borders. Adds bottom padding to compensate." },
+    { "type": "checkbox", "id": "both_sections_have_grunge", "label": "Both Adjacent Sections Have Grunge Borders", "default": false, "info": "Enable if BOTH sections above AND below have grunge borders. Adds padding to top and bottom." },
+    { "type": "checkbox", "id": "hide_on_mobile", "label": "Hide on Mobile", "default": false },
+    { "type": "range", "id": "section_z_index", "label": "Section Z-Index (Layer Order)", "min": 1, "max": 100, "step": 1, "default": 2, "info": "Controls stacking order. Higher numbers appear on top. Adjust if grunge borders overlap incorrectly." },
+    { "type": "checkbox", "id": "enable_header", "label": "Show Header", "default": true },
+    { "type": "checkbox", "id": "enable_full_underline", "label": "Enable Full Underline Style", "default": true },
+    { "type": "range", "id": "header_spacing_desktop", "label": "Header Bottom Spacing (Desktop)", "min": 0, "max": 100, "step": 2, "default": 40, "unit": "px", "info": "Space between header and content below" },
+    { "type": "range", "id": "header_spacing_mobile", "label": "Header Bottom Spacing (Mobile)", "min": 0, "max": 100, "step": 2, "default": 30, "unit": "px", "info": "Space between header and content below" },
+    
+    { "type": "header", "content": "Content Settings" },
+    { "type": "richtext", "id": "header_richtext", "label": "Header Text (Supports Links)", "default": "<p>5% Nation</p>" },
+    { "type": "richtext", "id": "subheader_richtext", "label": "Subheader Text (Supports Links)", "default": "<p><a href=\"https://www.instagram.com/explore/tags/5percentnutrition/\">#5percentnutrition</a> | <a href=\"https://www.instagram.com/5percentnutrition/\">@5percentnutrition</a></p>" },
+    { "type": "text", "id": "gallery_id", "label": "Yotpo Gallery ID", "default": "5d121d537c86290007f506e5" },
+    
+    { "type": "header", "content": "Color Controls (Optional)" },
+    { "type": "paragraph", "content": "Leave blank to use dynamic series colors." },
+    { "type": "color", "id": "section_bg_color", "label": "Section Background Color (Optional)", "info": "Leave blank to use grunge color or default background" },
+    { "type": "color", "id": "bg_color", "label": "Background Color", "default": "#ffffff" },
+    { "type": "select", "id": "text_color_source", "label": "Text Color Source", "default": "custom", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Core Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" },
+      { "value": "custom", "label": "Custom (Use Text Color Below)" }
+    ], "info": "Choose which series color to use for text" },
+    { "type": "color", "id": "text_color", "label": "Text Color", "default": "#000000" },
+    { "type": "select", "id": "underline_color_source", "label": "Header Underline Color Source", "default": "featured", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ], "info": "Choose which series color to use for header underline" },
+    
+    { "type": "header", "content": "Section Padding/Margins" },
+    { "type": "range", "id": "margin_top_desktop", "label": "Margin Top (Desktop)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_bottom_desktop", "label": "Margin Bottom (Desktop)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_top_mobile", "label": "Margin Top (Mobile)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_bottom_mobile", "label": "Margin Bottom (Mobile)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "padding_top_desktop", "label": "Padding Top (Desktop)", "min": 0, "max": 200, "step": 2, "default": 36, "unit": "px" },
+    { "type": "range", "id": "padding_bottom_desktop", "label": "Padding Bottom (Desktop)", "min": 0, "max": 200, "step": 2, "default": 36, "unit": "px" },
+    { "type": "range", "id": "padding_top_mobile", "label": "Padding Top (Mobile)", "min": 0, "max": 200, "step": 2, "default": 36, "unit": "px" },
+    { "type": "range", "id": "padding_bottom_mobile", "label": "Padding Bottom (Mobile)", "min": 0, "max": 200, "step": 2, "default": 36, "unit": "px" },
+    
+    { "type": "header", "content": "Gallery Padding" },
+    { "type": "range", "id": "padding_left_desktop", "label": "Left Padding Desktop (px)", "min": 0, "max": 200, "step": 2, "default": 0 },
+    { "type": "range", "id": "padding_right_desktop", "label": "Right Padding Desktop (px)", "min": 0, "max": 200, "step": 2, "default": 0 },
+    { "type": "range", "id": "padding_left_mobile", "label": "Left Padding Mobile (px)", "min": 0, "max": 100, "step": 2, "default": 16 },
+    { "type": "range", "id": "padding_right_mobile", "label": "Right Padding Mobile (px)", "min": 0, "max": 100, "step": 2, "default": 16 },
+    
+    { "type": "header", "content": "Grunge Borders" },
+    { "type": "select", "id": "grunge_border_color_source", "label": "Grunge Border Color", "default": "featured", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ], "info": "Color tint for grunge border SVG" },
+    { "type": "checkbox", "id": "use_grunge_as_bg", "label": "Use Grunge Border Color as Section Background", "default": false, "info": "When enabled, section background will match the grunge border color" },
+    { "type": "checkbox", "id": "show_before", "label": "Show Top Grunge Border", "default": false },
+    { "type": "image_picker", "id": "before_image", "label": "Top Grunge Border Image" },
+    { "type": "range", "id": "before_height_mobile", "label": "Top Grunge Border Height (Mobile)", "min": 20, "max": 300, "step": 4, "default": 52, "unit": "px" },
+    { "type": "range", "id": "before_height_desktop", "label": "Top Grunge Border Height (Desktop)", "min": 20, "max": 300, "step": 4, "default": 52, "unit": "px" },
+    { "type": "range", "id": "before_offset_top_mobile", "label": "Top Grunge Border Offset (Mobile)", "min": -200, "max": 200, "step": 4, "default": -40, "unit": "px" },
+    { "type": "range", "id": "before_offset_top_desktop", "label": "Top Grunge Border Offset (Desktop)", "min": -300, "max": 300, "step": 10, "default": -50, "unit": "px" },
+    { "type": "checkbox", "id": "show_after", "label": "Show Bottom Grunge Border", "default": false },
+    { "type": "image_picker", "id": "after_image", "label": "Bottom Grunge Border Image" },
+    { "type": "range", "id": "after_height", "label": "Bottom Grunge Border Height", "min": 20, "max": 300, "step": 4, "default": 64, "unit": "px" },
+    { "type": "range", "id": "after_offset_bottom", "label": "Bottom Grunge Border Offset", "min": -300, "max": 300, "step": 10, "default": -50, "unit": "px" },
+    
+    { "type": "header", "content": "Fallback Colors (When No Series Detected)" },
+    { "type": "paragraph", "content": "These colors are only used when a product has no series assigned. Normally, colors are pulled automatically from the product's series metaobject." },
+    { "type": "color", "id": "fallback_accent_1", "label": "Accent 1 Light (White/White/Lt Grey)", "default": "#FFFFFF", "info": "WL: Flagship White #FFFFFF | Core: Core White #FFFFFF | Code Red: CR Light Grey #CECECE" },
+    { "type": "color", "id": "fallback_accent_2", "label": "Accent 2 Neutral (Grey/Dk Grey/Grey)", "default": "#999999", "info": "WL: Flagship Grey #999999 | Core: Core Grey #585A5C | Code Red: CR Grey #BCBCBC" },
+    { "type": "color", "id": "fallback_accent_3", "label": "Accent 3 Dark (Black)", "default": "#000000", "info": "All Series: #000000 - Used for text, shadows, and dark backgrounds" }
+  ],
+  "presets": [
+    { "name": "Five Nation / Instagram" }
+  ]
+}
+{% endschema %}

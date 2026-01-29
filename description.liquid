@@ -1,0 +1,1298 @@
+{% assign _sid = section.id %}
+{%- if section.settings.use_series_colors -%}
+  {%- assign sfp_list = product.metafields.custom.sfp_section.value -%}
+  {%- assign sfp_section = sfp_list | first -%}
+  {%- assign product_series = sfp_section.series.value -%}
+
+  {%- if product_series -%}
+    {%- assign featured_color = product_series.template_specific_dynamic_featured_color | default: section.settings.bg_color -%}
+    {%- assign accent_colors = product_series.template_specific_accent_color_s -%}
+    {%- assign accent_1 = accent_colors[0] | default: section.settings.fallback_accent_1 -%}
+    {%- assign accent_2 = accent_colors[1] | default: section.settings.fallback_accent_2 -%}
+    {%- assign accent_3 = accent_colors[2] | default: section.settings.fallback_accent_3 -%}
+  {%- else -%}
+    {%- assign featured_color = section.settings.bg_color -%}
+    {%- assign accent_1 = section.settings.fallback_accent_1 -%}
+    {%- assign accent_2 = section.settings.fallback_accent_2 -%}
+    {%- assign accent_3 = section.settings.fallback_accent_3 -%}
+  {%- endif -%}
+{%- else -%}
+  {%- assign featured_color = section.settings.bg_color -%}
+  {%- assign accent_1 = section.settings.fallback_accent_1 -%}
+  {%- assign accent_2 = section.settings.fallback_accent_2 -%}
+  {%- assign accent_3 = section.settings.fallback_accent_3 -%}
+{%- endif -%}
+
+{%- comment -%}Set grunge border color{%- endcomment -%}
+{%- case section.settings.grunge_border_color_source -%}
+  {%- when 'featured' -%}{%- assign grunge_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign grunge_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign grunge_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign grunge_color = accent_3 -%}
+  {%- else -%}{%- assign grunge_color = accent_1 -%}
+{%- endcase -%}
+{%- assign grunge_color = grunge_color | default: section.settings.fallback_accent_1 -%}
+
+{%- comment -%}Use grunge color as default bg if enabled{%- endcomment -%}
+{%- if section.settings.use_grunge_as_bg -%}
+  {%- assign featured_color = grunge_color -%}
+{%- endif -%}
+
+{%- case section.settings.accordion_bg_color_source -%}
+  {%- when 'featured' -%}{%- assign accordion_bg = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_bg = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_bg = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_bg = accent_3 -%}
+  {%- else -%}{%- assign accordion_bg = accent_3 -%}
+{%- endcase -%}
+{%- assign accordion_bg = accordion_bg | default: section.settings.fallback_accent_3 -%}
+
+{%- case section.settings.accordion_expanded_tab_bg_color_source -%}
+  {%- when 'featured' -%}{%- assign accordion_expanded_tab_bg = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_expanded_tab_bg = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_expanded_tab_bg = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_expanded_tab_bg = accent_3 -%}
+  {%- else -%}{%- assign accordion_expanded_tab_bg = accent_1 -%}
+{%- endcase -%}
+{%- assign accordion_expanded_tab_bg = accordion_expanded_tab_bg | default: section.settings.fallback_accent_1 -%}
+
+{%- case section.settings.accordion_expanded_bg_color_source -%}
+  {%- when 'featured' -%}{%- assign accordion_expanded_bg = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_expanded_bg = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_expanded_bg = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_expanded_bg = accent_3 -%}
+  {%- else -%}{%- assign accordion_expanded_bg = accent_1 -%}
+{%- endcase -%}
+{%- assign accordion_expanded_bg = accordion_expanded_bg | default: section.settings.fallback_accent_1 -%}
+
+{%- case section.settings.accordion_expanded_border_color_source -%}
+  {%- when 'featured' -%}{%- assign accordion_border_expanded = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_border_expanded = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_border_expanded = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_border_expanded = accent_3 -%}
+  {%- else -%}{%- assign accordion_border_expanded = accordion_border -%}
+{%- endcase -%}
+{%- assign accordion_border_expanded = accordion_border_expanded | default: section.settings.fallback_accent_1 -%}
+
+
+{%- case section.settings.accordion_icon_color_source -%}
+  {%- when 'featured' -%}{%- assign accordion_icon = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_icon = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_icon = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_icon = accent_3 -%}
+  {%- else -%}{%- assign accordion_icon = accent_2 -%}
+{%- endcase -%}
+{%- assign accordion_icon = accordion_icon | default: section.settings.fallback_accent_2 -%}
+
+{%- case section.settings.accordion_border_color_source -%}
+  {%- when 'featured' -%}{%- assign accordion_border = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_border = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_border = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_border = accent_3 -%}
+  {%- else -%}{%- assign accordion_border = accent_1 -%}
+{%- endcase -%}
+{%- assign accordion_border = accordion_border | default: section.settings.fallback_accent_1 -%}
+
+{%- case section.settings.accordion_tab_font_color_source -%}
+  {%- when 'text_default' -%}{%- assign accordion_text_color = section.settings.text_color -%}
+  {%- when 'featured' -%}{%- assign accordion_text_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_text_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_text_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_text_color = accent_3 -%}
+  {%- else -%}{%- assign accordion_text_color = section.settings.text_color -%}
+{%- endcase -%}
+{%- assign accordion_text_color = accordion_text_color | default: section.settings.text_color -%}
+
+{%- case section.settings.accordion_expanded_font_color_source -%}
+  {%- when 'text_default' -%}{%- assign accordion_expanded_font_color = section.settings.text_color -%}
+  {%- when 'featured' -%}{%- assign accordion_expanded_font_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_expanded_font_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_expanded_font_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_expanded_font_color = accent_3 -%}
+  {%- else -%}{%- assign accordion_expanded_font_color = section.settings.text_color -%}
+{%- endcase -%}
+{%- assign accordion_expanded_font_color = accordion_expanded_font_color | default: section.settings.text_color -%}
+
+{%- case section.settings.button_border_color_source -%}
+  {%- when 'featured' -%}{%- assign button_border_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign button_border_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign button_border_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign button_border_color = accent_3 -%}
+  {%- else -%}{%- assign button_border_color = accent_1 -%}
+{%- endcase -%}
+
+{%- case section.settings.button_bg_color_source -%}
+  {%- when 'transparent' -%}{%- assign button_bg_color = 'transparent' -%}
+  {%- when 'featured' -%}{%- assign button_bg_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign button_bg_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign button_bg_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign button_bg_color = accent_3 -%}
+  {%- else -%}{%- assign button_bg_color = 'transparent' -%}
+{%- endcase -%}
+
+{%- case section.settings.button_font_color_source -%}
+  {%- when 'text_default' -%}{%- assign button_font_color = section.settings.text_color -%}
+  {%- when 'featured' -%}{%- assign button_font_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign button_font_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign button_font_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign button_font_color = accent_3 -%}
+  {%- else -%}{%- assign button_font_color = accent_1 -%}
+{%- endcase -%}
+
+<section id="description-{{ _sid }}" class="description-section section-{{ _sid }}">
+<style>
+  #description-{{ _sid }}{
+    --bg: {{ featured_color | default: section.settings.bg_color }};
+    --text: {{ section.settings.text_color }};
+    --accent-1: {{ accent_1 }};
+    --accent-2: {{ accent_2 }};
+    --accent-3: {{ accent_3 }};
+    --acc-bg: {{ accordion_bg | default: section.settings.fallback_accent_3 }};
+    --acc-bg-hover: color-mix(in srgb, var(--acc-bg), white 10%);
+    --acc-tab-bg-expanded: {{ accordion_expanded_tab_bg | default: section.settings.fallback_accent_1 }};
+    --acc-bg-expanded: {{ accordion_expanded_bg | default: section.settings.fallback_accent_1 }};
+    --acc-text: {{ accordion_text_color | default: section.settings.text_color }};
+    --acc-text-expanded: {{ accordion_expanded_font_color | default: section.settings.text_color }};
+    --acc-icon: {{ accordion_icon | default: section.settings.fallback_accent_2 }};
+    --acc-border: var(--acc-bg);
+    --acc-border-expanded: {{ accordion_border_expanded | default: section.settings.fallback_accent_1 }};
+    --anim-ms: 320ms;
+    background: var(--bg);
+    color: var(--text);
+    position: relative;
+    isolation: isolate;
+    z-index: 2;
+  }
+  
+  @media (max-width: 767px) {
+    #description-{{ _sid }} {
+      {% if section.settings.show_grunge_borders %}
+      padding-top: {{ section.settings.padding_top_mobile }}px;
+      padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+      {% else %}
+        {% if section.settings.both_sections_have_grunge %}
+        padding-top: calc({{ section.settings.padding_top_mobile }}px + 50px);
+        padding-bottom: calc({{ section.settings.padding_bottom_mobile }}px + 50px);
+        {% else %}
+          {% if section.settings.previous_section_has_grunge %}
+          padding-top: calc({{ section.settings.padding_top_mobile }}px + 50px);
+          {% else %}
+          padding-top: 0px;
+          {% endif %}
+          {% if section.settings.next_section_has_grunge %}
+          padding-bottom: calc({{ section.settings.padding_bottom_mobile }}px + 50px);
+          {% else %}
+          padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+          {% endif %}
+        {% endif %}
+      {% endif %}
+      margin-top: {{ section.settings.margin_top_mobile }}px;
+      margin-bottom: {{ section.settings.margin_bottom_mobile }}px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    #description-{{ _sid }} {
+      {% if section.settings.show_grunge_borders %}
+      padding-top: {{ section.settings.padding_top_desktop }}px;
+      padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+      {% else %}
+        {% if section.settings.both_sections_have_grunge %}
+        padding-top: calc({{ section.settings.padding_top_desktop }}px + 90px);
+        padding-bottom: calc({{ section.settings.padding_bottom_desktop }}px + 90px);
+        {% else %}
+          {% if section.settings.previous_section_has_grunge %}
+          padding-top: calc({{ section.settings.padding_top_desktop }}px + 90px);
+          {% else %}
+          padding-top: 0px;
+          {% endif %}
+          {% if section.settings.next_section_has_grunge %}
+          padding-bottom: calc({{ section.settings.padding_bottom_desktop }}px + 90px);
+          {% else %}
+          padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+          {% endif %}
+        {% endif %}
+      {% endif %}
+      margin-top: {{ section.settings.margin_top_desktop }}px;
+      margin-bottom: {{ section.settings.margin_bottom_desktop }}px;
+    }
+  }
+
+  #description-{{ _sid }} strong.featured-text {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    font-size: 1.5em;
+    font-family: 'Gunplay-Regular';
+    line-height: initial;
+    text-align: left;
+    font-weight: unset;
+  }
+  #description-{{ _sid }} strong.featured-text + p.sub-paragraph {
+    margin-top: 0.25rem;
+  }
+  #description-{{ _sid }} .product-description-text p {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  #description-{{ _sid }} .product-description-text sup {
+    font-size: 0.75em;
+    vertical-align: super;
+    line-height: 0;
+  }
+  #description-{{ _sid }} strong.featured-text sup {
+    font-family: 'Acumin Pro', sans-serif !important;
+    margin-left: 2px;
+  }
+
+  #description-{{ _sid }} li.description-list {
+    margin-top: 0.15rem;
+    margin-bottom: 0.15rem;
+    {% if section.settings.list_icon and section.settings.list_icon != blank %}
+    list-style: none;
+    position: relative;
+    padding-left: 1.75em;
+    {% else %}
+    list-style: disc inside;
+    padding-left: 0;
+    {% endif %}
+  }
+  {% if section.settings.list_icon and section.settings.list_icon != blank %}
+  #description-{{ _sid }} li.description-list::before {
+    content: '\{{ section.settings.list_icon }}';
+   font-family: 'Font Awesome 6 Pro', 'Font Awesome 6 Free', 'FontAwesome';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1.45;
+    position: absolute;
+    left: 0;
+    color: var(--text);
+  }
+  {% endif %}
+  #description-{{ _sid }} ul.list-group {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  #description-{{ _sid }} strong.featured-text + ul.list-group,
+  #description-{{ _sid }} strong.featured-text + p + ul.list-group {
+    margin-top: 0.5rem;
+  }
+  {%- if section.settings.show_key_ingredients -%}
+    {%- assign sfp_list_check = product.metafields.custom.sfp_section.value -%}
+    {%- assign sfp_section_check = sfp_list_check | first -%}
+    {%- if sfp_section_check -%}
+      {%- assign show_ingredients_check = sfp_section_check.highlight_key_ingredients -%}
+      {%- assign ingredients_list_check = sfp_section_check.key_ingredients.value -%}
+      {%- if ingredients_list_check == blank -%}
+        {%- assign ingredients_list_check = sfp_section_check.key_ingredients -%}
+      {%- endif -%}
+      {%- if show_ingredients_check != false and ingredients_list_check -%}
+  #description-{{ _sid }} .product-description-text::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: color-mix(in srgb, var(--bg), white 15%);
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+  }
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  #description-{{ _sid }} .container{
+    position:relative;
+    z-index:2;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+  @media (max-width: 767px) {
+    #description-{{ _sid }} .container{
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
+  #description-{{ _sid }} .read-more-toggle{
+    text-align:center;
+    cursor:pointer;
+    border:2px solid {{ button_border_color }};
+    width:max-content;
+    padding: 10px 28px;
+    font-family:"gunplay",sans-serif;
+    text-transform:uppercase;
+    color:{{ button_font_color }}!important;
+    display:block;
+    margin:20px auto;
+    background:{{ button_bg_color }};
+    transition:all var(--anim-ms) ease;
+  }
+  {% if section.settings.button_enable_hover %}
+  #description-{{ _sid }} .read-more-toggle:hover{opacity:0.7}
+  {% endif %}
+  {% if section.settings.show_grunge_borders and section.settings.show_top_grunge %}
+  #description-{{ _sid }}::before{
+    content:"";
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    width:100vw;
+    {% if section.settings.top_grunge_image %}
+    background-color:{{ grunge_color }};
+    -webkit-mask-image:url({{ section.settings.top_grunge_image | img_url: 'master' }});
+    mask-image:url({{ section.settings.top_grunge_image | img_url: 'master' }});
+    -webkit-mask-repeat:no-repeat;
+    mask-repeat:no-repeat;
+    -webkit-mask-size:cover;
+    mask-size:cover;
+    -webkit-mask-position:center;
+    mask-position:center;
+    {% endif %}
+    top:{{ section.settings.top_grunge_offset_mobile }}px;
+    height:{{ section.settings.top_grunge_height_mobile }}px;
+    z-index:-1;
+    display:block;
+  }
+  @media (min-width:768px){
+    #description-{{ _sid }}::before{
+      top:{{ section.settings.top_grunge_offset_desktop }}px;
+      height:{{ section.settings.top_grunge_height_desktop }}px;
+    }
+  }
+  {% endif %}
+  {% if section.settings.show_grunge_borders and section.settings.show_bottom_grunge %}
+  #description-{{ _sid }}::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    width:100vw;
+    {% if section.settings.bottom_grunge_image %}
+    background-color:{{ grunge_color }};
+    -webkit-mask-image:url({{ section.settings.bottom_grunge_image | img_url: 'master' }});
+    mask-image:url({{ section.settings.bottom_grunge_image | img_url: 'master' }});
+    -webkit-mask-repeat:no-repeat;
+    mask-repeat:no-repeat;
+    -webkit-mask-size:cover;
+    mask-size:cover;
+    -webkit-mask-position:center;
+    mask-position:center;
+    {% endif %}
+    bottom:{{ section.settings.bottom_grunge_offset | default: -50 }}px;
+    height:{{ section.settings.bottom_grunge_height | default: 64 }}px;
+    z-index:-1;
+    display:block;
+  }
+  {% endif %}
+  #description-{{ _sid }} .product-description-heading{
+    text-align:center;
+    font-size:24px;
+    line-height:34px;
+    text-transform:uppercase;
+    margin:0 0 5px;
+    display:{% if section.settings.show_heading %}block{% else %}none{% endif %};
+  }
+  #description-{{ _sid }} .product-description-text{line-height:26px;font-size:1em;}
+  #description-{{ _sid }} .product-description p{margin-top:1rem;margin-bottom:1rem}
+  #description-{{ _sid }} .product-title-desc{display:{% if section.settings.show_product_title %}block{% else %}none{% endif %}}
+  #description-{{ _sid }} .product-h2{text-transform:uppercase}
+  #description-{{ _sid }} img{margin:auto}
+  #description-{{ _sid }} h1, #description-{{ _sid }} h2{text-align:left!important;margin-top:1rem;margin-bottom:1rem;font-family:'Gunplay-Regular';text-transform:uppercase;font-size:1.5em;line-height:1.5}
+  #description-{{ _sid }} h3{text-align:left!important;/*margin-top:1rem; margin-bottom:1rem;*/font-family:'Gunplay-Regular';text-transform:uppercase;font-size:1.2em!important}
+  #description-{{ _sid }} h4{text-align:left!important;margin-top:1rem;margin-bottom:1rem;font-family:'Gunplay-Regular';text-transform:uppercase;font-size:1em!important}
+  #description-{{ _sid }} h5{text-align:left!important;margin-top:1rem;margin-bottom:1rem;font-family:'acumin-pro bold';text-transform:uppercase;font-size:1em!important}
+  #description-{{ _sid }} .key-ingredients-section{
+    height:0;
+    overflow:hidden;
+    transition:height var(--anim-ms) ease;
+  }
+  #description-{{ _sid }} .ingredient-breakdown-title{
+    font-family:"gunplay",sans-serif;
+    text-transform:uppercase;
+    margin-bottom:2rem;
+    /*margin-top:2rem;*/
+    line-height:34px;
+    color:#fff!important;
+    font-size:24px!important;
+    text-align:center;
+  }
+  #description-{{ _sid }} .ingredient-accordion{font-size:24px}
+  #description-{{ _sid }} .ingredient-accordion{
+    display:flex;
+    flex-direction:column;
+    gap:{{ section.settings.accordion_item_spacing | default: 0 }}px;
+    margin-bottom:2rem;
+  }
+  #description-{{ _sid }} .accordion-item{border:none}
+  #description-{{ _sid }} .accordion-tab-title{
+    width:100%;
+    background-color:var(--acc-bg);
+    border:none;
+    padding:0.75rem 1.5rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+    text-align:left;
+    transition:background-color var(--anim-ms) ease;
+  }
+  #description-{{ _sid }} .accordion-tab-text .unit{
+  font-variant-caps: all-small-caps;
+  font-variant: small-caps;  
+  font-size: 0.85em;
+  letter-spacing: 0.02em;
+  opacity: 0.95;
+}
+
+  {% if section.settings.enable_hover_transitions %}
+  #description-{{ _sid }} .accordion-tab-title:hover,
+  #description-{{ _sid }} .accordion-tab-title:focus-visible{
+    background-color:var(--acc-bg-hover);
+  }
+  #description-{{ _sid }} .accordion-tab-title[aria-expanded="true"]:hover,
+  #description-{{ _sid }} .accordion-tab-title[aria-expanded="true"]:focus-visible{
+    background-color:var(--acc-bg-hover);
+  }
+  {% endif %}
+  #description-{{ _sid }} .accordion-tab-title[aria-expanded="true"]{background-color:var(--acc-tab-bg-expanded)}
+  #description-{{ _sid }} .accordion-tab-text{
+    font-family:'Gunplay',sans-serif;
+    font-size:1rem;
+    font-weight:400;
+    color:var(--acc-text);
+    text-transform:uppercase;
+    flex:1;
+  }
+  #description-{{ _sid }} .accordion-icon{
+    font-size:1.5rem;
+    font-weight:700;
+    color:var(--acc-icon);
+    transition:transform var(--anim-ms) ease;
+    margin-left:1rem;
+  }
+  #description-{{ _sid }} .accordion-tab-title[aria-expanded="true"] .accordion-icon{transform:rotate(45deg)}
+  #description-{{ _sid }} .accordion-tab-content{
+    height:0;
+    overflow:hidden;
+    transition:height var(--anim-ms) ease;
+  }
+  #description-{{ _sid }} .accordion-content-inner{
+    background:var(--acc-bg-expanded);
+    border:2px solid var(--acc-border-expanded);
+    padding:1.5rem;
+    color:var(--acc-text-expanded);
+    font-family:'acumin-pro',sans-serif;
+    font-size:0.95rem;
+    line-height:1.6;
+    transition:border-color var(--anim-ms) ease;
+  }
+  #description-{{ _sid }} .accordion-content-inner b{
+    display:block;
+    /*margin-top:1rem;*/
+    margin-bottom:0.5rem;
+  }
+  #description-{{ _sid }} .accordion-content-inner .product-title-inline{
+    display:inline;
+    font-weight:700;
+    text-transform:none;
+    white-space:nowrap;
+  }
+  #description-{{ _sid }} .citation-link{
+    cursor:pointer;
+    text-decoration:none;
+    color:inherit;
+    transition:opacity 0.2s ease;
+  }
+  #description-{{ _sid }} .citation-link:hover{
+    opacity:0.7;
+  }
+  {% if section.settings.enable_hover_transitions %}
+  #description-{{ _sid }} .accordion-tab-title:hover + .accordion-tab-content .accordion-content-inner,
+  #description-{{ _sid }} .accordion-tab-title:focus-visible + .accordion-tab-content .accordion-content-inner{
+    border-color:var(--acc-bg-hover);
+  }
+  #description-{{ _sid }} .accordion-tab-title[aria-expanded="true"]:hover + .accordion-tab-content .accordion-content-inner,
+  #description-{{ _sid }} .accordion-tab-title[aria-expanded="true"]:focus-visible + .accordion-tab-content .accordion-content-inner{
+    border-color:var(--acc-bg-hover);
+  }
+  {% endif %}
+  @media (max-width:768px){
+    #description-{{ _sid }} .ingredient-breakdown-title{font-size:1.5rem}
+    #description-{{ _sid }} .accordion-tab-title{padding:1rem}
+    #description-{{ _sid }} .accordion-tab-text{font-size:1rem}
+    #description-{{ _sid }} .accordion-content-inner{padding:1rem;font-size:0.875rem}
+  }
+</style>
+
+
+  <div class="container">
+    {% if section.settings.show_heading and section.settings.heading != blank %}
+      <h4 class="product-description-heading">{{ section.settings.heading | replace: '†', '<sup>†</sup>' }}</h4>
+    {% endif %}
+    
+    <div class="product-description-text">
+      {% render 'product-description-markup' %}
+    </div>
+
+    {%- if section.settings.show_key_ingredients -%}
+      {%- assign sfp_list = product.metafields.custom.sfp_section.value -%}
+      {%- assign sfp_section = sfp_list | first -%}
+
+      {%- if sfp_section -%}
+        {%- assign show_ingredients = sfp_section.highlight_key_ingredients -%}
+        {%- assign ingredients_list = sfp_section.key_ingredients.value -%}
+        {%- if ingredients_list == blank -%}
+          {%- assign ingredients_list = sfp_section.key_ingredients -%}
+        {%- endif -%}
+          
+          {%- if show_ingredients == false -%}
+          {%- elsif ingredients_list -%}
+            <button 
+              class="read-more-toggle" 
+              data-read-more-trigger
+              aria-expanded="false"
+              aria-controls="key-ingredients-{{ _sid }}"
+            >
+              <span class="read-more-text">Read More</span>
+              <span class="read-less-text" style="display: none;">Read Less</span>
+            </button>
+            
+            <div class="key-ingredients-section" id="key-ingredients-{{ _sid }}" data-read-more-content>
+              <h3 class="ingredient-breakdown-title">INGREDIENT BREAKDOWN</h3>
+              
+              <div class="ingredient-accordion">
+{%- for key_ing_entry in ingredients_list -%}
+  {%- assign ing_amount      = key_ing_entry.ingredient_amount -%}
+  {%- assign ing_description = key_ing_entry.ingredient_write_up -%}
+  {%- assign ing_ref         = key_ing_entry.ingredient_name -%}
+
+{%- assign amount_raw = ing_amount | append: '' | strip -%}
+{%- assign amount_low = amount_raw | downcase -%}
+{%- assign unit = '' -%}
+{%- assign numeric = amount_raw -%}
+{%- assign known_units = 'fl oz,mcg,mg,g,kg,iu,ml,l,oz' | split: ',' -%}
+{%- for u in known_units -%}
+  {%- assign u_trim = u | strip -%}
+  {%- assign u_low  = u_trim | downcase -%}
+  {%- assign cut    = amount_low.size | minus: u_low.size -%}
+  {%- if amount_low != blank and cut >= 0 -%}
+    {%- assign suffix = amount_low | slice: cut, u_low.size -%}
+    {%- if suffix == u_low -%}
+      {%- assign numeric = amount_raw | slice: 0, cut | strip -%}
+      {%- assign unit    = u_trim -%}
+      {%- break -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
+  {%- assign ing_title = '' -%}
+  {%- if ing_ref and ing_ref != blank -%}
+    {%- assign ing_val = ing_ref.value | default: ing_ref -%}
+    {%- assign ing_title = ing_val.display_name | default: ing_val.name | default: ing_val.title | default: ing_ref.display_name -%}
+  {%- endif -%}
+
+  {%- if ing_title == blank -%}
+    {%- assign ing_title = key_ing_entry.display_name -%}
+  {%- endif -%}
+
+  {%- assign ing_title = ing_title | split: ' - ' | first | split: ' – ' | first | strip -%}
+
+  {%- if ing_title != blank -%}
+    <div class="accordion-item" data-accordion-item data-ingredient-name="{{ ing_title | handleize }}">
+      <div 
+        class="accordion-tab-title" 
+        role="button"
+        tabindex="0"
+        aria-expanded="false"
+        aria-controls="ing-{{ forloop.index }}-{{ _sid }}"
+        data-accordion-trigger
+      >
+      <span class="accordion-tab-text">
+  {{ ing_title | replace: '†', '<sup>†</sup>' }}
+  {% if amount_raw != blank %}
+    &nbsp;|&nbsp;
+    {% if unit != '' %}
+      {{ numeric }}<span class="unit"> {{ unit }}</span>
+    {% else %}
+      {%- assign amt_spaced = amount_raw
+        | replace: 'fl oz', ' fl oz'
+        | replace: 'mcg',  ' mcg'
+        | replace: 'mg',   ' mg'
+        | replace: 'kg',   ' kg'
+        | replace: 'ml',   ' ml'
+        | replace: 'oz',   ' oz'
+        | replace: 'g',    ' g'
+      -%}
+      {%- assign amt_spaced = amt_spaced | replace: '  ', ' ' | strip -%}
+      {{ amt_spaced }}
+    {% endif %}
+  {% endif %}
+</span>
+
+        <span class="accordion-icon" aria-hidden="true">+</span>
+      </div>
+
+      <div class="accordion-tab-content" id="ing-{{ forloop.index }}-{{ _sid }}" data-accordion-content>
+        <div class="accordion-content-inner">
+          {{ ing_description | replace: '†', '<sup>†</sup>' }}
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+{%- endfor -%}
+
+              </div>
+            </div>
+            
+            <button 
+              class="read-more-toggle read-more-bottom" 
+              data-read-more-trigger
+              aria-expanded="true"
+              aria-controls="key-ingredients-{{ _sid }}"
+              style="display: none;"
+            >
+              <span class="read-more-text" style="display: none;">Read More</span>
+              <span class="read-less-text">Read Less</span>
+            </button>
+          {%- endif -%}
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+
+ <script>
+document.addEventListener('DOMContentLoaded',function(){
+  var root=document.getElementById('description-{{ _sid }}');
+  if(!root) return;
+  var readMoreButtons=root.querySelectorAll('[data-read-more-trigger]');
+  var readMoreContent=root.querySelector('[data-read-more-content]');
+  var accordionItems=root.querySelectorAll('[data-accordion-item]');
+  var DUR=320;
+  var busy=false;
+
+  // Format product description: fix punctuation spacing and add superscript for citations
+  // Use setTimeout to ensure product-description-markup snippet has rendered
+  function processDescriptionText(){
+    var descriptionText = root.querySelector('.product-description-text');
+    if(!descriptionText) {
+      return false;
+    }
+    
+    var html = descriptionText.innerHTML;
+    
+    // Skip if already processed (check for existing sup tags)
+    if(html.includes('<sup>') && html.includes('citation-link')){
+      return true;
+    }
+    
+    // Remove unwanted spaces between punctuation (e.g., "? !" becomes "?!")
+    html = html.replace(/\?\s+!/g, '?!');
+    html = html.replace(/!\s+\?/g, '!?');
+    
+    // Wrap citation numbers in <sup> tags
+    // Matches patterns like (1), (2), (1,2), (1,2,3), (1,2,3,4,5), etc.
+    html = html.replace(/\((\d+(?:\s*,\s*\d+)*)\)/g, function(match, numbers){
+      return '<sup>(' + numbers + ')</sup>';
+    });
+    
+    // Remove period after superscript if it's at the end of a sentence
+    html = html.replace(/<\/sup>\./g, '</sup>');
+    
+    descriptionText.innerHTML = html;
+    
+    // Make superscript citations in product description clickable
+    var descSupTags = descriptionText.querySelectorAll('sup');
+    descSupTags.forEach(function(sup){
+      var text = sup.textContent.trim();
+      var match = text.match(/^\((\d+(?:,\s*\d+)*)\)$/);
+      if(match){
+        var numbers = match[1].split(',').map(function(n){ return n.trim(); });
+        var anchor = document.createElement('a');
+        anchor.href = 'javascript:void(0);';
+        anchor.className = 'citation-link';
+        anchor.textContent = sup.textContent; // Get the text content
+        anchor.style.cursor = 'pointer';
+        anchor.style.textDecoration = 'none';
+        anchor.style.color = 'inherit';
+        anchor.setAttribute('data-citation-numbers', numbers.join(','));
+        
+        anchor.onclick = function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Find FAQ section by anchor tag (set in faqs.liquid settings)
+          var faqAnchor = document.querySelector('a[name="faqSection"]');
+          var faqSection = null;
+          
+          if(faqAnchor){
+            faqSection = faqAnchor.nextElementSibling;
+            if(!faqSection || !faqSection.id || !faqSection.id.includes('five-nation')){
+              faqSection = faqAnchor.closest('section');
+            }
+          }
+          
+          if(!faqSection){
+            faqSection = document.querySelector('[id^="five-nation-"]');
+          }
+          
+          if(faqSection){
+            if(faqAnchor){
+              faqAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+              faqSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            setTimeout(function(){
+              var desktopTab = faqSection.querySelector('.main-tab[data-target="references"]');
+              var mobileTab = faqSection.querySelector('.mobile-tab[data-target="references"]');
+              
+              var tabToClick = null;
+              if(desktopTab){
+                var rect = desktopTab.getBoundingClientRect();
+                if(rect.width > 0 && rect.height > 0){
+                  tabToClick = desktopTab;
+                }
+              }
+              if(!tabToClick && mobileTab){
+                tabToClick = mobileTab;
+              }
+              
+              if(tabToClick){
+                tabToClick.click();
+              }
+              
+              setTimeout(function(){
+                numbers.forEach(function(num){
+                  var refElement = document.querySelector('li[data-reference-number="' + num + '"]') ||
+                                  document.querySelector('.references li:nth-child(' + num + ')');
+                  
+                  if(refElement){
+                    refElement.style.backgroundColor = '#ffffcc';
+                    refElement.style.transition = 'background-color 2s ease';
+                    setTimeout(function(){
+                      refElement.style.backgroundColor = '';
+                    }, 2000);
+                    refElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                });
+              }, 700);
+            }, 1000);
+          }
+        };
+        
+        // Clear sup contents and add anchor inside (keep the sup tag)
+        sup.innerHTML = '';
+        sup.appendChild(anchor);
+      }
+    });
+    
+    return true;
+  }
+  
+  // Try immediately
+  if(!processDescriptionText()){
+    // Try again after short delay if product-description-markup hasn't rendered yet
+    setTimeout(function(){
+      if(!processDescriptionText()){
+        // One more try after longer delay
+        setTimeout(processDescriptionText, 500);
+      }
+    }, 100);
+  }
+
+  // Format ingredient content: treat <b> as paragraph with padding and clean text after it
+  var productTitle = "{{ product.title | strip | escape }}";
+  
+  accordionItems.forEach(function(item){
+    var contentInner = item.querySelector('.accordion-content-inner');
+    if(!contentInner) return;
+    
+    // Fix punctuation spacing and add superscript for citations in ingredient descriptions too
+    var html = contentInner.innerHTML;
+    
+    
+    html = html.replace(/\?\s+!/g, '?!');
+    html = html.replace(/!\s+\?/g, '!?');
+    
+    // More flexible pattern that handles various spacing
+    html = html.replace(/\((\d+(?:\s*,\s*\d+)*)\)/g, function(match, numbers){
+      return '<sup>(' + numbers + ')</sup>';
+    });
+    
+    html = html.replace(/<\/sup>\./g, '</sup>');
+    contentInner.innerHTML = html;
+    
+    // Replace product title with strong tag anywhere in the content
+    if(productTitle && productTitle.length > 3){
+      var html = contentInner.innerHTML;
+      
+      // Escape special regex characters except trademark symbols
+      var escapedTitle = productTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      // Create flexible regex that matches the title with optional spaces/dashes/trademarks
+      var flexiblePattern = escapedTitle
+        .replace(/[®™©]/g, '')  // Remove trademarks from pattern
+        .split('')
+        .map(function(char){
+          if(/[\s\-–—]/.test(char)){
+            return '[\\s\\-–—]+';  // Match any space or dash
+          }
+          return char;
+        })
+        .join('');
+      
+      // Add optional trademark at the end
+      flexiblePattern += '[®™©]?';
+      
+      var regex = new RegExp('\\b(' + flexiblePattern + ')\\b', 'gi');
+      
+      // Replace in HTML while preserving tags
+      var replaced = html.replace(regex, function(match){
+        return '<strong class="product-title-inline">' + match + '</strong>';
+      });
+      
+      if(replaced !== html){
+        contentInner.innerHTML = replaced;
+      }
+    }
+    
+    // Style <b> tags
+    var boldTags = contentInner.querySelectorAll('b');
+    boldTags.forEach(function(bold){
+      bold.style.display = 'block';
+      bold.style.paddingTop = '1rem';
+      bold.style.marginBottom = '0.5rem';
+      
+      var nextNode = bold.nextSibling;
+      while(nextNode){
+        if(nextNode.nodeType === Node.TEXT_NODE){
+          var text = nextNode.textContent;
+          // Remove leading dashes, symbols, periods, spaces
+          text = text.replace(/^[\s\-–—*•:.]+/, '');
+          // Capitalize first letter
+          if(text.length > 0){
+            text = text.charAt(0).toUpperCase() + text.slice(1);
+          }
+          nextNode.textContent = text;
+          break;
+        } else if(nextNode.nodeType === Node.ELEMENT_NODE){
+          break;
+        }
+        nextNode = nextNode.nextSibling;
+      }
+    });
+    
+    // Apply sentence case to all text nodes (not in <b> or <strong>)
+    // Sentence case = lowercase with first letter capitalized for each sentence
+    function applySentenceCaseToTextNodes(node){
+      if(node.nodeType === Node.TEXT_NODE){
+        var parent = node.parentElement;
+        if(parent && parent.tagName !== 'B' && parent.tagName !== 'STRONG' && parent.tagName !== 'SUP'){
+          var text = node.textContent;
+          // Skip if text is only whitespace
+          if(text.trim().length === 0) return;
+          
+          // Convert to lowercase first
+          text = text.toLowerCase();
+          // Capitalize first letter of the entire text
+          text = text.replace(/^(\s*)([a-z])/, function(match, space, letter) {
+            return space + letter.toUpperCase();
+          });
+          // Capitalize first letter after sentence-ending punctuation (. ! ?)
+          text = text.replace(/([.!?]\s+)([a-z])/g, function(match, separator, letter) {
+            return separator + letter.toUpperCase();
+          });
+          node.textContent = text;
+        }
+      } else if(node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'B' && node.tagName !== 'STRONG'){
+        Array.from(node.childNodes).forEach(function(child){
+          applySentenceCaseToTextNodes(child);
+        });
+      }
+    }
+    
+    applySentenceCaseToTextNodes(contentInner);
+    
+    // Make superscript citations clickable anchors to references section
+    var supTags = contentInner.querySelectorAll('sup');
+    supTags.forEach(function(sup){
+      var text = sup.textContent.trim();
+      // Check if it's a citation format like (1), (2), (1,2,3), etc.
+      var match = text.match(/^\((\d+(?:,\s*\d+)*)\)$/);
+      if(match){
+        var numbers = match[1].split(',').map(function(n){ return n.trim(); });
+        var anchor = document.createElement('a');
+        anchor.href = 'javascript:void(0);';
+        anchor.className = 'citation-link';
+        anchor.innerHTML = sup.innerHTML;
+        anchor.style.cursor = 'pointer';
+        anchor.style.textDecoration = 'none';
+        anchor.style.color = 'inherit';
+        anchor.setAttribute('data-citation-numbers', numbers.join(','));
+        
+        anchor.onclick = function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Find FAQ section by anchor tag (set in faqs.liquid settings)
+          var faqAnchor = document.querySelector('a[name="faqSection"]');
+          var faqSection = null;
+          
+          if(faqAnchor){
+            // Find the section element after the anchor
+            faqSection = faqAnchor.nextElementSibling;
+            if(!faqSection || !faqSection.id || !faqSection.id.includes('five-nation')){
+              faqSection = faqAnchor.closest('section');
+            }
+          }
+          
+          // Fallback to ID search if anchor not found
+          if(!faqSection){
+            faqSection = document.querySelector('[id^="five-nation-"]');
+          }
+          
+          if(faqSection){
+            // Scroll to the section
+            if(faqAnchor){
+              faqAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+              faqSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            // Open References tab after scrolling
+            setTimeout(function(){
+              // Find all possible tab buttons
+              var desktopTab = faqSection.querySelector('.main-tab[data-target="references"]');
+              var mobileTab = faqSection.querySelector('.mobile-tab[data-target="references"]');
+              
+              var tabToClick = null;
+              if(desktopTab){
+                var rect = desktopTab.getBoundingClientRect();
+                if(rect.width > 0 && rect.height > 0){
+                  tabToClick = desktopTab;
+                }
+              }
+              if(!tabToClick && mobileTab){
+                tabToClick = mobileTab;
+              }
+              
+              if(tabToClick){
+                tabToClick.click();
+              }
+              
+              // Highlight the specific reference(s)
+              setTimeout(function(){
+                numbers.forEach(function(num){
+                  // Try multiple selectors
+                  var refElement = document.querySelector('li[data-reference-number="' + num + '"]') ||
+                                  document.querySelector('.references li:nth-child(' + num + ')');
+                  
+                  if(refElement){
+                    refElement.style.backgroundColor = '#ffffcc';
+                    refElement.style.transition = 'background-color 2s ease';
+                    setTimeout(function(){
+                      refElement.style.backgroundColor = '';
+                    }, 2000);
+                    // Scroll the reference into view
+                    refElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                });
+              }, 700);
+            }, 1000);
+          }
+        };
+        
+        // Clear sup contents and add anchor inside (keep the sup tag)
+        sup.innerHTML = '';
+        sup.appendChild(anchor);
+      }
+    });
+  });
+
+  function onEnd(el,cb){
+    var done=false;
+    function h(e){if(e.target!==el)return;if(done)return;done=true;el.removeEventListener('transitionend',h);cb&&cb();}
+    el.addEventListener('transitionend',h);
+    setTimeout(function(){if(!done){el.removeEventListener('transitionend',h);cb&&cb();}},DUR+40);
+  }
+
+  function slideDown(el){
+    el.style.display='block';
+    el.style.height='auto';
+    var h=el.scrollHeight+'px';
+    el.style.height='0px';
+    requestAnimationFrame(function(){el.style.height=h;});
+    onEnd(el,function(){el.style.height='auto';});
+  }
+
+  function slideUp(el){
+    el.style.height=el.scrollHeight+'px';
+    requestAnimationFrame(function(){el.style.height='0px';});
+    onEnd(el,function(){el.style.display='';});
+  }
+
+  accordionItems.forEach(function(item){
+    var trigger=item.querySelector('[data-accordion-trigger]');
+    var content=item.querySelector('[data-accordion-content]');
+    if(trigger&&content){
+      trigger.setAttribute('aria-expanded','false');
+      content.style.height='0px';
+    }
+  });
+
+  function setButtons(open){
+    readMoreButtons.forEach(function(b){
+      b.setAttribute('aria-expanded',open?'true':'false');
+      var more=b.querySelector('.read-more-text');
+      var less=b.querySelector('.read-less-text');
+      if(open){
+        if(b.classList.contains('read-more-bottom')){b.style.display='block';}
+        if(more)more.style.display='none';
+        if(less)less.style.display='inline';
+        if(!b.classList.contains('read-more-bottom')){b.style.display='none';}
+      }else{
+        if(b.classList.contains('read-more-bottom')){b.style.display='none';}
+        if(more)more.style.display='inline';
+        if(less)less.style.display='none';
+        if(!b.classList.contains('read-more-bottom')){b.style.display='block';}
+      }
+    });
+  }
+
+  readMoreButtons.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      if(busy)return;busy=true;
+      var open=readMoreContent&&readMoreContent.style.height!=='0px'&&readMoreContent.style.height!=='';
+      if(open){
+        accordionItems.forEach(function(item){
+          var t=item.querySelector('[data-accordion-trigger]');
+          var c=item.querySelector('[data-accordion-content]');
+          if(t&&c&&t.getAttribute('aria-expanded')==='true'){
+            t.setAttribute('aria-expanded','false');
+            slideUp(c);
+          }
+        });
+        slideUp(readMoreContent);
+        onEnd(readMoreContent,function(){setButtons(false);busy=false;});
+      }else{
+        slideDown(readMoreContent);
+        setButtons(true);
+        onEnd(readMoreContent,function(){busy=false;});
+      }
+    });
+  });
+
+  accordionItems.forEach(function(item){
+    var trigger=item.querySelector('[data-accordion-trigger]');
+    var content=item.querySelector('[data-accordion-content]');
+    if(!trigger||!content)return;
+
+    function toggle(e){
+      e.preventDefault();
+      if(busy)return;busy=true;
+      var expanded=trigger.getAttribute('aria-expanded')==='true';
+
+      if(expanded){
+        trigger.setAttribute('aria-expanded','false');
+        slideUp(content);
+        onEnd(content,function(){busy=false;});
+      }else{
+        accordionItems.forEach(function(other){
+          if(other===item)return;
+          var ot=other.querySelector('[data-accordion-trigger]');
+          var oc=other.querySelector('[data-accordion-content]');
+          if(ot&&oc&&ot.getAttribute('aria-expanded')==='true'){
+            ot.setAttribute('aria-expanded','false');
+            slideUp(oc);
+          }
+        });
+        trigger.setAttribute('aria-expanded','true');
+        slideDown(content);
+        onEnd(content,function(){busy=false;});
+      }
+    }
+
+    trigger.addEventListener('click',toggle);
+    trigger.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' ')toggle(e);
+    });
+  });
+});
+</script>
+
+</section>
+
+{% schema %}
+{
+  "name": "Product Description",
+  "tag": "section",
+  "class": "pdp-description-section",
+  "settings": [
+    { "type": "header", "content": "Main Section Controls" },
+    { "type": "text", "id": "anchor_tag", "label": "Anchor Tag Value", "info": "Add an anchor ID for linking to this section" },
+    { "type": "checkbox", "id": "use_series_colors", "label": "Use Dynamic Product Series Colors Globally In Section", "default": true, "info": "When enabled, colors will be pulled from the Product Series metaobject" },
+    { "type": "checkbox", "id": "show_grunge_borders", "label": "Show Grunge Borders", "default": true },
+    { "type": "checkbox", "id": "previous_section_has_grunge", "label": "Previous Section Has Grunge Borders", "default": false, "info": "Enable if the section above has grunge borders. Adds top padding to compensate." },
+    { "type": "checkbox", "id": "next_section_has_grunge", "label": "Next Section Has Grunge Borders", "default": false, "info": "Enable if the section below has grunge borders. Adds bottom padding to compensate." },
+    { "type": "checkbox", "id": "both_sections_have_grunge", "label": "Both Adjacent Sections Have Grunge Borders", "default": false, "info": "Enable if BOTH sections above AND below have grunge borders. Adds padding to top and bottom." },
+    { "type": "checkbox", "id": "show_key_ingredients", "label": "Show Key Ingredients", "default": true },
+    { "type": "checkbox", "id": "show_read_more_button", "label": "Show Read More Button", "default": true },
+    
+    { "type": "header", "content": "Description Block" },
+    { "type": "checkbox", "id": "show_product_title", "label": "Show Product Title", "default": false, "info": "Display product title above description" },
+    { "type": "checkbox", "id": "truncate_description", "label": "Truncate Description Area", "default": false },
+    { "type": "textarea", "id": "truncate_product_ids", "label": "Products To Truncate Description For", "info": "Enter product IDs separated by commas" },
+    { "type": "checkbox", "id": "desc_use_series_colors", "label": "Enable Dynamic Product Series Colors", "default": true },
+    { "type": "select", "id": "desc_font_color_source", "label": "Product Description Font Color", "default": "text_default", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "text_default", "label": "Default Text Color" },
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "text", "id": "list_icon", "label": "List Bullet Icon (Font Awesome)", "default": "f00c", "info": "Enter Font Awesome unicode (e.g., f00c for check, f111 for circle). Find codes at fontawesome.com" },
+    
+    { "type": "header", "content": "Key Ingredients" },
+    { "type": "range", "id": "accordion_item_spacing", "label": "Accordion Item Spacing", "min": 0, "max": 8, "step": 1, "default": 0, "unit": "px" },
+    { "type": "select", "id": "breakdown_font_color_source", "label": "Ingredient Breakdown Font Color", "default": "text_default", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "text_default", "label": "Default Text Color" },
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_tab_font_color_source", "label": "Accordion Tab Title Font Color", "default": "text_default", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "text_default", "label": "Default Text Color" },
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_bg_color_source", "label": "Accordion Tab Background Color", "default": "accent_3", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_expanded_tab_bg_color_source", "label": "Accordion Expanded Tab Title Background Color", "default": "accent_1", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_expanded_bg_color_source", "label": "Accordion Expanded Content Background Color", "default": "accent_1", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select",
+  "id": "accordion_expanded_border_color_source",
+  "label": "Accordion Expanded Content Border Color",
+  "default": "accent_1",
+  "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black",
+  "options": [
+    { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+    { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+    { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+    { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+{ "type": "select", "id": "accordion_expanded_font_color_source", "label": "Accordion Expanded Content Font Color", "default": "text_default", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "text_default", "label": "Default Text Color" },
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "checkbox", "id": "enable_hover_transitions", "label": "Enable Hover Transitions", "default": true },
+    { "type": "select", "id": "accordion_icon_color_source", "label": "Accordion Plus/Minus Icon Color", "default": "accent_2", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_amount_color_source", "label": "Ingredient Amount Color", "default": "accent_2", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    
+    { "type": "header", "content": "Read More Button Styles" },
+    { "type": "select", "id": "button_type", "label": "Button Type", "default": "border_only", "options": [
+      { "value": "border_only", "label": "Border Only" },
+      { "value": "background", "label": "Background" },
+      { "value": "background_border", "label": "Background With Border" }
+    ]},
+    { "type": "checkbox", "id": "button_enable_hover", "label": "Enable Hover Effects", "default": true },
+    { "type": "text", "id": "button_custom_text", "label": "Custom Button Text", "default": "Read More", "info": "Use liquid like: See {{ product.title }} Ingredients" },
+    { "type": "checkbox", "id": "button_enable_mobile_text", "label": "Enable Mobile Specific Button Text", "default": false },
+    { "type": "text", "id": "button_mobile_text", "label": "Mobile Button Text", "default": "Read More" },
+    { "type": "checkbox", "id": "button_use_series_colors", "label": "Enable Dynamic Product Series Colors", "default": true },
+    { "type": "select", "id": "button_border_color_source", "label": "Button Border Color", "default": "accent_1", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "button_bg_color_source", "label": "Button Background Color", "default": "featured", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "transparent", "label": "Transparent" },
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "button_font_color_source", "label": "Button Font Color", "default": "accent_1", "info": "Format: (5150 / Kill It / Crea-TEN). Featured=Red/Gold/Red, Accent1=White/White/LtGrey, Accent2=Grey/DkGrey/Grey, Accent3=Black", "options": [
+      { "value": "text_default", "label": "Default Text Color" },
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    
+    { "type": "header", "content": "Grunge Borders" },
+    { "type": "select", "id": "grunge_border_color_source", "label": "Grunge Border Color", "default": "accent_1", "options": [
+      { "value": "featured", "label": "Featured (5150:Red, Kill It:Gold, CT:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (5150:Wht, Kill It:Wht, CT:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (5150:Grey, Kill It:Grey, CT:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ], "info": "Color tint for grunge border SVG" },
+    { "type": "checkbox", "id": "use_grunge_as_bg", "label": "Use Grunge Border Color as Section Background", "default": true, "info": "When enabled, section background will match the grunge border color" },
+    { "type": "checkbox", "id": "show_top_grunge", "label": "Show Top Grunge Border", "default": true },
+    { "type": "image_picker", "id": "top_grunge_image", "label": "Top Grunge Border Image" },
+    { "type": "range", "id": "top_grunge_height_mobile", "label": "Top Grunge Border Height (Mobile)", "min": 20, "max": 300, "step": 4, "default": 52, "unit": "px" },
+    { "type": "range", "id": "top_grunge_height_desktop", "label": "Top Grunge Border Height (Desktop)", "min": 20, "max": 300, "step": 4, "default": 52, "unit": "px" },
+    { "type": "range", "id": "top_grunge_offset_mobile", "label": "Top Grunge Border Offset (Mobile)", "min": -200, "max": 200, "step": 4, "default": -40, "unit": "px" },
+    { "type": "range", "id": "top_grunge_offset_desktop", "label": "Top Grunge Border Offset (Desktop)", "min": -300, "max": 300, "step": 10, "default": -50, "unit": "px" },
+    { "type": "checkbox", "id": "show_bottom_grunge", "label": "Show Bottom Grunge Border", "default": true },
+    { "type": "image_picker", "id": "bottom_grunge_image", "label": "Bottom Grunge Border Image" },
+    { "type": "range", "id": "bottom_grunge_height", "label": "Bottom Grunge Border Height", "min": 20, "max": 300, "step": 4, "default": 64, "unit": "px" },
+    { "type": "range", "id": "bottom_grunge_offset", "label": "Bottom Grunge Border Offset", "min": -300, "max": 300, "step": 10, "default": -50, "unit": "px" },
+    
+    { "type": "header", "content": "Section Padding/Margins" },
+    { "type": "range", "id": "margin_top_desktop", "label": "Margin Top (Desktop)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_bottom_desktop", "label": "Margin Bottom (Desktop)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_top_mobile", "label": "Margin Top (Mobile)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_bottom_mobile", "label": "Margin Bottom (Mobile)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "padding_top_desktop", "label": "Padding Top (Desktop)", "min": 0, "max": 200, "step": 2, "default": 0, "unit": "px" },
+    { "type": "range", "id": "padding_bottom_desktop", "label": "Padding Bottom (Desktop)", "min": 0, "max": 200, "step": 2, "default": 0, "unit": "px" },
+    { "type": "range", "id": "padding_top_mobile", "label": "Padding Top (Mobile)", "min": 0, "max": 200, "step": 2, "default": 0, "unit": "px" },
+    { "type": "range", "id": "padding_bottom_mobile", "label": "Padding Bottom (Mobile)", "min": 0, "max": 200, "step": 2, "default": 0, "unit": "px" },
+    
+    { "type": "header", "content": "Fallback Colors (When No Series Detected)" },
+    { "type": "paragraph", "content": "These colors are only used when a product has no series assigned. Normally, colors are pulled automatically from the product's series metaobject." },
+    { "type": "color", "id": "bg_color", "label": "Featured/Hero (Red/Gold/Red)", "default": "#AE1F24", "info": "5150: Flagship Red #AE1F24 | Kill It: Core Gold #E0B357 | Crea-TEN: Code Red #AE1F24" },
+    { "type": "color", "id": "fallback_accent_1", "label": "Accent 1 Light (White/White/Lt Grey)", "default": "#FFFFFF", "info": "5150: Flagship White #FFFFFF | Kill It: Core White #FFFFFF | Crea-TEN: CR Light Grey #CECECE" },
+    { "type": "color", "id": "fallback_accent_2", "label": "Accent 2 Neutral (Grey/Dk Grey/Grey)", "default": "#999999", "info": "5150: Flagship Grey #999999 | Kill It: Core Grey #585A5C | Crea-TEN: CR Grey #BCBCBC" },
+    { "type": "color", "id": "fallback_accent_3", "label": "Accent 3 Dark (Black)", "default": "#000000", "info": "All Series: #000000 - Used for text, shadows, and dark backgrounds" },
+    { "type": "color", "id": "text_color", "label": "Default Text Color", "default": "#ffffff", "info": "Primary text color when not using dynamic series colors" }
+  ],
+  "presets": [
+    { "name": "Product Description" }
+  ]
+}
+{% endschema %}

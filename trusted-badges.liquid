@@ -1,0 +1,481 @@
+{% assign _sid = section.id %}
+{%- if section.settings.use_series_colors -%}
+  {%- assign sfp_list = product.metafields.custom.sfp_section.value -%}
+  {%- assign sfp_section = sfp_list | first -%}
+  {%- assign product_series = sfp_section.series.value -%}
+
+  {%- if product_series -%}
+    {%- assign featured_color = product_series.template_specific_dynamic_featured_color | default: section.settings.bg_color -%}
+    {%- assign accent_colors = product_series.template_specific_accent_color_s -%}
+    {%- assign accent_1 = accent_colors[0] | default: section.settings.fallback_accent_1 -%}
+    {%- assign accent_2 = accent_colors[1] | default: section.settings.fallback_accent_2 -%}
+    {%- assign accent_3 = accent_colors[2] | default: section.settings.fallback_accent_3 -%}
+  {%- else -%}
+    {%- assign featured_color = section.settings.bg_color -%}
+    {%- assign accent_1 = section.settings.fallback_accent_1 -%}
+    {%- assign accent_2 = section.settings.fallback_accent_2 -%}
+    {%- assign accent_3 = section.settings.fallback_accent_3 -%}
+  {%- endif -%}
+{%- else -%}
+  {%- assign featured_color = section.settings.bg_color -%}
+  {%- assign accent_1 = section.settings.fallback_accent_1 -%}
+  {%- assign accent_2 = section.settings.fallback_accent_2 -%}
+  {%- assign accent_3 = section.settings.fallback_accent_3 -%}
+{%- endif -%}
+
+{%- case section.settings.grunge_border_color_source -%}
+  {%- when 'featured' -%}{%- assign grunge_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign grunge_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign grunge_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign grunge_color = accent_3 -%}
+  {%- else -%}{%- assign grunge_color = featured_color -%}
+{%- endcase -%}
+{%- assign grunge_color = grunge_color | default: section.settings.fallback_accent_1 -%}
+
+{%- if section.settings.use_grunge_as_bg -%}
+  {%- assign section_bg_color = grunge_color -%}
+{%- elsif section.settings.section_bg_color and section.settings.section_bg_color != blank -%}
+  {%- assign section_bg_color = section.settings.section_bg_color -%}
+{%- else -%}
+  {%- assign section_bg_color = 'transparent' -%}
+{%- endif -%}
+
+{%- assign section_has_icons = false -%}
+{%- for block in section.blocks -%}
+  {%- if block.settings.fa_icon and block.settings.fa_icon != blank -%}
+    {%- assign section_has_icons = true -%}
+  {%- endif -%}
+{%- endfor -%}
+
+<section 
+  id="three-column-images-{{ _sid }}" 
+  {% if section.settings.anchor_tag and section.settings.anchor_tag != blank %}data-anchor="{{ section.settings.anchor_tag }}"{% endif %}
+  class="three-column-images-section section-{{ _sid }} {% if section_has_icons %}has-icons-section{% endif %}"
+>
+<style>
+  #three-column-images-{{ _sid }} {
+    --bg: {{ section_bg_color }};
+    --featured: {{ featured_color }};
+    --accent-1: {{ accent_1 }};
+    --accent-2: {{ accent_2 }};
+    --accent-3: {{ accent_3 }};
+    {% unless section.settings.section_bg_image %}
+    background: var(--bg);
+    {% endunless %}
+    position: relative;
+    isolation: isolate;
+    z-index: {{ section.settings.section_z_index | default: 2 }};
+    width: 100%;
+    {% if section.settings.section_max_width and section.settings.section_max_width != blank %}
+    max-width: {{ section.settings.section_max_width }}px;
+    margin-left: auto;
+    margin-right: auto;
+    {% endif %}
+  }
+  
+  {% if section.settings.section_bg_image %}
+  #three-column-images-{{ _sid }}::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    height: 100%;
+    top: 0;
+    background-image: url({{ section.settings.section_bg_image | img_url: 'master' }});
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -1;
+  }
+  {% endif %}
+  
+  @media (max-width: 767px) {
+    #three-column-images-{{ _sid }} {
+      {% if section.settings.show_grunge_borders %}
+      padding-top: 40px;
+      padding-bottom: 40px;
+      {% else %}
+        {% if section.settings.both_sections_have_grunge %}
+        padding-top: 90px;
+        padding-bottom: 90px;
+        {% else %}
+          {% if section.settings.previous_section_has_grunge %}
+          padding-top: 90px;
+          {% else %}
+          padding-top: 0px;
+          {% endif %}
+          padding-bottom: 90px;
+        {% endif %}
+      {% endif %}
+      margin-top: {{ section.settings.margin_top_mobile }}px;
+      margin-bottom: {{ section.settings.margin_bottom_mobile }}px;
+    }
+    
+    #three-column-images-{{ _sid }}.has-icons-section {
+      {% if section.settings.show_grunge_borders %}
+      padding-top: 30px;
+      padding-bottom: 30px;
+      {% else %}
+        {% if section.settings.both_sections_have_grunge %}
+        padding-top: 60px;
+        padding-bottom: 60px;
+        {% else %}
+          {% if section.settings.previous_section_has_grunge %}
+          padding-top: 60px;
+          {% else %}
+          padding-top: 0px;
+          {% endif %}
+          padding-bottom: 60px;
+        {% endif %}
+      {% endif %}
+    }
+  }
+  
+  @media (min-width: 768px) {
+    #three-column-images-{{ _sid }} {
+      {% if section.settings.show_grunge_borders %}
+      padding-top: 50px;
+      padding-bottom: 50px;
+      {% else %}
+        {% if section.settings.both_sections_have_grunge %}
+        padding-top: 140px;
+        padding-bottom: 140px;
+        {% else %}
+          {% if section.settings.previous_section_has_grunge %}
+          padding-top: 140px;
+          {% else %}
+          padding-top: 0px;
+          {% endif %}
+          padding-bottom: 140px;
+        {% endif %}
+      {% endif %}
+      margin-top: {{ section.settings.margin_top_desktop }}px;
+      margin-bottom: {{ section.settings.margin_bottom_desktop }}px;
+    }
+    
+    #three-column-images-{{ _sid }}.has-icons-section {
+      {% if section.settings.show_grunge_borders %}
+      padding-top: 40px;
+      padding-bottom: 40px;
+      {% else %}
+        {% if section.settings.both_sections_have_grunge %}
+        padding-top: 100px;
+        padding-bottom: 100px;
+        {% else %}
+          {% if section.settings.previous_section_has_grunge %}
+          padding-top: 100px;
+          {% else %}
+          padding-top: 0px;
+          {% endif %}
+          padding-bottom: 100px;
+        {% endif %}
+      {% endif %}
+    }
+  }
+  
+  {% if section.settings.show_grunge_borders and section.settings.show_top_grunge %}
+  #three-column-images-{{ _sid }}::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    {% if section.settings.top_grunge_image %}
+    background-color: {{ grunge_color }};
+    -webkit-mask-image: url({{ section.settings.top_grunge_image | img_url: 'master' }});
+    mask-image: url({{ section.settings.top_grunge_image | img_url: 'master' }});
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    -webkit-mask-position: center;
+    mask-position: center;
+    {% endif %}
+    top: {{ section.settings.top_grunge_offset_mobile }}px;
+    height: {{ section.settings.top_grunge_height_mobile }}px;
+    z-index: -1;
+    display: block;
+  }
+  @media (min-width: 768px) {
+    #three-column-images-{{ _sid }}::before {
+      top: {{ section.settings.top_grunge_offset_desktop }}px;
+      height: {{ section.settings.top_grunge_height_desktop }}px;
+    }
+  }
+  {% endif %}
+  
+  {% if section.settings.show_grunge_borders and section.settings.show_bottom_grunge %}
+  #three-column-images-{{ _sid }}::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    {% if section.settings.bottom_grunge_image %}
+    background-color: {{ grunge_color }};
+    -webkit-mask-image: url({{ section.settings.bottom_grunge_image | img_url: 'master' }});
+    mask-image: url({{ section.settings.bottom_grunge_image | img_url: 'master' }});
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    -webkit-mask-position: center;
+    mask-position: center;
+    {% endif %}
+    bottom: {{ section.settings.bottom_grunge_offset }}px;
+    height: {{ section.settings.bottom_grunge_height }}px;
+    z-index: -1;
+    display: block;
+  }
+  {% endif %}
+
+  #three-column-images-{{ _sid }} {
+    {% if section.settings.container_max_width and section.settings.container_max_width != blank %}
+    max-width: {{ section.settings.container_max_width }}px;
+    {% endif %}
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .three-column-grid-{{ _sid }} {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: {{ section.settings.column_gap_desktop | default: 40 }}px;
+    align-items: start;
+  }
+
+  @media (max-width: 767px) {
+    .three-column-grid-{{ _sid }}.has-images {
+      grid-template-columns: 1fr;
+      gap: {{ section.settings.column_gap_mobile | default: 30 }}px;
+    }
+    
+    .three-column-grid-{{ _sid }}.has-icons {
+      grid-template-columns: repeat(3, 1fr);
+      gap: {{ section.settings.column_gap_mobile | default: 30 | divided_by: 2 }}px;
+      row-gap: {{ section.settings.column_gap_mobile | default: 30 | times: 0.75 }}px;
+    }
+  }
+
+  .column-item-{{ _sid }} {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .column-link-{{ _sid }} {
+    display: block;
+    width: 100%;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .column-link-{{ _sid }}:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+
+  @media (max-width: 767px) {
+    .three-column-grid-{{ _sid }}.has-icons .column-link-{{ _sid }}:hover {
+      transform: scale(1.02);
+    }
+  }
+
+  .column-image-{{ _sid }} {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-width: 100%;
+  }
+
+  .column-icon-{{ _sid }} {
+    font-size: 8em;
+    display: block;
+    text-align: center;
+    line-height: 1;
+  }
+
+  @media (max-width: 767px) {
+    .column-icon-{{ _sid }} {
+      font-size: 5em;
+    }
+  }
+
+  .column-text-{{ _sid }} {
+    margin-top: 12px;
+    text-align: center;
+    font-family: 'Acumin Pro', sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
+    color: {% if section.settings.text_color and section.settings.text_color != blank %}{{ section.settings.text_color }}{% else %}var(--accent-1){% endif %};
+    min-height: 1.4em;
+  }
+
+  @media (max-width: 767px) {
+    .three-column-grid-{{ _sid }}.has-icons .column-text-{{ _sid }} {
+      font-size: 16px;
+      margin-top: 8px;
+      min-height: 1em;
+    }
+  }
+
+  .column-content-wrapper-{{ _sid }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+</style>
+
+{%- assign has_any_icons = false -%}
+{%- for block in section.blocks -%}
+  {%- if block.settings.fa_icon and block.settings.fa_icon != blank -%}
+    {%- assign has_any_icons = true -%}
+  {%- endif -%}
+{%- endfor -%}
+
+<div class="three-column-grid-{{ _sid }} {% if has_any_icons %}has-icons{% else %}has-images{% endif %}">
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'column' -%}
+      <div class="column-item-{{ _sid }}" {{ block.shopify_attributes }}>
+        {%- if block.settings.link and block.settings.link != blank -%}
+          <a href="{{ block.settings.link }}" class="column-link-{{ _sid }}">
+            <div class="column-content-wrapper-{{ _sid }}">
+              {%- if block.settings.fa_icon and block.settings.fa_icon != blank -%}
+                <i class="fak fa-{{ block.settings.fa_icon }} column-icon-{{ _sid }}" style="{% if block.settings.icon_color and block.settings.icon_color != blank %}color: {{ block.settings.icon_color }};{% elsif section.settings.icon_color and section.settings.icon_color != blank %}color: {{ section.settings.icon_color }};{% else %}color: var(--featured);{% endif %}"></i>
+              {%- elsif block.settings.image -%}
+                <img 
+                  src="{{ block.settings.image | img_url: 'master' }}" 
+                  alt="{{ block.settings.image.alt | default: block.settings.alt_text }}"
+                  class="column-image-{{ _sid }}"
+                  loading="lazy"
+                >
+              {%- else -%}
+                <div style="background: #f0f0f0; padding: 60px 20px; text-align: center; color: #999;">
+                  {{ 'Image or Icon placeholder' }}
+                </div>
+              {%- endif -%}
+              {%- if block.settings.text and block.settings.text != blank -%}
+                <div class="column-text-{{ _sid }}">{{ block.settings.text }}</div>
+              {%- endif -%}
+            </div>
+          </a>
+        {%- else -%}
+          <div class="column-content-wrapper-{{ _sid }}">
+            {%- if block.settings.fa_icon and block.settings.fa_icon != blank -%}
+              <i class="fak fa-{{ block.settings.fa_icon }} column-icon-{{ _sid }}" style="{% if block.settings.icon_color and block.settings.icon_color != blank %}color: {{ block.settings.icon_color }};{% elsif section.settings.icon_color and section.settings.icon_color != blank %}color: {{ section.settings.icon_color }};{% else %}color: var(--featured);{% endif %}"></i>
+            {%- elsif block.settings.image -%}
+              <img 
+                src="{{ block.settings.image | img_url: 'master' }}" 
+                alt="{{ block.settings.image.alt | default: block.settings.alt_text }}"
+                class="column-image-{{ _sid }}"
+                loading="lazy"
+              >
+            {%- else -%}
+              <div style="background: #f0f0f0; padding: 60px 20px; text-align: center; color: #999;">
+                {{ 'Image or Icon placeholder' }}
+              </div>
+            {%- endif -%}
+            {%- if block.settings.text and block.settings.text != blank -%}
+              <div class="column-text-{{ _sid }}">{{ block.settings.text }}</div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+</div>
+</section>
+
+{% schema %}
+{
+  "name": "Trust Badges",
+  "tag": "section",
+  "class": "three-column-images-section",
+  "settings": [
+    { "type": "header", "content": "Main Section Controls" },
+    { "type": "text", "id": "anchor_tag", "label": "Anchor Tag Value", "info": "Add an anchor ID for linking to this section" },
+    { "type": "checkbox", "id": "use_series_colors", "label": "Use Dynamic Product Series Colors Globally In Section", "default": true, "info": "When enabled, colors will be pulled from the Product Series metaobject" },
+    { "type": "checkbox", "id": "show_grunge_borders", "label": "Show Grunge Borders", "default": false },
+    { "type": "checkbox", "id": "previous_section_has_grunge", "label": "Previous Section Has Grunge Borders", "default": false, "info": "Enable if the section above has grunge borders. Adds top padding to compensate." },
+    { "type": "checkbox", "id": "next_section_has_grunge", "label": "Next Section Has Grunge Borders", "default": false, "info": "Enable if the section below has grunge borders. Adds bottom padding to compensate." },
+    { "type": "checkbox", "id": "both_sections_have_grunge", "label": "Both Adjacent Sections Have Grunge Borders", "default": false, "info": "Enable if BOTH sections above AND below have grunge borders. Adds padding to top and bottom." },
+    { "type": "range", "id": "section_z_index", "label": "Section Z-Index (Layer Order)", "min": 1, "max": 100, "step": 1, "default": 2, "info": "Controls stacking order. Higher numbers appear on top. Adjust if grunge borders overlap incorrectly." },
+    { "type": "text", "id": "section_max_width", "label": "Section Max Width (px)", "info": "Enter pixel value (e.g., 1600) or leave blank for full width", "placeholder": "Leave blank for full width" },
+    { "type": "text", "id": "container_max_width", "label": "Container Max Width (px)", "info": "Enter pixel value (e.g., 1200) or leave blank for default", "placeholder": "1200", "default": "1200" },
+    
+    { "type": "header", "content": "Layout Settings" },
+    { "type": "range", "id": "column_gap_desktop", "label": "Column Gap (Desktop)", "min": 0, "max": 100, "step": 5, "default": 40, "unit": "px" },
+    { "type": "range", "id": "column_gap_mobile", "label": "Column Gap (Mobile)", "min": 0, "max": 60, "step": 5, "default": 30, "unit": "px" },
+    
+    { "type": "header", "content": "Icon & Text Styling" },
+    { "type": "color", "id": "icon_color", "label": "Default Icon Color (Fallback)", "info": "Default color for all icons. Leave blank to use featured series color. Can be overridden per icon in block settings." },
+    { "type": "color", "id": "text_color", "label": "Text Color (Optional)", "info": "Leave blank to use accent 1 series color" },
+    
+    { "type": "header", "content": "Color Controls (Optional)" },
+    { "type": "paragraph", "content": "Leave blank to use dynamic series colors or transparent background." },
+    { "type": "color", "id": "section_bg_color", "label": "Section Background Color (Optional)", "info": "Leave blank for transparent background" },
+    { "type": "image_picker", "id": "section_bg_image", "label": "Section Background Image (Optional)", "info": "If set, this will override the background color" },
+    
+    { "type": "header", "content": "Grunge Borders" },
+    { "type": "select", "id": "grunge_border_color_source", "label": "Grunge Border Color", "default": "featured", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ], "info": "Color tint for grunge border SVG" },
+    { "type": "checkbox", "id": "use_grunge_as_bg", "label": "Use Grunge Border Color as Section Background", "default": false, "info": "When enabled, section background will match the grunge border color" },
+    { "type": "checkbox", "id": "show_top_grunge", "label": "Show Top Grunge Border", "default": false },
+    { "type": "image_picker", "id": "top_grunge_image", "label": "Top Grunge Border Image" },
+    { "type": "range", "id": "top_grunge_height_mobile", "label": "Top Grunge Border Height (Mobile)", "min": 20, "max": 300, "step": 4, "default": 52, "unit": "px" },
+    { "type": "range", "id": "top_grunge_height_desktop", "label": "Top Grunge Border Height (Desktop)", "min": 20, "max": 300, "step": 4, "default": 52, "unit": "px" },
+    { "type": "range", "id": "top_grunge_offset_mobile", "label": "Top Grunge Border Offset (Mobile)", "min": -200, "max": 200, "step": 4, "default": -40, "unit": "px" },
+    { "type": "range", "id": "top_grunge_offset_desktop", "label": "Top Grunge Border Offset (Desktop)", "min": -300, "max": 300, "step": 10, "default": -50, "unit": "px" },
+    { "type": "checkbox", "id": "show_bottom_grunge", "label": "Show Bottom Grunge Border", "default": false },
+    { "type": "image_picker", "id": "bottom_grunge_image", "label": "Bottom Grunge Border Image" },
+    { "type": "range", "id": "bottom_grunge_height", "label": "Bottom Grunge Border Height", "min": 20, "max": 300, "step": 4, "default": 64, "unit": "px" },
+    { "type": "range", "id": "bottom_grunge_offset", "label": "Bottom Grunge Border Offset", "min": -300, "max": 300, "step": 10, "default": -50, "unit": "px" },
+    
+    { "type": "header", "content": "Section Margins" },
+    { "type": "paragraph", "content": "Padding is automatically managed based on grunge border settings. Use margins for additional spacing adjustments if needed." },
+    { "type": "range", "id": "margin_top_desktop", "label": "Margin Top (Desktop)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_bottom_desktop", "label": "Margin Bottom (Desktop)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_top_mobile", "label": "Margin Top (Mobile)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_bottom_mobile", "label": "Margin Bottom (Mobile)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    
+    { "type": "header", "content": "Fallback Colors (When No Series Detected)" },
+    { "type": "paragraph", "content": "These colors are only used when a product has no series assigned. Normally, colors are pulled automatically from the product's series metaobject." },
+    { "type": "color", "id": "bg_color", "label": "Featured/Hero (Red/Gold/Red)", "default": "#AE1F24", "info": "WL: Flagship Red #AE1F24 | Core: Core Gold #E0B357 | Code Red: Code Red #AE1F24" },
+    { "type": "color", "id": "fallback_accent_1", "label": "Accent 1 Light (White/White/Lt Grey)", "default": "#FFFFFF", "info": "WL: Flagship White #FFFFFF | Core: Core White #FFFFFF | Code Red: CR Light Grey #CECECE" },
+    { "type": "color", "id": "fallback_accent_2", "label": "Accent 2 Neutral (Grey/Dk Grey/Grey)", "default": "#999999", "info": "WL: Flagship Grey #999999 | Core: Core Grey #585A5C | Code Red: CR Grey #BCBCBC" },
+    { "type": "color", "id": "fallback_accent_3", "label": "Accent 3 Dark (Black)", "default": "#000000", "info": "All Series: #000000 - Used for text, shadows, and dark backgrounds" }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Column",
+      "settings": [
+        { "type": "header", "content": "Content Type (Choose One)" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "alt_text", "label": "Image Alt Text", "info": "Describe the image for accessibility" },
+        { "type": "paragraph", "content": "OR use a Font Awesome icon instead of an image:" },
+        { "type": "text", "id": "fa_icon", "label": "Font Awesome Icon", "info": "Enter icon name without 'fa-' prefix (e.g., 'flag-usa', 'shield-check', 'award'). Icon takes priority over image if both are set.", "placeholder": "flag-usa" },
+        { "type": "color", "id": "icon_color", "label": "Icon Color", "info": "Optional - customize this icon's color. Leave blank to use section default or series color." },
+        { "type": "header", "content": "Additional Options" },
+        { "type": "textarea", "id": "text", "label": "Text Below Badge", "info": "Optional text to display below the image or icon", "placeholder": "Made in USA" },
+        { "type": "url", "id": "link", "label": "Link URL", "info": "Optional - make this badge clickable" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust Badges",
+      "blocks": [
+        { "type": "column" },
+        { "type": "column" },
+        { "type": "column" }
+      ]
+    }
+  ]
+}
+{% endschema %}

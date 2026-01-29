@@ -1,0 +1,250 @@
+{%- assign raw = product.metafields.custom.description -%}
+{%- if raw and raw != blank -%}
+  {%- comment -%}Product title mapping with proper symbols{%- endcomment -%}
+  {%- assign display_title = product.title -%}
+  {%- case product.handle -%}
+    {%- when '5150-high-stimulant-pre-workout' or '5150-high-stimulant-pre-workout-intl' -%}
+      {%- assign display_title = '5150® High-Stim Pre-Workout' -%}
+    {%- when 'shake-time-real-food-protein' or 'shake-time-real-food-protein-sample' -%}
+      {%- assign display_title = 'Shake Time Real Food®' -%}
+    {%- when 'stage-ready-diuretic' -%}
+      {%- assign display_title = 'Stage Ready®' -%}
+    {%- when 'shred-time' -%}
+      {%- assign display_title = 'Shred Time®' -%}
+    {%- when 'real-carbs-rice-complex-carbohydrates' -%}
+      {%- assign display_title = 'Real Carbs® Rice' -%}
+    {%- when 'real-carbs-complex-carbohydrates' -%}
+      {%- assign display_title = 'Real Carbs®' -%}
+    {%- when 'zma-core' -%}
+      {%- assign display_title = 'ZMA®' -%}
+    {%- when 'fiber-core' -%}
+      {%- assign display_title = 'Core Fiber' -%}
+    {%- when 'fish-oil-core' -%}
+      {%- assign display_title = 'Core Fish Oil' -%}
+    {%- when 'l-glutamine-5000-core' -%}
+      {%- assign display_title = 'Core L-Glutamine 5000' -%}
+    {%- when 'l-citrulline-3000-core' -%}
+      {%- assign display_title = 'Core L-Citrulline 3000' -%}
+    {%- when 'dim-core' -%}
+      {%- assign display_title = 'Core DIM' -%}
+    {%- when 'freak-show-nutrition-partitioner' -%}
+      {%- assign display_title = 'Freak Show®' -%}
+    {%- when 'liquid-l-carnitine-3150' -%}
+      {%- assign display_title = 'Liquid L-Carnitine 3150®' -%}
+    {%- when 'crea-ten-multi-creatine-supplement' -%}
+      {%- assign display_title = 'Crea-TEN®' -%}
+    {%- when 'knocked-out' -%}
+      {%- assign display_title = 'Knocked Out®' -%}
+    {%- when 'alldayyoumay-caffeinated-bcaa' -%}
+      {%- assign display_title = 'All Day You May Caffeinated®' -%}
+    {%- when 'liver-and-organ-defender' -%}
+      {%- assign display_title = 'Liver & Organ Defender' -%}
+    {%- when 'fullaf-preworkout-nitric-oxide-booster' -%}
+      {%- assign display_title = 'FULL AF' -%}
+  {%- endcase -%}
+  {%- assign norm = raw | replace: '&nbsp;', ' ' -%}
+  {%- comment -%}Convert text symbols to proper UTF-8 symbols (with and without spaces){%- endcomment -%}
+  {%- assign norm = norm | replace: ' (R)', '®' | replace: ' (r)', '®' | replace: '(R)', '®' | replace: '(r)', '®' -%}
+  {%- assign norm = norm | replace: ' (TM)', '™' | replace: ' (tm)', '™' | replace: '(TM)', '™' | replace: '(tm)', '™' -%}
+  {%- assign norm = norm | replace: ' (C)', '©' | replace: ' (c)', '©' | replace: '(C)', '©' | replace: '(c)', '©' -%}
+  {%- comment -%}Wrap dagger symbols in sup tags{%- endcomment -%}
+  {%- assign norm = norm | replace: '†', '<sup>†</sup>' -%}
+  {%- comment -%}Fix missing spaces after punctuation{%- endcomment -%}
+  {%- assign norm = norm | replace: '.', '. ' | replace: '!', '! ' | replace: '?', '? ' | replace: '  ', ' ' -%}
+  {%- assign lines = norm | newline_to_br | split: '<br />' -%}
+  <div id="{{ product.handle }}-description">
+    <section class="product-description">
+      {%- assign pending_list_header = '' -%}
+      {%- for _line in lines -%}
+        {%- assign t = _line | strip -%}
+        {%- if t == '' -%}{% continue %}{%- endif -%}
+        {%- comment -%}Skip HTML comments and comment lines{%- endcomment -%}
+        {%- if t contains '<!--' or t contains '-->' -%}{% continue %}{%- endif -%}
+        {%- assign first_two = t | slice: 0, 2 -%}
+        {%- if first_two == '//' or first_two == '/*' -%}{% continue %}{%- endif -%}
+        {%- assign first_char = t | slice: 0, 1 -%}
+        {%- assign last_char = t | slice: -1, 1 -%}
+        {%- if first_char == '[' and last_char == ']' -%}
+          {%- assign token = t | remove_first: '[' | remove_last: ']' | strip -%}
+          {%- assign cmd = token | split: ':' | first | strip | upcase -%}
+          {%- assign payload = token | replace_first: cmd, '' | remove_first: ':' | strip -%}
+          {%- case cmd -%}
+            {%- when 'TITLE' -%}
+              <strong class="product-title-desc">{{ display_title }}</strong>
+            {%- when 'H2' -%}
+              {%- assign h2bits = payload | split: '|' -%}
+              {%- assign h2txt = h2bits[0] | strip | replace: '__TITLE__', product.title | replace: '__HANDLE__', product.handle -%}
+              {%- assign given_id = '' -%}
+              {%- if h2bits.size > 1 -%}{%- assign given_id = h2bits[1] | strip -%}{%- endif -%}
+              {%- assign auto_id = h2txt | handle -%}
+              <h2 class="description-header"{% if given_id or auto_id %} id="{{ given_id | default: auto_id }}"{% endif %}>{{ h2txt | raw }}</h2>
+            {%- when 'H3' -%}
+              {%- assign h3txt = payload | replace: '__TITLE__', product.title | replace: '__HANDLE__', product.handle -%}
+              <h3 class="featured-title">{{ h3txt | raw }}</h3>
+            {%- when 'SPOT' -%}
+              {%- assign spot = payload | strip -%}
+              {%- assign title_wrap = '<strong class="product-title-inline">' | append: display_title | append: '</strong>' -%}
+              {%- assign spot_html = spot | replace: '__TITLE__', title_wrap | replace: '__HANDLE__', product.handle -%}
+              <strong class="description-spotlight">{{ spot_html | raw }}</strong>
+            {%- when 'P' -%}
+              {%- assign paras = payload | split: '||' -%}
+              {%- for p in paras -%}
+                {%- assign ptxt = p | strip -%}
+                {%- assign last_char = ptxt | slice: -1, 1 -%}
+                {%- unless last_char == '.' or last_char == '!' or last_char == '?' -%}
+                  {%- assign ptxt = ptxt | append: '.' -%}
+                {%- endunless -%}
+                {%- assign title_wrap = '<strong class="product-title-inline">' | append: display_title | append: '</strong>' -%}
+                {%- assign ptxt_html = ptxt | replace: '__TITLE__', title_wrap | replace: '__HANDLE__', product.handle -%}
+                {%- if ptxt != '' -%}<p>{{ ptxt_html | raw }}</p>{%- endif -%}
+              {%- endfor -%}
+            {%- when 'SUB' -%}
+              {%- assign pair = payload | split: '||' -%}
+              {%- assign sub_head = pair[0] | strip | replace: '__TITLE__', product.title | replace: '__HANDLE__', product.handle -%}
+              {%- assign sub_para = '' -%}
+              {%- if pair.size > 1 -%}
+                {%- assign sub_para = pair[1] | strip -%}
+                {%- assign last_char = sub_para | slice: -1, 1 -%}
+                {%- unless last_char == '.' or last_char == '!' or last_char == '?' -%}
+                  {%- assign sub_para = sub_para | append: '.' -%}
+                {%- endunless -%}
+                {%- assign title_wrap = '<strong class="product-title-inline">' | append: display_title | append: '</strong>' -%}
+                {%- assign sub_para = sub_para | replace: '__TITLE__', title_wrap | replace: '__HANDLE__', product.handle -%}
+              {%- endif -%}
+              {%- if sub_head != '' -%}<strong class="featured-text">{{ sub_head | raw }}</strong>{%- endif -%}
+              {%- if sub_para != '' -%}
+                <p class="sub-paragraph">{{ sub_para | raw }}</p>
+                {%- assign pending_list_header = '' -%}
+              {%- else -%}
+                {%- assign pending_list_header = sub_head -%}
+              {%- endif -%}
+            {%- when 'LISTH' -%}
+              {%- assign items = payload | split: '||' -%}
+              {%- assign header = items[0] | strip | replace: '__TITLE__', product.title | replace: '__HANDLE__', product.handle -%}
+              {%- assign count = 0 -%}
+              {%- for it in items offset:1 -%}
+                {%- assign clean = it | strip | replace: '__TITLE__', product.title | replace: '__HANDLE__', product.handle -%}
+                {%- if clean != '' -%}{%- assign count = count | plus: 1 -%}{%- endif -%}
+              {%- endfor -%}
+              {%- if header != '' -%}<strong class="featured-text">{{ header | raw }}</strong>{%- endif -%}
+              {%- if count > 1 -%}
+                <ul class="list-group">
+                  {%- for it in items offset:1 -%}
+                    {%- assign clean = it | strip -%}
+                    {%- if clean != '' -%}
+                      {%- assign has_colon = false -%}
+                      {%- assign has_semicolon = false -%}
+                      {%- assign colon_pos = clean | split: ':' -%}
+                      {%- assign semicolon_pos = clean | split: ';' -%}
+                      {%- if colon_pos.size > 1 -%}{%- assign has_colon = true -%}{%- endif -%}
+                      {%- if semicolon_pos.size > 1 -%}{%- assign has_semicolon = true -%}{%- endif -%}
+                      {%- if has_colon or has_semicolon -%}
+                        {%- comment -%}Use whichever delimiter comes first{%- endcomment -%}
+                        {%- assign colon_idx = clean | split: ':' | first | size -%}
+                        {%- assign semicolon_idx = clean | split: ';' | first | size -%}
+                        {%- if has_colon and has_semicolon -%}
+                          {%- if colon_idx <= semicolon_idx -%}
+                            {%- assign label = colon_pos[0] | append: ':' -%}
+                            {%- assign rest = clean | replace_first: label, '' | strip -%}
+                          {%- else -%}
+                            {%- assign label = semicolon_pos[0] | append: ';' -%}
+                            {%- assign rest = clean | replace_first: label, '' | strip -%}
+                          {%- endif -%}
+                        {%- elsif has_colon -%}
+                          {%- assign label = colon_pos[0] | append: ':' -%}
+                          {%- assign rest = clean | replace_first: label, '' | strip -%}
+                        {%- else -%}
+                          {%- assign label = semicolon_pos[0] | append: ';' -%}
+                          {%- assign rest = clean | replace_first: label, '' | strip -%}
+                        {%- endif -%}
+                        {%- assign title_wrap = '<strong class="product-title-inline">' | append: display_title | append: '</strong>' -%}
+                        {%- assign rest_html = rest | replace: '__TITLE__', title_wrap | replace: '__HANDLE__', product.handle -%}
+                        <li class="description-list"><strong>{{ label | raw }}</strong><br>{{ rest_html | raw }}</li>
+                      {%- else -%}
+                        {%- assign title_wrap = '<strong class="product-title-inline">' | append: display_title | append: '</strong>' -%}
+                        {%- assign clean_html = clean | replace: '__TITLE__', title_wrap | replace: '__HANDLE__', product.handle -%}
+                        <li class="description-list">{{ clean_html | raw }}</li>
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              {%- elsif count == 1 -%}
+                {%- for it in items offset:1 -%}
+                  {%- assign clean = it | strip -%}
+                  {%- if clean != '' -%}
+                    {%- assign last_char = clean | slice: -1, 1 -%}
+                    {%- unless last_char == '.' or last_char == '!' or last_char == '?' -%}
+                      {%- assign clean = clean | append: '.' -%}
+                    {%- endunless -%}
+                    {%- assign title_wrap = '<strong class="product-title-inline">' | append: display_title | append: '</strong>' -%}
+                    {%- assign clean_html = clean | replace: '__TITLE__', title_wrap | replace: '__HANDLE__', product.handle -%}
+                    <p>{{ clean_html | raw }}</p>{% break %}
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endif -%}
+              {%- assign pending_list_header = '' -%}
+            {%- when 'LIST' -%}
+              {%- assign items = payload | split: '||' -%}
+              {%- assign count = 0 -%}
+              {%- for it in items -%}
+                {%- assign clean = it | strip | replace: '__TITLE__', product.title | replace: '__HANDLE__', product.handle -%}
+                {%- if clean != '' -%}{%- assign count = count | plus: 1 -%}{%- endif -%}
+              {%- endfor -%}
+              {%- if pending_list_header != '' -%}
+                <strong class="featured-text">{{ pending_list_header | raw }}</strong>
+                {%- assign pending_list_header = '' -%}
+              {%- endif -%}
+              {%- if count > 1 -%}
+                <ul class="list-group">
+                  {%- for it in items -%}
+                    {%- assign clean = it | strip -%}
+                    {%- if clean != '' -%}
+                      {%- assign colon_pos = clean | split: ':' -%}
+                      {%- if colon_pos.size > 1 -%}
+                        {%- assign label = colon_pos[0] | append: ':' -%}
+                        {%- assign rest = clean | replace_first: label, '' | strip -%}
+                        {%- assign title_wrap = '<strong class="product-title-inline">' | append: display_title | append: '</strong>' -%}
+                        {%- assign rest_html = rest | replace: '__TITLE__', title_wrap | replace: '__HANDLE__', product.handle -%}
+                        <li class="description-list"><strong>{{ label | raw }}</strong> {{ rest_html | raw }}</li>
+                      {%- else -%}
+                        {%- assign title_wrap = '<strong class="product-title-inline">' | append: display_title | append: '</strong>' -%}
+                        {%- assign clean_html = clean | replace: '__TITLE__', title_wrap | replace: '__HANDLE__', product.handle -%}
+                        <li class="description-list">{{ clean_html | raw }}</li>
+
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              {%- elsif count == 1 -%}
+                {%- for it in items -%}
+                  {%- assign clean = it | strip -%}
+                  {%- if clean != '' -%}
+                    {%- assign last_char = clean | slice: -1, 1 -%}
+                    {%- unless last_char == '.' or last_char == '!' or last_char == '?' -%}
+                      {%- assign clean = clean | append: '.' -%}
+                    {%- endunless -%}
+                    {%- assign title_wrap = '<strong class="product-title-inline">' | append: display_title | append: '</strong>' -%}
+                    {%- assign clean_html = clean | replace: '__TITLE__', title_wrap | replace: '__HANDLE__', product.handle -%}
+                    <p>{{ clean_html | raw }}</p>{% break %}
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endif -%}
+            {%- when 'NOTE' -%}
+              {%- assign _ = nil -%}
+          {%- endcase -%}
+        {%- else -%}
+          {%- assign plain = t | strip -%}
+          {%- if plain != '' -%}
+            {%- assign last_char = plain | slice: -1, 1 -%}
+            {%- unless last_char == '.' or last_char == '!' or last_char == '?' -%}
+              {%- assign plain = plain | append: '.' -%}
+            {%- endunless -%}
+            {%- assign title_wrap = '<strong class="product-title-inline">' | append: display_title | append: '</strong>' -%}
+            {%- assign plain_html = plain | replace: '__TITLE__', title_wrap | replace: '__HANDLE__', product.handle -%}
+            <p>{{ plain_html | raw }}</p>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </section>
+  </div>
+{%- endif -%}

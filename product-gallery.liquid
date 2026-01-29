@@ -1,18 +1,6 @@
 {%- assign default_media = product.selected_or_first_available_variant.featured_media | default: product.featured_media -%}
 {%- capture product_form_id -%}product-form-{{ product.id }}-{{ section.id }}{%- endcapture -%}
 {%- capture product_gallery_id -%}product-gallery-{{ product.id }}-{{ section.id }}{%- endcapture -%}
-{% assign product_sfp_raw = product.metafields.custom.sfp_section.value %}
-{% assign product_sfp = product_sfp_raw | first | default: product_sfp_raw %}
-{% assign product_series = product_sfp.series.value %}
-{% assign series_handle = product_series.handle %}
-{% if series_handle == blank %}
-  {% assign series_name_lower = product_series.series_name | downcase | replace: ' ', '-' %}
-  {% assign series_handle = series_name_lower %}
-{% endif %}
-{% assign is_gladiator_series = false %}
-{% if series_handle contains 'gladiator' %}
-  {% assign is_gladiator_series = true %}
-{% endif %}
 
 {% assign filtered_indexes = null | sort %}
 
@@ -46,9 +34,6 @@
 .gallery-nav-arrow.prev{left:0!important}
 .gallery-nav-arrow.next{right:0!important}
 .gallery-nav-arrow svg{width:18px;height:18px;fill:#333}
-.product-gallery__thumbnail-list-wrapper.is-gladiator-series .gallery-nav-arrow{background:rgb(0 0 0 / 49%)!important}
-.product-gallery__thumbnail-list-wrapper.is-gladiator-series .gallery-nav-arrow svg{fill:var(--series-featured-color,#AE1F24);color:var(--series-featured-color,#AE1F24)}
-.product-gallery__thumbnail-list-wrapper.is-gladiator-series .gallery-nav-arrow svg path{stroke:var(--series-featured-color,#AE1F24)}
 .video-play-button{position:absolute;top:50px;right:20px;width:105px;height:105px;border-radius:50%;cursor:pointer;z-index:100;animation:pulse-button 2s ease-in-out infinite}
 .video-play-button::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;padding:0;border-radius:50%;background:var(--series-featured,#8B1419);opacity:.35;animation:pulse-ring 2s ease-in-out infinite;z-index:-1}
 .video-play-button-inner{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;z-index:10}
@@ -110,7 +95,7 @@
 
 <product-gallery form="{{ product_form_id }}"
   {%- if section.settings.enable_image_zoom -%}allow-zoom="{{ section.settings.max_image_zoom_level }}"{% endif %}
-  class="product-gallery {% if section.settings.mobile_carousel_control contains 'dots' %}product-gallery--mobile-dots{% endif %} {% if section.settings.desktop_media_layout contains 'grid' %}product-gallery--desktop-grid{% else %}product-gallery--desktop-carousel{% endif %} {% if section.settings.desktop_media_layout == 'carousel_thumbnails_left' %}product-gallery--desktop-thumbnails-left{% endif %} {% if section.settings.mobile_media_size == 'expanded' %}product-gallery--mobile-expanded{% endif %} {% if is_gladiator_series %}is-gladiator-series{% endif %}">
+  class="product-gallery {% if section.settings.mobile_carousel_control contains 'dots' %}product-gallery--mobile-dots{% endif %} {% if section.settings.desktop_media_layout contains 'grid' %}product-gallery--desktop-grid{% else %}product-gallery--desktop-carousel{% endif %} {% if section.settings.desktop_media_layout == 'carousel_thumbnails_left' %}product-gallery--desktop-thumbnails-left{% endif %} {% if section.settings.mobile_media_size == 'expanded' %}product-gallery--mobile-expanded{% endif %}">
 
   <div class="product-gallery__ar-wrapper">
     <div class="product-gallery__media-list-wrapper">
@@ -176,7 +161,7 @@
 </product-gallery>
 
 {%- if product.media.size > 1 -%}
-<scroll-shadow class="product-gallery__thumbnail-list-wrapper{% if is_gladiator_series %} is-gladiator-series{% endif %}">
+<scroll-shadow class="product-gallery__thumbnail-list-wrapper">
   <button id="gallery-nav-prev-{{ section.id }}" class="gallery-nav-arrow prev" data-gallery-action="prev" aria-label="Previous image">
     <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none"/></svg>
   </button>

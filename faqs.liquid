@@ -1,0 +1,720 @@
+{% assign _sid = section.id %}
+{% assign faq_group = product.metafields.custom.faqs.value %}
+{% assign warnings_data = product.metafields.custom.product_warnings.value %}
+{% assign references = product.metafields.custom.references.value %}
+{% assign current_variant = product.selected_or_first_available_variant %}
+{% assign vsfp_entry = nil %}
+{% if current_variant.metafields.custom.sfp_section and current_variant.metafields.custom.sfp_section.value %}
+  {% assign vsfp_entry = current_variant.metafields.custom.sfp_section.value %}
+{% endif %}
+{% assign suggested_use_text = '' %}
+{% if vsfp_entry and vsfp_entry.suggested_use %}
+  {% assign suggested_use_text = vsfp_entry.suggested_use | strip %}
+{% endif %}
+{%- if section.settings.use_series_colors -%}
+  {%- assign sfp_list = product.metafields.custom.sfp_section.value -%}
+  {%- assign sfp_section = sfp_list | first -%}
+  {%- assign product_series = sfp_section.series.value -%}
+  {%- if product_series -%}
+    {%- assign featured_color = product_series.template_specific_dynamic_featured_color | default: section.settings.bg_color -%}
+    {%- assign accent_colors = product_series.template_specific_accent_color_s -%}
+    {%- assign accent_1 = accent_colors[0] | default: section.settings.fallback_accent_1 -%}
+    {%- assign accent_2 = accent_colors[1] | default: section.settings.fallback_accent_2 -%}
+    {%- assign accent_3 = accent_colors[2] | default: section.settings.fallback_accent_3 -%}
+  {%- else -%}
+    {%- assign featured_color = section.settings.bg_color -%}
+    {%- assign accent_1 = section.settings.fallback_accent_1 -%}
+    {%- assign accent_2 = section.settings.fallback_accent_2 -%}
+    {%- assign accent_3 = section.settings.fallback_accent_3 -%}
+  {%- endif -%}
+{%- else -%}
+  {%- assign featured_color = section.settings.bg_color -%}
+  {%- assign accent_1 = section.settings.fallback_accent_1 -%}
+  {%- assign accent_2 = section.settings.fallback_accent_2 -%}
+  {%- assign accent_3 = section.settings.fallback_accent_3 -%}
+{%- endif -%}
+{%- case section.settings.grunge_border_color_source -%}
+  {%- when 'featured' -%}{%- assign grunge_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign grunge_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign grunge_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign grunge_color = accent_3 -%}
+  {%- else -%}{%- assign grunge_color = featured_color -%}
+{%- endcase -%}
+{%- assign grunge_color = grunge_color | default: section.settings.fallback_accent_1 -%}
+{%- if section.settings.use_grunge_as_bg -%}
+  {%- assign section_bg_color = grunge_color -%}
+{%- elsif section.settings.section_bg_color and section.settings.section_bg_color != blank -%}
+  {%- assign section_bg_color = section.settings.section_bg_color -%}
+{%- else -%}
+  {%- assign section_bg_color = section.settings.bg_color -%}
+{%- endif -%}
+{%- if section.settings.text_color_source and section.settings.text_color_source != blank -%}
+  {%- case section.settings.text_color_source -%}
+    {%- when 'featured' -%}{%- assign dynamic_text_color = featured_color -%}
+    {%- when 'accent_1' -%}{%- assign dynamic_text_color = accent_1 -%}
+    {%- when 'accent_2' -%}{%- assign dynamic_text_color = accent_2 -%}
+    {%- when 'accent_3' -%}{%- assign dynamic_text_color = accent_3 -%}
+    {%- else -%}{%- assign dynamic_text_color = section.settings.text_color -%}
+  {%- endcase -%}
+{%- else -%}
+  {%- assign dynamic_text_color = section.settings.text_color -%}
+{%- endif -%}
+{%- if section.settings.inactive_tab_color_source and section.settings.inactive_tab_color_source != blank -%}
+  {%- case section.settings.inactive_tab_color_source -%}
+    {%- when 'featured' -%}{%- assign inactive_tab_color = featured_color -%}
+    {%- when 'accent_1' -%}{%- assign inactive_tab_color = accent_1 -%}
+    {%- when 'accent_2' -%}{%- assign inactive_tab_color = accent_2 -%}
+    {%- when 'accent_3' -%}{%- assign inactive_tab_color = accent_3 -%}
+    {%- else -%}{%- assign inactive_tab_color = '#999999' -%}
+  {%- endcase -%}
+{%- else -%}
+  {%- assign inactive_tab_color = '#999999' -%}
+{%- endif -%}
+{%- if section.settings.inactive_tab_hover_color_source and section.settings.inactive_tab_hover_color_source != blank -%}
+  {%- case section.settings.inactive_tab_hover_color_source -%}
+    {%- when 'featured' -%}{%- assign inactive_hover_color = featured_color -%}
+    {%- when 'accent_1' -%}{%- assign inactive_hover_color = accent_1 -%}
+    {%- when 'accent_2' -%}{%- assign inactive_hover_color = accent_2 -%}
+    {%- when 'accent_3' -%}{%- assign inactive_hover_color = accent_3 -%}
+    {%- else -%}{%- assign inactive_hover_color = featured_color -%}
+  {%- endcase -%}
+{%- else -%}
+  {%- assign inactive_hover_color = featured_color -%}
+{%- endif -%}
+{% if faq_group != blank and faq_group.faqs != blank or references != blank or warnings_data != blank or suggested_use_text != blank %}
+  {% if section.settings.anchor_id != blank %}<a name="{{ section.settings.anchor_id }}"></a>{% endif %}
+  <section 
+    id="five-nation-{{ _sid }}" 
+    {% if section.settings.anchor_tag and section.settings.anchor_tag != blank %}data-anchor="{{ section.settings.anchor_tag }}"{% endif %}
+    class="fivenation-section section-{{ _sid }}{% if section.settings.hide_on_mobile %} hide_mobile{% endif %}"
+  >
+    <style>
+      #five-nation-{{ _sid }}{
+        --bg: {{ section_bg_color }};
+        --text: {{ dynamic_text_color }};
+        --series-bg: {{ featured_color }};
+        --inactive-tab: {{ inactive_tab_color }};
+        --inactive-hover: {{ inactive_hover_color }};
+        --featured: {{ featured_color }};
+        --accent-1: {{ accent_1 }};
+        --accent-2: {{ accent_2 }};
+        --accent-3: {{ accent_3 }};
+        --content-max: 1400px;
+        --sidebar-w: 280px;
+        {% if section.settings.section_bg_image %}
+        background-image: url({{ section.settings.section_bg_image | img_url: 'master' }});
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        {% else %}
+        background: var(--bg);
+        {% endif %}
+        position: relative;
+        z-index: {{ section.settings.section_z_index | default: 2 }};
+        {% if section.settings.section_max_width and section.settings.section_max_width != blank %}
+        max-width: {{ section.settings.section_max_width }}px;
+        margin-left: auto;
+        margin-right: auto;
+        {% endif %}
+        color: var(--text);
+      }
+      @media (max-width: 767px) {
+        #five-nation-{{ _sid }} {
+          {% if section.settings.show_grunge_borders %}
+          padding-top: {{ section.settings.padding_top_mobile }}px;
+          padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+          {% else %}
+            {% if section.settings.both_sections_have_grunge %}
+            padding-top: calc({{ section.settings.padding_top_mobile }}px + 50px);
+            padding-bottom: calc({{ section.settings.padding_bottom_mobile }}px + 50px);
+            {% else %}
+              {% if section.settings.previous_section_has_grunge %}
+              padding-top: calc({{ section.settings.padding_top_mobile }}px + 50px);
+              {% else %}
+              padding-top: 0px;
+              {% endif %}
+              {% if section.settings.next_section_has_grunge %}
+              padding-bottom: calc({{ section.settings.padding_bottom_mobile }}px + 50px);
+              {% else %}
+              padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          margin-top: {{ section.settings.margin_top_mobile }}px;
+          margin-bottom: {{ section.settings.margin_bottom_mobile }}px;
+        }
+      }
+      @media (min-width: 768px) {
+        #five-nation-{{ _sid }} {
+          {% if section.settings.show_grunge_borders %}
+          padding-top: {{ section.settings.padding_top_desktop }}px;
+          padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+          {% else %}
+            {% if section.settings.both_sections_have_grunge %}
+            padding-top: calc({{ section.settings.padding_top_desktop }}px + 90px);
+            padding-bottom: calc({{ section.settings.padding_bottom_desktop }}px + 90px);
+            {% else %}
+              {% if section.settings.previous_section_has_grunge %}
+              padding-top: calc({{ section.settings.padding_top_desktop }}px + 90px);
+              {% else %}
+              padding-top: 0px;
+              {% endif %}
+              {% if section.settings.next_section_has_grunge %}
+              padding-bottom: calc({{ section.settings.padding_bottom_desktop }}px + 90px);
+              {% else %}
+              padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          margin-top: {{ section.settings.margin_top_desktop }}px;
+          margin-bottom: {{ section.settings.margin_bottom_desktop }}px;
+        }
+      }
+      #five-nation-{{ _sid }} .t-center{ text-align:center }
+      #five-nation-{{ _sid }} .text-uppercase{ text-transform:uppercase }
+      #five-nation-{{ _sid }} .product-h2{ font-size:1.5rem; line-height:34px; font-family:'Gunplay' }
+      #five-nation-{{ _sid }} .full-underline{ padding-left:30px; padding-right:30px; display:inline-block }
+      #five-nation-{{ _sid }} .full-underline.full-underline--fivenation{ display:inline-block; position:relative; padding-bottom:.3em; margin:0 auto }
+      #five-nation-{{ _sid }} .sidebar-tabs .full-underline.full-underline--fivenation:before { content:''; position:absolute; bottom:0; left:0; width:100%; height:2px; background-color:var(--series-bg); }
+      #five-nation-{{ _sid }} .faq-container{
+        {% if section.settings.container_max_width and section.settings.container_max_width != blank %}
+        max-width: {{ section.settings.container_max_width }}px;
+        margin-left: auto;
+        margin-right: auto;
+        {% endif %}
+      }
+      #five-nation-{{ _sid }} .faq-accordion{ margin:0; padding:0; }
+      #five-nation-{{ _sid }} .faq-accordion details{ border-top:1px solid #d9d9d9; padding:18px 0; }
+      #five-nation-{{ _sid }} .faq-accordion details:first-child{ border-top:none; padding-top:0; margin-top:0; }
+      #five-nation-{{ _sid }} .faq-accordion summary{ list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap: 0px 2.5px; outline:none; }
+      #five-nation-{{ _sid }} .faq-accordion summary::-webkit-details-marker{ display:none; }
+      #five-nation-{{ _sid }} .faq-accordion .summary-text{ text-align:left; font-family:'Acumin Pro Bold'; font-size:16px; line-height:26px; margin:0; }
+      #five-nation-{{ _sid }} .faq-accordion .faq-icon{ font-size:20px; line-height:1; margin-left:1rem; transition:transform .32s ease, color .32s ease; color: var(--inactive-tab); }
+      #five-nation-{{ _sid }} .faq-accordion details[open] .faq-icon{ transform:rotate(45deg); color: var(--series-bg); }
+      #five-nation-{{ _sid }} .faq-panel{ overflow:hidden; height:0; transition:height 320ms ease; will-change:height; padding-right:35px !important; }
+      #five-nation-{{ _sid }} .faq-panel-inner{ padding-top:15px; line-height:1.6; text-align:left; }
+      #five-nation-{{ _sid }} .references-section{ padding:0; background:none }
+      #five-nation-{{ _sid }} .references_font_header{ color:#999; text-transform:uppercase; font-family:"Acumin Pro Bold"; font-size:16px; line-height:1.75em; margin-bottom:2px }
+      #five-nation-{{ _sid }} .references_font{ color:#999; font-size:12px }
+      #five-nation-{{ _sid }} .references_font ol{ margin:0; padding:0; list-style-position:inside; display:block; list-style-type:decimal; margin-inline-start:0px; margin-inline-end:0px }
+      #five-nation-{{ _sid }} .references_font li{ display:list-item; text-align:-webkit-match-parent }
+      #five-nation-{{ _sid }} .references_font_sub_header{ color:#999; text-transform:uppercase; margin-top:18px; font-family:"Acumin Pro Bold"; font-size:16px; line-height:1.75em; margin-bottom:2px }
+      #five-nation-{{ _sid }} .references_font_p65warning{ color:#999; font-size:12px; margin-top:10px; border:1px #cccccc solid; padding:12px 18px }
+      #five-nation-{{ _sid }} .svg-inline--fa{ display:inline-block; height:1em; overflow:visible; vertical-align:-.125em }
+      #five-nation-{{ _sid }} .references_font_p65warning a{ color:#999 }
+      #five-nation-{{ _sid }} .fda-disclaimer{ border:1px #cccccc solid; padding:12px 18px; color:#999; font-size:12px; margin-bottom:15px }
+      #five-nation-{{ _sid }} .hidden-template-tabs{ display:none }
+      #five-nation-{{ _sid }} .suggested-use{ line-height:1.7; font-size:16px; }
+      #five-nation-{{ _sid }} .suggested-use p{ margin:0 0 10px 0; }
+      #five-nation-{{ _sid }} .suggested-use ul{ list-style:disc; padding-left:20px; margin:0 0 10px 20px; }
+      #five-nation-{{ _sid }} .suggested-use ol{ list-style:decimal; padding-left:20px; margin:0 0 10px 20px; }
+      #five-nation-{{ _sid }} sup{ font-size:0.6em !important; vertical-align:super; line-height:0; position:relative; top:-0.5em; }
+      #five-nation-{{ _sid }} .product-h4 sup{ font-size:0.6em !important; }
+      #five-nation-{{ _sid }} .faq-answer sup{ font-size:0.6em !important; }
+      #five-nation-{{ _sid }} .product-h4,
+      #five-nation-{{ _sid }} .faq-answer{ font-variant-numeric:normal; font-feature-settings:normal; }
+      @media screen and (min-width:1200px){
+        #five-nation-{{ _sid }} .faq-container{ padding-left: 0; padding-right: 0 }
+      }
+      @media screen and (min-width:1025px){
+        #five-nation-{{ _sid }} .faq-container{ padding-left: 0; padding-right: 0 }
+        #five-nation-{{ _sid }} .product-h2{ font-size:2rem }
+      }
+      @media screen and (max-width:1024px){
+        #five-nation-{{ _sid }} .product-h2{ font-size:1.5rem }
+      }
+      @media screen and (max-width:768px){
+        #five-nation-{{ _sid }} .faq-container{ padding-left:16px; padding-right:16px }
+        #five-nation-{{ _sid }} .faq-answer{ padding-right:0 }
+        #five-nation-{{ _sid }} .tabs-content-wrapper{ display:block !important; flex-direction:column }
+        #five-nation-{{ _sid }} .active-tab-holder{ display:none !important }
+        #five-nation-{{ _sid }} .mobile-tabs-wrapper{ display:block; margin-bottom:20px; width:100%; overflow:hidden; position:relative }
+        #five-nation-{{ _sid }} .mobile-tab-scroller{ overflow-x:auto; overflow-y:hidden; scrollbar-width:none; -ms-overflow-style:none }
+        #five-nation-{{ _sid }} .mobile-tab-scroller::-webkit-scrollbar{ display:none }
+        #five-nation-{{ _sid }} .mobile-tabs{ display:flex; position:relative; min-width:max-content; padding:0; gap:20px }
+        #five-nation-{{ _sid }} .mobile-tab{ flex:0 0 auto; white-space:nowrap; cursor:pointer; padding:0; border:none; background:none; position:relative }
+        #five-nation-{{ _sid }} .mobile-tab .full-underline{ font-family:gunplay,sans-serif; font-weight:400; font-style:normal; text-transform:uppercase; font-size:1.2rem; line-height:1.2; color:var(--text); position:relative; padding-bottom:.3em; margin:0; text-align:left; display:inline-block; padding-left:0; padding-right:0 }
+        #five-nation-{{ _sid }} .mobile-tab .full-underline:before{ position:absolute; width:50%; height:2px; background-color:var(--series-bg); content:""; bottom:-2px; left:0 }
+        #five-nation-{{ _sid }} .mobile-tab:not(.active) .full-underline{ color:#999 }
+        #five-nation-{{ _sid }} .mobile-tab:not(.active) .full-underline:before{ background-color:#999 !important }
+        #five-nation-{{ _sid }} .main-tabs-container{ display:none }
+        #five-nation-{{ _sid }} .main-content-area{ width:100%; padding:0 }
+        #five-nation-{{ _sid }} .faq-panel{ padding-right:0 !important; }
+      }
+      @media screen and (min-width:769px) {
+        #five-nation-{{ _sid }} .mobile-tabs-wrapper { display: none; }
+        #five-nation-{{ _sid }} .tabs-content-wrapper {
+          display: grid;
+          grid-template-columns: var(--sidebar-w) 1fr;
+          grid-template-areas: ". active" "sidebar content";
+          column-gap: 80px;
+          row-gap: 20px;
+          max-width: var(--content-max);
+          margin: 0 auto;
+          padding: 0 60px;
+          position: relative;
+          opacity: 1;
+          transition: opacity 0.3s ease-out;
+          align-items: start;
+        }
+        #five-nation-{{ _sid }} .tabs-content-wrapper.content-transition { transition: opacity 0.2s ease-out; }
+        #five-nation-{{ _sid }} .main-tabs-container { grid-area: sidebar; padding-top: 0; }
+        #five-nation-{{ _sid }} .main-content-area { grid-area: content; width: 100%; padding-top: 0; }
+        #five-nation-{{ _sid }} .active-tab-holder { grid-area: active; padding: 20px 0 0 0; margin-top: -4px; }
+        #five-nation-{{ _sid }} .active-tab-holder .main-tab { margin: 0; padding: 0; }
+        #five-nation-{{ _sid }} .main-tabs-container .main-tab { margin-bottom: 32px; display: block; width: 100%; transition: all 0.3s ease; }
+        #five-nation-{{ _sid }} .main-tabs-container .main-tab:hover { opacity: 1; }
+        #five-nation-{{ _sid }} .main-tab:not(.active) .full-underline:hover{ color: var(--inactive-hover); transition: all 0.3s ease; }
+        #five-nation-{{ _sid }} .main-tab:not(.active) .full-underline:before{ background-color: #999 !important; opacity: 0.5; transition: all 0.3s ease; }
+        #five-nation-{{ _sid }} .main-tab:not(.active) .full-underline:hover:before{ background-color: var(--inactive-tab) !important; opacity: 1; transition: all 0.3s ease; }
+        #five-nation-{{ _sid }} .main-tabs-container .main-tab.active { opacity: 1; font-weight: bold; }
+        #five-nation-{{ _sid }} .main-tabs-container{ grid-area: sidebar; display:block }
+        #five-nation-{{ _sid }} .desktop-tabs{ display:block }
+        #five-nation-{{ _sid }} .sidebar-tabs{ grid-area: sidebar }
+        #five-nation-{{ _sid }} .active-tab-holder{ grid-area: active }
+        #five-nation-{{ _sid }} .main-content-area{ grid-area: content; width:100% }
+        #five-nation-{{ _sid }} .sidebar-tabs .main-tab{ display: block; width: 100%; text-align: left; margin: 0 0 40px 0; padding: 0; box-sizing: border-box; }
+        #five-nation-{{ _sid }} .main-tab{ cursor:pointer; padding:0; border:none; background:none; position:relative }
+        #five-nation-{{ _sid }} .main-tab .full-underline{
+          font-family: gunplay, sans-serif; font-weight: 400; font-style: normal; text-transform: uppercase; position: relative; display: block; width: 100%;
+          padding: 0 0 5px 0; margin: 0; line-height: 1.2; font-size: 1.5rem; text-align: left; box-sizing: border-box;
+        }
+        #five-nation-{{ _sid }} .active-tab-holder .main-tab .full-underline { font-size: 2rem; text-align: left; margin: 0 0 20px 0; padding-bottom: 10px; }
+        #five-nation-{{ _sid }} .main-tab[data-target="faqs"].active .full-underline:before { width: 50px !important; }
+      }
+      #five-nation-{{ _sid }} .main-tab.active .full-underline:before{ background-color:var(--series-bg) !important }
+      #five-nation-{{ _sid }} .main-tab:not(.active) .full-underline{ color:#999 }
+      #five-nation-{{ _sid }} .tab-content{ display:none }
+      #five-nation-{{ _sid }} .tab-content.active{ display:block }
+      {% if section.settings.show_grunge_borders and section.settings.show_top_grunge %}
+      #five-nation-{{ _sid }}::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100vw;
+        {% if section.settings.top_grunge_image %}
+        background-color: {{ grunge_color }};
+        -webkit-mask-image: url({{ section.settings.top_grunge_image | img_url: 'master' }});
+        mask-image: url({{ section.settings.top_grunge_image | img_url: 'master' }});
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: cover;
+        mask-size: cover;
+        -webkit-mask-position: center;
+        mask-position: center;
+        {% endif %}
+        top: {{ section.settings.top_grunge_offset_mobile }}px;
+        height: {{ section.settings.top_grunge_height_mobile }}px;
+        z-index: 0;
+        display: block;
+      }
+      @media (min-width: 768px) {
+        #five-nation-{{ _sid }}::before {
+          top: {{ section.settings.top_grunge_offset_desktop }}px;
+          height: {{ section.settings.top_grunge_height_desktop }}px;
+        }
+      }
+      {% endif %}
+      {% if section.settings.show_grunge_borders and section.settings.show_bottom_grunge %}
+      #five-nation-{{ _sid }}::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100vw;
+        {% if section.settings.bottom_grunge_image %}
+        background-color: {{ grunge_color }};
+        -webkit-mask-image: url({{ section.settings.bottom_grunge_image | img_url: 'master' }});
+        mask-image: url({{ section.settings.bottom_grunge_image | img_url: 'master' }});
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: cover;
+        mask-size: cover;
+        -webkit-mask-position: center;
+        mask-position: center;
+        {% endif %}
+        bottom: {{ section.settings.bottom_grunge_offset }}px;
+        height: {{ section.settings.bottom_grunge_height }}px;
+        z-index: 0;
+        display: block;
+      }
+      {% endif %}
+    </style>
+
+    <div class="faq-container">
+      <div class="tabs-content-wrapper">
+        <div class="active-tab-holder" id="active-tab-{{ _sid }}"></div>
+        <div class="main-tabs-container">
+          <div class="desktop-tabs">
+            <div class="sidebar-tabs" id="sidebar-tabs-{{ _sid }}"></div>
+          </div>
+          <div class="hidden-template-tabs">
+            <div class="main-tabs" id="main-tabs-{{ _sid }}">
+              {% if faq_group != blank and faq_group.faqs != blank %}
+              <button class="main-tab active" data-target="faqs">
+                <div class="full-underline">{% if template.suffix == 'core' %}Frequently Asked Questions{% else %}FAQs{% endif %}</div>
+              </button>
+              {% endif %}
+              {% if suggested_use_text != blank %}
+              <button class="main-tab" data-target="suggested-use">
+                <div class="full-underline">Suggested Use</div>
+              </button>
+              {% endif %}
+              {% if references and references != blank %}
+              <button class="main-tab" data-target="references">
+                <div class="full-underline">References</div>
+              </button>
+              {% endif %}
+              {% if warnings_data %}
+                {% if warnings_data.enable_product_warning.value or warnings_data.enable_prop65_warning.value %}
+              <button class="main-tab" data-target="warnings">
+                <div class="full-underline">Product Warnings</div>
+              </button>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="mobile-tabs-wrapper">
+          <div class="mobile-tab-scroller">
+            <div class="mobile-tabs">
+              {% if faq_group != blank and faq_group.faqs != blank %}
+              <button class="mobile-tab active" data-target="faqs">
+                <div class="full-underline full-underline--fivenation">FAQs</div>
+              </button>
+              {% endif %}
+              {% if suggested_use_text != blank %}
+              <button class="mobile-tab" data-target="suggested-use">
+                <div class="full-underline full-underline--fivenation">Directions</div>
+              </button>
+              {% endif %}
+              {% if references and references != blank %}
+              <button class="mobile-tab" data-target="references">
+                <div class="full-underline full-underline--fivenation">References</div>
+              </button>
+              {% endif %}
+              {% if warnings_data %}
+                {% if warnings_data.enable_product_warning.value or warnings_data.enable_prop65_warning.value %}
+              <button class="mobile-tab" data-target="warnings">
+                <div class="full-underline full-underline--fivenation">Product Warnings</div>
+              </button>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="main-content-area">
+          {% if faq_group != blank and faq_group.faqs != blank %}
+          <div class="tab-content active" id="faqs-content">
+            <div class="faq-accordion">
+              {% for faq_entry in faq_group.faqs.value %}
+                <details class="faq-item">
+                  <summary class="accordion-heading product-h4">
+                    <span class="summary-text">{{ faq_entry.question.value }}</span>
+                    <span class="faq-icon" aria-hidden="true">+</span>
+                  </summary>
+                  <div class="faq-panel">
+                    <div class="faq-panel-inner">
+                      <div class="faq-answer">{{ faq_entry.answer.value }}</div>
+                    </div>
+                  </div>
+                </details>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if suggested_use_text != blank %}
+          <div class="tab-content" id="suggested-use-content">
+            <div class="suggested-use">
+              {{ suggested_use_text | newline_to_br }}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if references and references != blank %}
+          <div class="tab-content" id="references-content">
+            <div class="references-section">
+              <div class="references_font">
+                <ol class="references">
+                  {% assign references_lines = references | newline_to_br | split: '<br />' %}
+                  {% assign ref_counter = 0 %}
+                  {% for reference in references_lines %}
+                  {% assign trimmed_ref = reference | strip %}
+                  {% if trimmed_ref != blank %}
+                  {% assign ref_counter = ref_counter | plus: 1 %}
+                  <li data-reference-number="{{ ref_counter }}">
+                    {% comment %}Strip any href links - display as plain text only{% endcomment %}
+                    {% assign clean_ref = trimmed_ref | strip_html %}
+                    {% if clean_ref != blank %}
+                      {{ clean_ref }}
+                    {% else %}
+                      {{ trimmed_ref }}
+                    {% endif %}
+                  </li>
+                  {% endif %}
+                  {% endfor %}
+                </ol>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if warnings_data %}
+            {% if warnings_data.enable_product_warning.value or warnings_data.enable_prop65_warning.value %}
+          <div class="tab-content" id="warnings-content">
+            {% if warnings_data %}
+              {% if warnings_data.enable_product_warning and warnings_data.enable_product_warning.value and warnings_data.product_warning_statement and warnings_data.product_warning_statement.value != blank %}
+              <div class="references_font" style="margin-bottom:15px;">{{ warnings_data.product_warning_statement.value | newline_to_br }}</div>
+              {% endif %}
+              <div class="references_font fda-disclaimer">†These statements have not been evaluated by the Food and Drug Administration. This product is not intended to diagnose, treat, cure or prevent any disease.</div>
+              {% if warnings_data.enable_prop65_warning and warnings_data.enable_prop65_warning.value and warnings_data.choose_prop_65_warning %}
+              <div class="references_font_p65warning">
+                <svg class="svg-inline--fa fa-exclamation-triangle" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="exclamation-triangle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>
+                &nbsp;WARNING: 
+                {% if warnings_data.choose_prop_65_warning and warnings_data.choose_prop_65_warning.warning_statement and warnings_data.choose_prop_65_warning.warning_statement.value %}
+                  {{ warnings_data.choose_prop_65_warning.warning_statement.value | newline_to_br }}
+                {% else %}
+                  This product can expose you to chemicals which are known to the State of California to cause cancer, birth defects or other reproductive harm. For more information go to <a href="https://www.P65Warnings.ca.gov/food" target="_blank" rel="noopener">www.P65Warnings.ca.gov/food</a>.
+                {% endif %}
+              </div>
+              {% endif %}
+            {% endif %}
+          </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        function normalizeSymbols(element) {
+          if (!element) return;
+          const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+          const nodesToProcess = [];
+          while(walker.nextNode()) { nodesToProcess.push(walker.currentNode); }
+          nodesToProcess.forEach(node => {
+            if (node.nodeValue) {
+              let text = node.nodeValue;
+              text = text.replace(/Ⓡ/g, '®').replace(/&#174;/g, '®').replace(/&reg;/gi, '®');
+              text = text.replace(/Ⓒ/g, '©').replace(/&#169;/g, '©').replace(/&copy;/gi, '©');
+              text = text.replace(/™/g, '™').replace(/&#8482;/g, '™').replace(/&trade;/gi, '™');
+              if (text !== node.nodeValue) node.nodeValue = text;
+            }
+          });
+        }
+        const faqContainer = document.querySelector('#five-nation-{{ _sid }} .faq-container');
+        if (faqContainer) normalizeSymbols(faqContainer);
+        (function(){
+          const DUR = 320;
+          let busy = false;
+          const faqRoot = document.querySelector('#five-nation-{{ _sid }}');
+          if(!faqRoot) return;
+          const items = faqRoot.querySelectorAll('.faq-accordion details');
+          function onEnd(el, cb){
+            let done=false;
+            function h(e){ if(e.target!==el) return; if(done) return; done=true; el.removeEventListener('transitionend',h); cb&&cb(); }
+            el.addEventListener('transitionend',h);
+            setTimeout(()=>{ if(!done){ el.removeEventListener('transitionend',h); cb&&cb(); } }, DUR+40);
+          }
+          function slideDown(panel){
+            panel.style.display = 'block';
+            panel.style.height = '0px';
+            const h = panel.scrollHeight + 'px';
+            requestAnimationFrame(()=>{ panel.style.height = h; });
+            onEnd(panel, ()=>{ panel.style.height = 'auto'; });
+          }
+          function slideUp(panel){
+            panel.style.height = panel.scrollHeight + 'px';
+            requestAnimationFrame(()=>{ panel.style.height = '0px'; });
+            onEnd(panel, ()=>{ panel.style.display = ''; });
+          }
+          items.forEach(d => {
+            const panel = d.querySelector('.faq-panel');
+            if(!panel) return;
+            if(d.hasAttribute('open')){ panel.style.height = 'auto'; } else { panel.style.height = '0px'; }
+            const summary = d.querySelector('summary');
+            if(!summary) return;
+            summary.addEventListener('click', function(e){
+              e.preventDefault();
+              if(busy) return; busy = true;
+              const isOpen = d.hasAttribute('open');
+              if(isOpen){
+                const p = d.querySelector('.faq-panel');
+                slideUp(p);
+                onEnd(p, ()=>{ d.removeAttribute('open'); busy=false; });
+              }else{
+                items.forEach(other => {
+                  if(other!==d && other.hasAttribute('open')){
+                    const op = other.querySelector('.faq-panel');
+                    other.removeAttribute('open');
+                    if(op){
+                      op.style.height = op.scrollHeight+'px';
+                      requestAnimationFrame(()=>{ op.style.height='0px'; });
+                      setTimeout(()=>{ op.style.display=''; }, DUR+40);
+                    }
+                  }
+                });
+                d.setAttribute('open','');
+                const p = d.querySelector('.faq-panel');
+                slideDown(p);
+                onEnd(p, ()=>{ busy=false; });
+              }
+            });
+            summary.addEventListener('keydown', function(e){
+              if(e.key==='Enter' || e.key===' '){ e.preventDefault(); summary.click(); }
+            });
+          });
+        })();
+        const templateTabs = document.querySelectorAll('#main-tabs-{{ _sid }} .main-tab');
+        const desktopSidebar = document.getElementById('sidebar-tabs-{{ _sid }}');
+        const activeHolder = document.getElementById('active-tab-{{ _sid }}');
+        const mobileTabs = document.querySelectorAll('.mobile-tabs .mobile-tab');
+        const contents = document.querySelectorAll('.tab-content');
+        function createClone(btn) {
+          const clone = btn.cloneNode(true);
+          clone.addEventListener('click', function(e) { 
+            e.preventDefault();
+            const target = clone.getAttribute('data-target');
+            if (!clone.classList.contains('active')) switchTab(target);
+          });
+          return clone;
+        }
+        function renderDesktop() {
+          desktopSidebar.innerHTML = '';
+          activeHolder.innerHTML = '';
+          templateTabs.forEach(btn => {
+            if (btn.classList.contains('active')) {
+              activeHolder.appendChild(createClone(btn));
+            } else {
+              desktopSidebar.appendChild(createClone(btn));
+            }
+          });
+        }
+        function switchTab(target) {
+          const wrapper = document.querySelector('#five-nation-{{ _sid }} .tabs-content-wrapper');
+          wrapper.classList.add('content-transition');
+          setTimeout(() => {
+            templateTabs.forEach(t => t.classList.remove('active'));
+            const src = Array.from(templateTabs).find(t => t.getAttribute('data-target') === target);
+            if (src) src.classList.add('active');
+            mobileTabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-target') === target));
+            contents.forEach(c => {
+              const isActive = c.id === target + '-content';
+              c.style.display = isActive ? 'block' : 'none';
+              c.classList.toggle('active', isActive);
+            });
+            renderDesktop();
+            setTimeout(() => {
+              wrapper.classList.remove('content-transition');
+              void wrapper.offsetWidth;
+              const activeContent = document.getElementById(target + '-content');
+              if (activeContent) {
+                activeContent.style.opacity = '1';
+                activeContent.style.transition = 'opacity 0.3s ease-out';
+              }
+            }, 20);
+          }, 200);
+        }
+        templateTabs.forEach(tab => {
+          tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!tab.classList.contains('active')) switchTab(tab.getAttribute('data-target'));
+          });
+        });
+        mobileTabs.forEach(tab => {
+          tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!tab.classList.contains('active')) switchTab(tab.getAttribute('data-target'));
+          });
+        });
+        renderDesktop();
+      });
+    </script>
+  </section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "FAQs",
+  "tag": "section",
+  "class": "section-faqs",
+  "settings": [
+    { "type": "header", "content": "Main Section Controls" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor Tag Value", "info": "Add an anchor ID for linking to this section", "default": "faqSection" },
+    { "type": "checkbox", "id": "use_series_colors", "label": "Use Dynamic Product Series Colors Globally In Section", "default": true, "info": "When enabled, colors will be pulled from the Product Series metaobject" },
+    { "type": "checkbox", "id": "show_grunge_borders", "label": "Show Grunge Borders", "default": false },
+    { "type": "checkbox", "id": "previous_section_has_grunge", "label": "Previous Section Has Grunge Borders", "default": false, "info": "Enable if the section above has grunge borders. Adds top padding to compensate." },
+    { "type": "checkbox", "id": "next_section_has_grunge", "label": "Next Section Has Grunge Borders", "default": false, "info": "Enable if the section below has grunge borders. Adds bottom padding to compensate." },
+    { "type": "checkbox", "id": "both_sections_have_grunge", "label": "Both Adjacent Sections Have Grunge Borders", "default": false, "info": "Enable if BOTH sections above AND below have grunge borders. Adds padding to top and bottom." },
+    { "type": "checkbox", "id": "hide_on_mobile", "label": "Hide on Mobile", "default": false },
+    { "type": "range", "id": "section_z_index", "label": "Section Z-Index (Layer Order)", "min": 1, "max": 100, "step": 1, "default": 2, "info": "Controls stacking order. Higher numbers appear on top. Adjust if grunge borders overlap incorrectly." },
+    { "type": "text", "id": "section_max_width", "label": "Section Max Width (px)", "placeholder": "Leave blank for full width" },
+    { "type": "text", "id": "container_max_width", "label": "Container Max Width (px)", "placeholder": "Leave blank for full width" },
+    { "type": "header", "content": "Color Controls (Optional)" },
+    { "type": "paragraph", "content": "Leave blank to use dynamic series colors." },
+    { "type": "color", "id": "section_bg_color", "label": "Section Background Color (Optional)" },
+    { "type": "image_picker", "id": "section_bg_image", "label": "Section Background Image (Optional)", "info": "If set, this will override the background color" },
+    { "type": "select", "id": "text_color_source", "label": "Text Color Source", "default": "custom", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" },
+      { "value": "custom", "label": "Custom (Use Default Text Color Below)" }
+    ]},
+    { "type": "select", "id": "inactive_tab_color_source", "label": "Inactive Tab Hover Underline Color Source", "default": "accent_2", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "inactive_tab_hover_color_source", "label": "Inactive Tab Hover Color Source", "default": "featured", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "header", "content": "Grunge Borders" },
+    { "type": "select", "id": "grunge_border_color_source", "label": "Grunge Border Color", "default": "featured", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "checkbox", "id": "use_grunge_as_bg", "label": "Use Grunge Border Color as Section Background", "default": false },
+    { "type": "checkbox", "id": "show_top_grunge", "label": "Show Top Grunge Border", "default": true },
+    { "type": "image_picker", "id": "top_grunge_image", "label": "Top Grunge Border Image" },
+    { "type": "range", "id": "top_grunge_height_mobile", "label": "Top Grunge Border Height (Mobile)", "min": 20, "max": 300, "step": 4, "default": 52, "unit": "px" },
+    { "type": "range", "id": "top_grunge_height_desktop", "label": "Top Grunge Border Height (Desktop)", "min": 20, "max": 300, "step": 4, "default": 52, "unit": "px" },
+    { "type": "range", "id": "top_grunge_offset_mobile", "label": "Top Grunge Border Offset (Mobile)", "min": -200, "max": 200, "step": 4, "default": -40, "unit": "px" },
+    { "type": "range", "id": "top_grunge_offset_desktop", "label": "Top Grunge Border Offset (Desktop)", "min": -300, "max": 300, "step": 10, "default": -50, "unit": "px" },
+    { "type": "checkbox", "id": "show_bottom_grunge", "label": "Show Bottom Grunge Border", "default": true },
+    { "type": "image_picker", "id": "bottom_grunge_image", "label": "Bottom Grunge Border Image" },
+    { "type": "range", "id": "bottom_grunge_height", "label": "Bottom Grunge Border Height", "min": 20, "max": 300, "step": 4, "default": 64, "unit": "px" },
+    { "type": "range", "id": "bottom_grunge_offset", "label": "Bottom Grunge Border Offset", "min": -300, "max": 300, "step": 10, "default": -50, "unit": "px" },
+    { "type": "header", "content": "Section Padding/Margins" },
+    { "type": "range", "id": "margin_top_desktop", "label": "Margin Top (Desktop)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_bottom_desktop", "label": "Margin Bottom (Desktop)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_top_mobile", "label": "Margin Top (Mobile)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_bottom_mobile", "label": "Margin Bottom (Mobile)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "padding_top_desktop", "label": "Padding Top (Desktop)", "min": 0, "max": 200, "step": 2, "default": 36, "unit": "px" },
+    { "type": "range", "id": "padding_bottom_desktop", "label": "Padding Bottom (Desktop)", "min": 0, "max": 200, "step": 2, "default": 36, "unit": "px" },
+    { "type": "range", "id": "padding_top_mobile", "label": "Padding Top (Mobile)", "min": 0, "max": 200, "step": 2, "default": 36, "unit": "px" },
+    { "type": "range", "id": "padding_bottom_mobile", "label": "Padding Bottom (Mobile)", "min": 0, "max": 200, "step": 2, "default": 36, "unit": "px" },
+    { "type": "header", "content": "Fallback Colors (When No Series Detected)" },
+    { "type": "paragraph", "content": "These colors are only used when a product has no series assigned. Normally, colors are pulled automatically from the product's series metaobject." },
+    { "type": "color", "id": "bg_color", "label": "Featured/Hero (Red/Gold/Red)", "default": "#AE1F24" },
+    { "type": "color", "id": "fallback_accent_1", "label": "Accent 1 Light (White/White/Lt Grey)", "default": "#FFFFFF" },
+    { "type": "color", "id": "fallback_accent_2", "label": "Accent 2 Neutral (Grey/Dk Grey/Grey)", "default": "#999999" },
+    { "type": "color", "id": "fallback_accent_3", "label": "Accent 3 Dark (Black)", "default": "#000000" },
+    { "type": "color", "id": "text_color", "label": "Default Text Color", "default": "#000000" }
+  ],
+  "presets": [
+    { "name": "FAQs" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,1097 @@
+{% assign _sid = section.id %}
+{%- if section.settings.use_series_colors -%}
+  {%- assign sfp_list = product.metafields.custom.sfp_section.value -%}
+  {%- assign sfp_section = sfp_list | first -%}
+  {%- assign product_series = sfp_section.series.value -%}
+
+  {%- if product_series -%}
+    {%- assign featured_color = product_series.template_specific_dynamic_featured_color | default: section.settings.bg_color -%}
+    {%- assign accent_colors = product_series.template_specific_accent_color_s -%}
+    {%- assign accent_1 = accent_colors[0] | default: section.settings.fallback_accent_1 -%}
+    {%- assign accent_2 = accent_colors[1] | default: section.settings.fallback_accent_2 -%}
+    {%- assign accent_3 = accent_colors[2] | default: section.settings.fallback_accent_3 -%}
+  {%- else -%}
+    {%- assign featured_color = section.settings.bg_color -%}
+    {%- assign accent_1 = section.settings.fallback_accent_1 -%}
+    {%- assign accent_2 = section.settings.fallback_accent_2 -%}
+    {%- assign accent_3 = section.settings.fallback_accent_3 -%}
+  {%- endif -%}
+{%- else -%}
+  {%- assign featured_color = section.settings.bg_color -%}
+  {%- assign accent_1 = section.settings.fallback_accent_1 -%}
+  {%- assign accent_2 = section.settings.fallback_accent_2 -%}
+  {%- assign accent_3 = section.settings.fallback_accent_3 -%}
+{%- endif -%}
+
+{%- case section.settings.grunge_border_color_source -%}
+  {%- when 'featured' -%}{%- assign grunge_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign grunge_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign grunge_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign grunge_color = accent_3 -%}
+  {%- else -%}{%- assign grunge_color = accent_1 -%}
+{%- endcase -%}
+
+{%- if section.settings.use_grunge_as_bg -%}
+  {%- assign section_bg_color = grunge_color -%}
+{%- elsif section.settings.section_bg_color and section.settings.section_bg_color != blank -%}
+  {%- assign section_bg_color = section.settings.section_bg_color -%}
+{%- else -%}
+  {%- assign section_bg_color = featured_color -%}
+{%- endif -%}
+
+{%- case section.settings.text_color_source -%}
+  {%- when 'featured' -%}{%- assign dynamic_text_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign dynamic_text_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign dynamic_text_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign dynamic_text_color = accent_3 -%}
+  {%- else -%}{%- assign dynamic_text_color = section.settings.text_color -%}
+{%- endcase -%}
+
+{%- case section.settings.accordion_bg_color_source -%}
+  {%- when 'transparent' -%}{%- assign accordion_bg = 'transparent' -%}
+  {%- when 'featured' -%}{%- assign accordion_bg = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_bg = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_bg = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_bg = accent_3 -%}
+  {%- else -%}{%- assign accordion_bg = accent_3 -%}
+{%- endcase -%}
+
+{%- case section.settings.accordion_tab_border_color_source -%}
+  {%- when 'transparent' -%}{%- assign accordion_tab_border = 'transparent' -%}
+  {%- when 'featured' -%}{%- assign accordion_tab_border = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_tab_border = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_tab_border = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_tab_border = accent_3 -%}
+  {%- else -%}{%- assign accordion_tab_border = 'transparent' -%}
+{%- endcase -%}
+
+{%- case section.settings.accordion_expanded_tab_bg_color_source -%}
+  {%- when 'transparent' -%}{%- assign accordion_expanded_tab_bg = 'transparent' -%}
+  {%- when 'featured' -%}{%- assign accordion_expanded_tab_bg = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_expanded_tab_bg = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_expanded_tab_bg = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_expanded_tab_bg = accent_3 -%}
+  {%- else -%}{%- assign accordion_expanded_tab_bg = accent_1 -%}
+{%- endcase -%}
+
+{%- case section.settings.accordion_expanded_bg_color_source -%}
+  {%- when 'transparent' -%}{%- assign accordion_expanded_bg = 'transparent' -%}
+  {%- when 'featured' -%}{%- assign accordion_expanded_bg = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_expanded_bg = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_expanded_bg = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_expanded_bg = accent_3 -%}
+  {%- else -%}{%- assign accordion_expanded_bg = accent_1 -%}
+{%- endcase -%}
+
+{%- case section.settings.accordion_expanded_border_color_source -%}
+  {%- when 'transparent' -%}{%- assign accordion_border_expanded = 'transparent' -%}
+  {%- when 'featured' -%}{%- assign accordion_border_expanded = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_border_expanded = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_border_expanded = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_border_expanded = accent_3 -%}
+  {%- else -%}{%- assign accordion_border_expanded = accent_1 -%}
+{%- endcase -%}
+
+{%- case section.settings.accordion_icon_color_source -%}
+  {%- when 'featured' -%}{%- assign accordion_icon = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_icon = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_icon = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_icon = accent_3 -%}
+  {%- else -%}{%- assign accordion_icon = accent_2 -%}
+{%- endcase -%}
+
+{%- case section.settings.accordion_border_color_source -%}
+  {%- when 'featured' -%}{%- assign accordion_border = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_border = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_border = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_border = accent_3 -%}
+  {%- else -%}{%- assign accordion_border = accent_1 -%}
+{%- endcase -%}
+
+{%- case section.settings.accordion_tab_font_color_source -%}
+  {%- when 'text_default' -%}{%- assign accordion_text_color = section.settings.text_color -%}
+  {%- when 'featured' -%}{%- assign accordion_text_color = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_text_color = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_text_color = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_text_color = accent_3 -%}
+  {%- else -%}{%- assign accordion_text_color = section.settings.text_color -%}
+{%- endcase -%}
+
+{%- case section.settings.accordion_expanded_font_color_source -%}
+  {%- when 'text_default' -%}{%- assign accordion_text_expanded = section.settings.text_color -%}
+  {%- when 'featured' -%}{%- assign accordion_text_expanded = featured_color -%}
+  {%- when 'accent_1' -%}{%- assign accordion_text_expanded = accent_1 -%}
+  {%- when 'accent_2' -%}{%- assign accordion_text_expanded = accent_2 -%}
+  {%- when 'accent_3' -%}{%- assign accordion_text_expanded = accent_3 -%}
+  {%- else -%}{%- assign accordion_text_expanded = section.settings.text_color -%}
+{%- endcase -%}
+
+{% assign current_variant = product.selected_or_first_available_variant %}
+{% assign sfp_image_url = '' %}
+{% if current_variant.metafields.custom.sfp_section and current_variant.metafields.custom.sfp_section.value %}
+  {% assign variant_sfp = current_variant.metafields.custom.sfp_section.value %}
+  {% assign variant_sfp_entry = variant_sfp | first | default: variant_sfp %}
+  {% if variant_sfp_entry.sfp_image != blank %}
+    {% assign sfp_image_url = variant_sfp_entry.sfp_image | file_url %}
+  {% endif %}
+{% endif %}
+
+<section id="ingredients-sfp-{{ _sid }}" class="ingredients-sfp-section cr-ingredients-sfp-section section-{{ _sid }}">
+{% if section.settings.show_grunge_borders %}
+  {% if section.settings.show_top_grunge and section.settings.top_grunge_image %}
+  <div class="cr-ing-grunge-top"></div>
+  {% endif %}
+  {% if section.settings.show_bottom_grunge and section.settings.bottom_grunge_image %}
+  <div class="cr-ing-grunge-bottom"></div>
+  {% endif %}
+{% endif %}
+<style>
+  #ingredients-sfp-{{ _sid }} {
+    --bg: {{ section_bg_color }};
+    --text: {{ dynamic_text_color }};
+    --acc-bg: {{ accordion_bg }};
+    --acc-tab-border: {{ accordion_tab_border }};
+    --acc-tab-bg-expanded: {{ accordion_expanded_tab_bg }};
+    --acc-bg-expanded: {{ accordion_expanded_bg }};
+    --acc-border-expanded: {{ accordion_border_expanded }};
+    --acc-icon: {{ accordion_icon }};
+    --acc-border: {{ accordion_border }};
+    --acc-text: {{ accordion_text_color }};
+    --acc-text-expanded: {{ accordion_text_expanded }};
+    --acc-bg-hover: color-mix(in srgb, var(--acc-bg) 85%, white 15%);
+    --anim-ms: 320ms;
+    {% if section.settings.section_bg_image %}
+    background-image: url({{ section.settings.section_bg_image | img_url: 'master' }});
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    {% else %}
+    background: var(--bg);
+    {% endif %}
+    color: var(--text);
+    position: relative;
+    z-index: {{ section.settings.section_z_index | default: 2 }};
+  }
+  
+  @media (max-width: 767px) {
+    #ingredients-sfp-{{ _sid }} {
+      {% if section.settings.both_sections_have_grunge %}
+      padding-top: calc({{ section.settings.padding_top_mobile }}px + 50px);
+      padding-bottom: calc({{ section.settings.padding_bottom_mobile }}px + 50px);
+      {% else %}
+        {% if section.settings.previous_section_has_grunge %}
+        padding-top: calc({{ section.settings.padding_top_mobile }}px + 50px);
+        {% else %}
+        padding-top: {{ section.settings.padding_top_mobile }}px;
+        {% endif %}
+        {% if section.settings.next_section_has_grunge %}
+        padding-bottom: calc({{ section.settings.padding_bottom_mobile }}px + 50px);
+        {% else %}
+        padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+        {% endif %}
+      {% endif %}
+      margin-top: {{ section.settings.margin_top_mobile }}px;
+      margin-bottom: {{ section.settings.margin_bottom_mobile }}px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    #ingredients-sfp-{{ _sid }} {
+      {% if section.settings.both_sections_have_grunge %}
+      padding-top: calc({{ section.settings.padding_top_desktop }}px + 90px);
+      padding-bottom: calc({{ section.settings.padding_bottom_desktop }}px + 90px);
+      {% else %}
+        {% if section.settings.previous_section_has_grunge %}
+        padding-top: calc({{ section.settings.padding_top_desktop }}px + 90px);
+        {% else %}
+        padding-top: {{ section.settings.padding_top_desktop }}px;
+        {% endif %}
+        {% if section.settings.next_section_has_grunge %}
+        padding-bottom: calc({{ section.settings.padding_bottom_desktop }}px + 90px);
+        {% else %}
+        padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+        {% endif %}
+      {% endif %}
+      margin-top: {{ section.settings.margin_top_desktop }}px;
+      margin-bottom: {{ section.settings.margin_bottom_desktop }}px;
+    }
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-container {
+    position: relative;
+    z-index: 3;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+  
+  @media (max-width: 767px) {
+    #ingredients-sfp-{{ _sid }} .cr-ing-container {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
+  
+  #ingredients-sfp-{{ _sid }} .two-col-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: {{ section.settings.column_gap_desktop | default: 60 }}px;
+    align-items: start;
+  }
+  
+  @media (max-width: 767px) {
+    #ingredients-sfp-{{ _sid }} .two-col-layout {
+      grid-template-columns: 1fr;
+      gap: {{ section.settings.column_gap_mobile | default: 40 }}px;
+    }
+  }
+  
+  #ingredients-sfp-{{ _sid }} .ingredients-col {
+    width: 100%;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-col {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  @media (max-width: 767px) {
+    #ingredients-sfp-{{ _sid }} .sfp-col {
+      order: -1;
+    }
+  }
+  
+  #ingredients-sfp-{{ _sid }} .section-title {
+    font-family: 'Gunplay', sans-serif;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    line-height: 34px;
+    color: var(--text);
+    font-size: 24px;
+    text-align: center;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: {{ section.settings.accordion_item_spacing | default: 0 }}px;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-item {
+    border: none;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title {
+    width: 100%;
+    background-color: var(--acc-bg);
+    border: 2px solid var(--acc-tab-border);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color var(--anim-ms) ease, border-color var(--anim-ms) ease;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-text .unit {
+    font-variant-caps: all-small-caps;
+    font-variant: small-caps;  
+    font-size: 0.85em;
+    letter-spacing: 0.02em;
+    opacity: 0.95;
+  }
+  
+  {% if section.settings.enable_hover_transitions %}
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title:hover,
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title:focus-visible {
+    background-color: var(--acc-bg-hover);
+  }
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title[aria-expanded="true"]:hover,
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title[aria-expanded="true"]:focus-visible {
+    background-color: var(--acc-bg-hover);
+  }
+  {% endif %}
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title[aria-expanded="true"] {
+    background-color: var(--acc-tab-bg-expanded);
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-text {
+    font-family: 'Gunplay', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--acc-text);
+    text-transform: uppercase;
+    flex: 1;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-icon {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--acc-icon);
+    transition: transform var(--anim-ms) ease;
+    margin-left: 1rem;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title[aria-expanded="true"] .cr-ing-accordion-icon {
+    transform: rotate(45deg);
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-content {
+    height: 0;
+    overflow: hidden;
+    transition: height var(--anim-ms) ease;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-content-inner {
+    background: var(--acc-bg-expanded);
+    border: 2px solid var(--acc-border-expanded);
+    padding: 1.5rem;
+    color: var(--acc-text-expanded);
+    font-family: 'Acumin Pro', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    transition: border-color var(--anim-ms) ease;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-content-inner b {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  {% if section.settings.enable_hover_transitions %}
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title:hover + .cr-ing-accordion-tab-content .cr-ing-accordion-content-inner,
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title:focus-visible + .cr-ing-accordion-tab-content .cr-ing-accordion-content-inner {
+    border-color: var(--acc-bg-hover);
+  }
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title[aria-expanded="true"]:hover + .cr-ing-accordion-tab-content .cr-ing-accordion-content-inner,
+  #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title[aria-expanded="true"]:focus-visible + .cr-ing-accordion-tab-content .cr-ing-accordion-content-inner {
+    border-color: var(--acc-bg-hover);
+  }
+  {% endif %}
+  
+  #ingredients-sfp-{{ _sid }} .sfp-variant-selector {
+    width: 100%;
+    margin: 0 auto 18px auto;
+    position: relative;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-combobox {
+    position: relative;
+    width: 100%;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-trigger {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 40px 12px 14px;
+    background: #fff;
+    border: 2px solid #e5e5e5;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Acumin Pro', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a1a;
+    text-align: left;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-trigger.out-of-stock .sfp-trigger-swatch {
+    filter: grayscale(100%);
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-trigger.out-of-stock .sfp-trigger-text {
+    color: #999;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-trigger:hover {
+    border-color: #999;
+    background: #fafafa;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-trigger-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-trigger-text {
+    flex: 1;
+    text-align: left;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-trigger-caret {
+    position: absolute;
+    right: 12px;
+    transition: transform 0.2s ease;
+    color: #888;
+    width: 16px;
+    height: 16px;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-combobox.open .sfp-trigger-caret {
+    transform: rotate(180deg);
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    max-height: 340px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-combobox.open .sfp-flavor-panel {
+    display: block;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-list {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-option {
+    padding: 11px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-family: 'Acumin Pro', sans-serif;
+    font-size: 14px;
+    color: #1a1a1a;
+    transition: background 0.15s ease;
+    border-radius: 4px;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-option:hover {
+    background: #f5f5f5;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-option.active {
+    background: #eef5ff;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-option.out-of-stock {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-flavor-option.out-of-stock .sfp-option-swatch {
+    filter: grayscale(100%);
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-option-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-option-text {
+    flex: 1;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .sfp-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  
+  {% if section.settings.show_grunge_borders %}
+  #ingredients-sfp-{{ _sid }} .cr-ing-grunge-top {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    {% if section.settings.top_grunge_image %}
+    background-color: {{ grunge_color }};
+    -webkit-mask-image: url({{ section.settings.top_grunge_image | img_url: 'master' }});
+    mask-image: url({{ section.settings.top_grunge_image | img_url: 'master' }});
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    -webkit-mask-position: center;
+    mask-position: center;
+    {% endif %}
+    top: {{ section.settings.top_grunge_offset_mobile }}px;
+    height: {{ section.settings.top_grunge_height_mobile }}px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  #ingredients-sfp-{{ _sid }} .cr-ing-grunge-bottom {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    {% if section.settings.bottom_grunge_image %}
+    background-color: {{ grunge_color }};
+    -webkit-mask-image: url({{ section.settings.bottom_grunge_image | img_url: 'master' }});
+    mask-image: url({{ section.settings.bottom_grunge_image | img_url: 'master' }});
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    -webkit-mask-position: center;
+    mask-position: center;
+    {% endif %}
+    bottom: {{ section.settings.bottom_grunge_offset }}px;
+    height: {{ section.settings.bottom_grunge_height }}px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  @media (min-width: 768px) {
+    #ingredients-sfp-{{ _sid }} .cr-ing-grunge-top {
+      top: {{ section.settings.top_grunge_offset_desktop }}px;
+      height: {{ section.settings.top_grunge_height_desktop }}px;
+    }
+  }
+  {% endif %}
+  
+  @media (max-width: 768px) {
+    #ingredients-sfp-{{ _sid }} .section-title {
+      font-size: 1.5rem;
+    }
+    #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-title {
+      padding: 1rem;
+    }
+    #ingredients-sfp-{{ _sid }} .cr-ing-accordion-tab-text {
+      font-size: 1rem;
+    }
+    #ingredients-sfp-{{ _sid }} .cr-ing-accordion-content-inner {
+      padding: 1rem;
+      font-size: 0.875rem;
+    }
+  }
+</style>
+
+<div class="cr-ing-container">
+  <div class="two-col-layout">
+    <div class="ingredients-col">
+      {% if section.settings.show_section_title and section.settings.section_title != blank %}
+        <h2 class="section-title">{{ section.settings.section_title }}</h2>
+      {% endif %}
+      
+      <div class="cr-ing-accordion">
+        {%- assign sfp_list = product.metafields.custom.sfp_section.value -%}
+        {%- assign sfp_section = sfp_list | first -%}
+        
+        {%- if sfp_section -%}
+          {%- assign ingredients_list = sfp_section.key_ingredients.value -%}
+          {%- if ingredients_list == blank -%}
+            {%- assign ingredients_list = sfp_section.key_ingredients -%}
+          {%- endif -%}
+          
+          {%- if ingredients_list -%}
+            {%- for key_ing_entry in ingredients_list -%}
+              {%- assign ing_amount = key_ing_entry.ingredient_amount -%}
+              {%- assign ing_description = key_ing_entry.ingredient_write_up -%}
+              {%- assign ing_ref = key_ing_entry.ingredient_name -%}
+
+              {%- assign amount_raw = ing_amount | append: '' | strip -%}
+              {%- assign amount_low = amount_raw | downcase -%}
+              {%- assign unit = '' -%}
+              {%- assign numeric = amount_raw -%}
+              {%- assign known_units = 'fl oz,mcg,mg,g,kg,iu,ml,l,oz' | split: ',' -%}
+              {%- for u in known_units -%}
+                {%- assign u_trim = u | strip -%}
+                {%- assign u_low = u_trim | downcase -%}
+                {%- assign cut = amount_low.size | minus: u_low.size -%}
+                {%- if amount_low != blank and cut >= 0 -%}
+                  {%- assign suffix = amount_low | slice: cut, u_low.size -%}
+                  {%- if suffix == u_low -%}
+                    {%- assign numeric = amount_raw | slice: 0, cut | strip -%}
+                    {%- assign unit = u_trim -%}
+                    {%- break -%}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- assign ing_title = '' -%}
+              {%- if ing_ref and ing_ref != blank -%}
+                {%- assign ing_val = ing_ref.value | default: ing_ref -%}
+                {%- assign ing_title = ing_val.display_name | default: ing_val.name | default: ing_val.title | default: ing_ref.display_name -%}
+              {%- endif -%}
+
+              {%- if ing_title == blank -%}
+                {%- assign ing_title = key_ing_entry.display_name -%}
+              {%- endif -%}
+
+              {%- assign ing_title = ing_title | split: ' - ' | first | split: ' – ' | first | strip -%}
+
+              {%- if ing_title != blank -%}
+                <div class="cr-ing-accordion-item" data-cr-ing-accordion-item data-ingredient-name="{{ ing_title | handleize }}">
+                  <div 
+                    class="cr-ing-accordion-tab-title" 
+                    role="button"
+                    tabindex="0"
+                    aria-expanded="false"
+                    aria-controls="cr-ing-{{ forloop.index }}-{{ _sid }}"
+                    data-cr-ing-accordion-trigger
+                  >
+                    <span class="cr-ing-accordion-tab-text">
+                      {{ ing_title | replace: '†', '<sup>†</sup>' }}
+                      {% if amount_raw != blank %}
+                        &nbsp;|&nbsp;
+                        {% if unit != '' %}
+                          {{ numeric }}<span class="unit"> {{ unit }}</span>
+                        {% else %}
+                          {%- assign amt_spaced = amount_raw
+                            | replace: 'fl oz', ' fl oz'
+                            | replace: 'mcg',  ' mcg'
+                            | replace: 'mg',   ' mg'
+                            | replace: 'kg',   ' kg'
+                            | replace: 'ml',   ' ml'
+                            | replace: 'oz',   ' oz'
+                            | replace: 'g',    ' g'
+                          -%}
+                          {%- assign amt_spaced = amt_spaced | replace: '  ', ' ' | strip -%}
+                          {{ amt_spaced }}
+                        {% endif %}
+                      {% endif %}
+                    </span>
+                    <span class="cr-ing-accordion-icon" aria-hidden="true">+</span>
+                  </div>
+
+                  <div class="cr-ing-accordion-tab-content" id="cr-ing-{{ forloop.index }}-{{ _sid }}" data-cr-ing-accordion-content>
+                    <div class="cr-ing-accordion-content-inner">
+                      {{ ing_description | replace: '†', '<sup>†</sup>' }}
+                    </div>
+                  </div>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+    </div>
+    
+    <div class="sfp-col">
+      {% if product.variants.size > 1 %}
+      <div class="sfp-variant-selector">
+        <div class="sfp-flavor-combobox" id="sfp-flavor-combobox-{{ _sid }}">
+          <button type="button" class="sfp-flavor-trigger" id="sfp-flavor-trigger-{{ _sid }}" aria-haspopup="listbox" aria-expanded="false">
+            {% assign cur_vsfp = current_variant.metafields.custom.sfp_section.value %}
+            {% assign cur_vsfp_entry = cur_vsfp | first | default: cur_vsfp %}
+            {% assign cur_swatch_obj = cur_vsfp_entry.flavor_swatch_image.value %}
+            {% assign cur_swatch = cur_swatch_obj.swatch_image.value %}
+            <img class="sfp-trigger-swatch" id="sfp-trigger-swatch-{{ _sid }}" src="{{ cur_swatch | image_url: width: 28 }}" alt="">
+            <span class="sfp-trigger-text" id="sfp-trigger-text-{{ _sid }}">{{ current_variant.title | replace: ' / US', '' }}</span>
+            <svg class="sfp-trigger-caret" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="sfp-flavor-panel" id="sfp-flavor-panel-{{ _sid }}" role="listbox">
+            <ul class="sfp-flavor-list">
+              {% for variant in product.variants %}
+                {% if variant.metafields.custom.sfp_section and variant.metafields.custom.sfp_section.value %}
+                  {% assign v_sfp_raw = variant.metafields.custom.sfp_section.value %}
+                  {% assign v_sfp = v_sfp_raw | first | default: v_sfp_raw %}
+                  {% assign swatch_obj = v_sfp.flavor_swatch_image.value %}
+                  {% assign swatch_image = swatch_obj.swatch_image.value %}
+                  {% assign v_name = variant.title | replace: ' / US', '' %}
+                  {% assign v_sfp_img = v_sfp.sfp_image | file_url %}
+                  <li class="sfp-flavor-option {% if variant.id == current_variant.id %}active currently-selected{% endif %} {% unless variant.available %}out-of-stock{% endunless %}"
+                      role="option"
+                      data-variant-id="{{ variant.id }}"
+                      data-variant-name="{{ v_name }}"
+                      data-swatch-url="{{ swatch_image | image_url: width: 28 }}"
+                      data-sfp-url="{{ v_sfp_img }}"
+                      data-available="{{ variant.available }}"
+                      {% if variant.id == current_variant.id %}style="display:none"{% endif %}>
+                    <img class="sfp-option-swatch" src="{{ swatch_image | image_url: width: 28 }}" alt="">
+                    <span class="sfp-option-text">{{ v_name }}{% unless variant.available %} – Out Of Stock{% endunless %}</span>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      
+      {% if sfp_image_url != blank %}
+        <img src="{{ sfp_image_url }}" id="sfp-image-{{ _sid }}" alt="Supplement Facts" class="sfp-image">
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var root = document.getElementById('ingredients-sfp-{{ _sid }}');
+  if (!root) return;
+  
+  var accordionItems = root.querySelectorAll('[data-cr-ing-accordion-item]');
+  var DUR = 320;
+  var busy = false;
+
+  function slideDown(el) {
+    el.style.height = 'auto';
+    var h = el.scrollHeight;
+    el.style.height = '0px';
+    void el.offsetWidth;
+    el.style.height = h + 'px';
+  }
+  
+  function slideUp(el) {
+    el.style.height = el.scrollHeight + 'px';
+    void el.offsetWidth;
+    el.style.height = '0px';
+  }
+  
+  function onEnd(el, isExpanding, cb) {
+    var done = false;
+    function fin() {
+      if (done) return;
+      done = true;
+      if (isExpanding) {
+        el.style.height = 'auto';
+      }
+      if (cb) cb();
+    }
+    setTimeout(fin, DUR + 50);
+    el.addEventListener('transitionend', fin, { once: true });
+  }
+
+  accordionItems.forEach(function(item) {
+    var trigger = item.querySelector('[data-cr-ing-accordion-trigger]');
+    var content = item.querySelector('[data-cr-ing-accordion-content]');
+    if (!trigger || !content) return;
+
+    function toggle(e) {
+      e.preventDefault();
+      if (busy) return;
+      busy = true;
+      var expanded = trigger.getAttribute('aria-expanded') === 'true';
+      if (expanded) {
+        trigger.setAttribute('aria-expanded', 'false');
+        slideUp(content);
+        onEnd(content, false, function() { busy = false; });
+      } else {
+        accordionItems.forEach(function(other) {
+          if (other === item) return;
+          var ot = other.querySelector('[data-cr-ing-accordion-trigger]');
+          var oc = other.querySelector('[data-cr-ing-accordion-content]');
+          if (ot && oc && ot.getAttribute('aria-expanded') === 'true') {
+            ot.setAttribute('aria-expanded', 'false');
+            slideUp(oc);
+          }
+        });
+        trigger.setAttribute('aria-expanded', 'true');
+        slideDown(content);
+        onEnd(content, true, function() { busy = false; });
+      }
+    }
+
+    trigger.addEventListener('click', toggle);
+    trigger.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') toggle(e);
+    });
+  });
+
+  // SFP variant selector - declare variables first
+  var combobox = document.getElementById('sfp-flavor-combobox-{{ _sid }}');
+  var sfpTrigger = document.getElementById('sfp-flavor-trigger-{{ _sid }}');
+  var panel = document.getElementById('sfp-flavor-panel-{{ _sid }}');
+  var triggerText = document.getElementById('sfp-trigger-text-{{ _sid }}');
+  var triggerSwatch = document.getElementById('sfp-trigger-swatch-{{ _sid }}');
+  var sfpImage = document.getElementById('sfp-image-{{ _sid }}');
+  var isUpdatingFromBuyBox = false;
+
+  // Function to update SFP selector and image
+  function updateSFPForVariant(selectedVariantId) {
+    if (!panel) return;
+    var option = panel.querySelector('.sfp-flavor-option[data-variant-id="' + selectedVariantId + '"]');
+    if (option && !option.classList.contains('currently-selected')) {
+      var variantName = option.getAttribute('data-variant-name');
+      var swatchUrl = option.getAttribute('data-swatch-url');
+      var sfpUrl = option.getAttribute('data-sfp-url');
+      
+      var allOptions = panel.querySelectorAll('.sfp-flavor-option');
+      allOptions.forEach(function(opt) {
+        opt.classList.remove('active', 'currently-selected');
+        opt.style.display = '';
+      });
+      option.classList.add('active', 'currently-selected');
+      option.style.display = 'none';
+      
+      if (triggerText) triggerText.textContent = variantName;
+      if (triggerSwatch && swatchUrl) triggerSwatch.src = swatchUrl;
+      if (sfpImage && sfpUrl) sfpImage.src = sfpUrl;
+    }
+  }
+
+  // Listen for variant changes from buy-box (change event)
+  document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'variant-select' && !isUpdatingFromBuyBox) {
+      isUpdatingFromBuyBox = true;
+      updateSFPForVariant(e.target.value);
+      setTimeout(function() { isUpdatingFromBuyBox = false; }, 100);
+    }
+  });
+
+  // Listen for custom variant:changed event from buy-box
+  document.addEventListener('variant:changed', function(e) {
+    if (e.detail && e.detail.variantId && !isUpdatingFromBuyBox) {
+      isUpdatingFromBuyBox = true;
+      updateSFPForVariant(String(e.detail.variantId));
+      setTimeout(function() { isUpdatingFromBuyBox = false; }, 100);
+    }
+  });
+
+  if (combobox && sfpTrigger && panel) {
+    sfpTrigger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var isOpen = combobox.classList.contains('open');
+      if (isOpen) {
+        combobox.classList.remove('open');
+        sfpTrigger.setAttribute('aria-expanded', 'false');
+      } else {
+        combobox.classList.add('open');
+        sfpTrigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!combobox.contains(e.target)) {
+        combobox.classList.remove('open');
+        sfpTrigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    var options = panel.querySelectorAll('.sfp-flavor-option');
+    options.forEach(function(option) {
+      option.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (option.classList.contains('out-of-stock')) return;
+        if (option.classList.contains('currently-selected')) return;
+
+        var variantId = option.getAttribute('data-variant-id');
+        var variantName = option.getAttribute('data-variant-name');
+        var swatchUrl = option.getAttribute('data-swatch-url');
+        var sfpUrl = option.getAttribute('data-sfp-url');
+
+        options.forEach(function(opt) {
+          opt.classList.remove('active', 'currently-selected');
+          opt.style.display = '';
+        });
+        option.classList.add('active', 'currently-selected');
+        option.style.display = 'none';
+
+        if (triggerText) triggerText.textContent = variantName;
+        if (triggerSwatch && swatchUrl) triggerSwatch.src = swatchUrl;
+        if (sfpImage && sfpUrl) sfpImage.src = sfpUrl;
+
+        combobox.classList.remove('open');
+        sfpTrigger.setAttribute('aria-expanded', 'false');
+
+        // Update buy-box variant selector
+        isUpdatingFromBuyBox = true;
+        
+        // If selectApparelVariant exists (for apparel products), use it
+        if (window.selectApparelVariant && variantName) {
+          // Parse variant name to extract size/color if it's an apparel product
+          var parts = variantName.split(' / ');
+          if (parts.length > 0) {
+            window.selectApparelVariant(parts[0], parts[1] || null);
+          }
+        } else {
+          // For supplement products, update directly
+          var selectEl = document.getElementById('variant-select');
+          if (selectEl) {
+            for (var i = 0; i < selectEl.options.length; i++) {
+              if (selectEl.options[i].value == variantId) {
+                selectEl.selectedIndex = i;
+                document.getElementById('selected-variant-id').value = variantId;
+                
+                // Dispatch change event
+                var changeEvent = new Event('change', { bubbles: true });
+                selectEl.dispatchEvent(changeEvent);
+                
+                // Dispatch custom variant:changed event
+                var variantChangedEvent = new CustomEvent('variant:changed', {
+                  detail: {
+                    variantId: variantId,
+                    variantName: variantName
+                  },
+                  bubbles: true
+                });
+                document.dispatchEvent(variantChangedEvent);
+                
+                // Update prices
+                if (window.updatePricesForVariant) {
+                  window.updatePricesForVariant(variantId);
+                }
+                break;
+              }
+            }
+          }
+        }
+        setTimeout(function() { isUpdatingFromBuyBox = false; }, 100);
+      });
+    });
+  }
+});
+</script>
+</section>
+
+{% schema %}
+{
+  "name": "CR Ingredients",
+  "tag": "section",
+  "class": "ingredients-sfp-section",
+  "settings": [
+    { "type": "header", "content": "Main Section Controls" },
+    { "type": "text", "id": "anchor_tag", "label": "Anchor Tag Value", "info": "Add an anchor ID for linking to this section" },
+    { "type": "checkbox", "id": "use_series_colors", "label": "Use Dynamic Product Series Colors Globally In Section", "default": true, "info": "When enabled, colors will be pulled from the Product Series metaobject" },
+    { "type": "checkbox", "id": "show_grunge_borders", "label": "Show Grunge Borders", "default": true },
+    { "type": "checkbox", "id": "previous_section_has_grunge", "label": "Previous Section Has Grunge Borders", "default": false, "info": "Enable if the section above has grunge borders. Adds top padding to compensate." },
+    { "type": "checkbox", "id": "next_section_has_grunge", "label": "Next Section Has Grunge Borders", "default": false, "info": "Enable if the section below has grunge borders. Adds bottom padding to compensate." },
+    { "type": "checkbox", "id": "both_sections_have_grunge", "label": "Both Adjacent Sections Have Grunge Borders", "default": false, "info": "Enable if BOTH sections above AND below have grunge borders. Adds padding to top and bottom." },
+    { "type": "range", "id": "section_z_index", "label": "Section Z-Index (Layer Order)", "min": 1, "max": 100, "step": 1, "default": 2, "info": "Controls stacking order. Higher numbers appear on top." },
+    
+    { "type": "header", "content": "Layout Settings" },
+    { "type": "checkbox", "id": "show_section_title", "label": "Show Section Title", "default": true },
+    { "type": "text", "id": "section_title", "label": "Section Title", "default": "Key Ingredients" },
+    { "type": "range", "id": "column_gap_desktop", "label": "Column Gap (Desktop)", "min": 20, "max": 120, "step": 10, "default": 60, "unit": "px" },
+    { "type": "range", "id": "column_gap_mobile", "label": "Column Gap (Mobile)", "min": 20, "max": 80, "step": 10, "default": 40, "unit": "px" },
+    
+    { "type": "header", "content": "Color Controls" },
+    { "type": "color", "id": "section_bg_color", "label": "Section Background Color (Optional)", "info": "Leave blank to use series color" },
+    { "type": "image_picker", "id": "section_bg_image", "label": "Section Background Image (Optional)", "info": "If set, this will override the background color" },
+    { "type": "select", "id": "text_color_source", "label": "Text Color Source", "default": "custom", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" },
+      { "value": "custom", "label": "Custom Color" }
+    ]},
+    { "type": "color", "id": "text_color", "label": "Custom Text Color", "default": "#ffffff" },
+    
+    { "type": "header", "content": "Key Ingredients Accordion" },
+    { "type": "range", "id": "accordion_item_spacing", "label": "Accordion Item Spacing", "min": 0, "max": 8, "step": 1, "default": 0, "unit": "px" },
+    { "type": "select", "id": "accordion_tab_font_color_source", "label": "Accordion Tab Title Font Color", "default": "text_default", "options": [
+      { "value": "text_default", "label": "Default Text Color" },
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_bg_color_source", "label": "Accordion Tab Background Color", "default": "accent_3", "options": [
+      { "value": "transparent", "label": "Transparent" },
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_tab_border_color_source", "label": "Accordion Tab Border Color", "default": "transparent", "options": [
+      { "value": "transparent", "label": "Transparent (No Border)" },
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_expanded_tab_bg_color_source", "label": "Accordion Expanded Tab Title Background Color", "default": "accent_1", "options": [
+      { "value": "transparent", "label": "Transparent" },
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accordion 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_expanded_bg_color_source", "label": "Accordion Expanded Content Background Color", "default": "accent_1", "options": [
+      { "value": "transparent", "label": "Transparent" },
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accordion 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_expanded_border_color_source", "label": "Accordion Expanded Content Border Color", "default": "accent_1", "options": [
+      { "value": "transparent", "label": "Transparent" },
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accordion 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_expanded_font_color_source", "label": "Accordion Expanded Content Font Color", "default": "text_default", "options": [
+      { "value": "text_default", "label": "Default Text Color" },
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "checkbox", "id": "enable_hover_transitions", "label": "Enable Hover Transitions", "default": true },
+    { "type": "select", "id": "accordion_icon_color_source", "label": "Accordion Plus/Minus Icon Color", "default": "accent_2", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    { "type": "select", "id": "accordion_border_color_source", "label": "Accordion Border Color", "default": "accent_1", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ]},
+    
+    { "type": "header", "content": "Grunge Borders" },
+    { "type": "select", "id": "grunge_border_color_source", "label": "Grunge Border Color", "default": "accent_1", "options": [
+      { "value": "featured", "label": "Featured (WL:Red, Core:Gold, Code Red:Red)" },
+      { "value": "accent_1", "label": "Accent 1 (WL:Wht, Core:Wht, Code Red:Grey)" },
+      { "value": "accent_2", "label": "Accent 2 (WL:Grey, Core:Grey, Code Red:Grey)" },
+      { "value": "accent_3", "label": "Accent 3 (All:Black)" }
+    ], "info": "Color tint for grunge border SVG" },
+    { "type": "checkbox", "id": "use_grunge_as_bg", "label": "Use Grunge Border Color as Section Background", "default": true, "info": "When enabled, section background will match the grunge border color" },
+    { "type": "checkbox", "id": "show_top_grunge", "label": "Show Top Grunge Border", "default": false },
+    { "type": "image_picker", "id": "top_grunge_image", "label": "Top Grunge Border Image" },
+    { "type": "range", "id": "top_grunge_height_mobile", "label": "Top Grunge Border Height (Mobile)", "min": 20, "max": 300, "step": 4, "default": 52, "unit": "px" },
+    { "type": "range", "id": "top_grunge_height_desktop", "label": "Top Grunge Border Height (Desktop)", "min": 20, "max": 300, "step": 4, "default": 52, "unit": "px" },
+    { "type": "range", "id": "top_grunge_offset_mobile", "label": "Top Grunge Border Offset (Mobile)", "min": -200, "max": 200, "step": 4, "default": -40, "unit": "px" },
+    { "type": "range", "id": "top_grunge_offset_desktop", "label": "Top Grunge Border Offset (Desktop)", "min": -300, "max": 300, "step": 10, "default": -50, "unit": "px" },
+    { "type": "checkbox", "id": "show_bottom_grunge", "label": "Show Bottom Grunge Border", "default": false },
+    { "type": "image_picker", "id": "bottom_grunge_image", "label": "Bottom Grunge Border Image" },
+    { "type": "range", "id": "bottom_grunge_height", "label": "Bottom Grunge Border Height", "min": 20, "max": 300, "step": 4, "default": 64, "unit": "px" },
+    { "type": "range", "id": "bottom_grunge_offset", "label": "Bottom Grunge Border Offset", "min": -300, "max": 300, "step": 10, "default": -50, "unit": "px" },
+    
+    { "type": "header", "content": "Section Padding/Margins" },
+    { "type": "range", "id": "margin_top_desktop", "label": "Margin Top (Desktop)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_bottom_desktop", "label": "Margin Bottom (Desktop)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_top_mobile", "label": "Margin Top (Mobile)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "margin_bottom_mobile", "label": "Margin Bottom (Mobile)", "min": -200, "max": 200, "step": 4, "default": 0, "unit": "px" },
+    { "type": "range", "id": "padding_top_desktop", "label": "Padding Top (Desktop)", "min": 0, "max": 200, "step": 2, "default": 60, "unit": "px" },
+    { "type": "range", "id": "padding_bottom_desktop", "label": "Padding Bottom (Desktop)", "min": 0, "max": 200, "step": 2, "default": 60, "unit": "px" },
+    { "type": "range", "id": "padding_top_mobile", "label": "Padding Top (Mobile)", "min": 0, "max": 200, "step": 2, "default": 40, "unit": "px" },
+    { "type": "range", "id": "padding_bottom_mobile", "label": "Padding Bottom (Mobile)", "min": 0, "max": 200, "step": 2, "default": 40, "unit": "px" },
+    
+    { "type": "header", "content": "Fallback Colors (When No Series Detected)" },
+    { "type": "paragraph", "content": "These colors are only used when a product has no series assigned. Normally, colors are pulled automatically from the product's series metaobject." },
+    { "type": "color", "id": "bg_color", "label": "Featured/Hero (Red/Gold/Red)", "default": "#AE1F24", "info": "WL: Flagship Red #AE1F24 | Core: Core Gold #E0B357 | Code Red: Code Red #AE1F24" },
+    { "type": "color", "id": "fallback_accent_1", "label": "Accent 1 Light (White/White/Lt Grey)", "default": "#FFFFFF", "info": "WL: Flagship White #FFFFFF | Core: Core White #FFFFFF | Code Red: CR Light Grey #CECECE" },
+    { "type": "color", "id": "fallback_accent_2", "label": "Accent 2 Neutral (Grey/Dk Grey/Grey)", "default": "#999999", "info": "WL: Flagship Grey #999999 | Core: Core Grey #585A5C | Code Red: CR Grey #BCBCBC" },
+    { "type": "color", "id": "fallback_accent_3", "label": "Accent 3 Dark (Black)", "default": "#000000", "info": "All Series: #000000 - Used for text, shadows, and dark backgrounds" }
+  ],
+  "presets": [
+    { "name": "CR Ingredients"}
+  ]
+}
+{% endschema %}

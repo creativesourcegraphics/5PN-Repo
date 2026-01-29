@@ -1,0 +1,661 @@
+{%- liquid
+  assign product_sfp_raw = product.metafields.custom.sfp_section.value
+  assign product_sfp = product_sfp_raw | first | default: product_sfp_raw
+  assign product_series = product_sfp.series.value
+  assign bg_image = nil
+  if section.settings.use_series_bg_image and product_series.pdp_main_background_image
+    assign bg_image = product_series.pdp_main_background_image
+  elsif section.settings.background_image
+    assign bg_image = section.settings.background_image
+  endif
+-%}
+
+<main id="MainContent" class="series-scope{% if bg_image %} has-background-image{% endif %}">
+{%- render 'series-colors' -%}
+ {%- render 'global-styles-series' -%}
+
+<style>
+#MainContent {
+  padding-bottom: 80px;
+}
+
+#MainContent.has-background-image {
+  position: relative;
+}
+
+#MainContent.has-background-image > * {
+  position: relative;
+  z-index: 2;
+}
+
+#MainContent.has-background-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  {% if section.settings.bg_image_blur > 0 %}
+  filter: blur({{ section.settings.bg_image_blur }}px);
+  {% else %}
+  filter: blur(0px);
+  {% endif %}
+  transition: filter 0.6s ease-out;
+  z-index: 0;
+  pointer-events: none;
+}
+
+{% if section.settings.bg_image_blur > 0 %}
+#MainContent.has-background-image.is-scrolled::before {
+  filter: blur(0px);
+}
+{% endif %}
+
+#MainContent.has-background-image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: {{ section.settings.bg_overlay_color | default: '#000000' }};
+  opacity: {{ section.settings.bg_overlay_opacity | divided_by: 100.0 }};
+  z-index: 1;
+  pointer-events: none;
+}
+
+@media (max-width: 999px) {
+  #MainContent.has-background-image::before {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: auto;
+    background-attachment: fixed;
+  }
+  
+  #MainContent {
+    padding-bottom: 20px!important;
+  }
+}
+
+{% if bg_image %}
+#MainContent.has-background-image::before {
+  {% if bg_image.src %}
+    background-image: url('{{ bg_image.src | image_url: width: 2400 }}');
+  {% else %}
+    background-image: url('{{ bg_image | image_url: width: 2400 }}');
+  {% endif %}
+}
+{% endif %}
+</style>
+
+<style>
+#shopify-section-{{ section.id }} {
+  --product-grid: auto / minmax(0, 1fr);
+  --product-gallery-media-list-grid: auto / auto-flow {% if section.settings.mobile_carousel_control == 'free_scroll' %}{% if section.settings.mobile_media_size == 'expanded' %}84vw{% else %}73vw{% endif %}{% else %}100%{% endif %};
+  --product-gallery-media-list-gap: {% if section.settings.mobile_media_size == 'expanded' %}var(--spacing-0-5){% else %}var(--grid-gutter){% endif %};
+}
+
+@media screen and (max-width: 999px) {
+  #shopify-section-{{ section.id }} {
+    --section-spacing-block-start: {% if section.settings.mobile_media_size == 'expanded' %}0px{% else %}var(--container-gutter){% endif %};
+  }
+}
+
+@media screen and (min-width: 1000px) {
+  #shopify-section-{{ section.id }} {
+    {%- assign media_ratio = section.settings.desktop_media_width | default: 55 | divided_by: 50.0 -%}
+    --product-grid: auto / minmax(0, {{ media_ratio }}fr) minmax(0, {{ 2.0 | minus: media_ratio }}fr);
+    --product-gallery-media-list-grid: {% if section.settings.desktop_media_layout contains 'grid' %}auto-flow dense / repeat(2, minmax(0, 1fr)){% else %}auto / auto-flow 100%{% endif %};
+    --product-gallery-media-list-gap: calc(var(--grid-gutter) / 2);
+  }
+  
+  #shopify-section-{{ section.id }} .product {
+    display: grid !important;
+  }
+}
+
+@media screen and (min-width: 1400px) {
+  #shopify-section-{{ section.id }} {
+    --product-gallery-media-list-gap: var(--grid-gutter);
+  }
+}
+
+.product-gallery-column {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 120px;
+  align-self: flex-start;
+  z-index: 5;
+  grid-column: 1;
+  grid-auto-columns: minmax(0, 1fr);
+  display: grid;
+  gap: var(--spacing-6) var(--spacing-12);
+}
+
+@media (max-width: 999px) {
+  .product-gallery-column {
+    position: relative;
+    top: 0;
+    grid-column: auto;
+  }
+}
+
+.product-info-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  grid-column: 2;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 999px) {
+  .product-info-wrapper {
+    grid-column: auto;
+  }
+}
+
+.product-info-wrapper > * {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+</style>
+
+{% if bg_image and section.settings.bg_image_blur > 0 %}
+<script>
+(function() {
+  if('requestIdleCallback' in window){
+    requestIdleCallback(initBlurObserver);
+  }else{
+    setTimeout(initBlurObserver,1);
+  }
+  
+  function initBlurObserver(){
+    const mainContent = document.getElementById('MainContent');
+    if(!mainContent)return;
+    const sentinel = document.createElement('div');
+    sentinel.style.cssText = 'position:absolute;top:150px;height:1px;width:100%;pointer-events:none';
+    mainContent.appendChild(sentinel);
+    
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      mainContent.classList.toggle('is-scrolled', !entry.isIntersecting);
+    }, {
+      threshold: 0,
+      rootMargin: '0px'
+    });
+    
+    observer.observe(sentinel);
+  }
+})();
+</script>
+{% endif %}
+
+{%- if product.tags contains 'no-buy-now' -%}
+  <style>
+    .no-buy-now .product-info__quantity-selector,
+    .no-buy-now .product-info__buy-buttons {
+      display: none !important;
+    }
+  </style>
+{%- endif -%}
+
+<div {% render 'section-properties', tight: true %}>
+  <div class="product{% if product.tags contains 'no-buy-now' %} no-buy-now{% endif %}">
+    <div class="product-gallery-column">
+      {%- if product.media.size > 0 -%}
+        {%- render 'product-gallery', product: product -%}
+      {%- endif -%}
+    </div>
+    
+    <div class="product-info-wrapper">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'product_info_header' -%}
+          {%- render 'product-info-block', block: block -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+       {%- for block in section.blocks -%}
+        {%- if block.type == 'buy-box' -%}
+          {%- render 'buy-box', default_purchase_option: block.settings.default_purchase_option -%}
+        {%- endif -%}
+      {%- endfor -%}
+      
+      {%- render 'product-info', product: product, update_url: true -%}
+    </div>
+  </div>
+</div>
+
+{%- assign buy_buttons_block = section.blocks | where: 'type', 'buy_buttons' | first -%}
+{%- assign vendor_block      = section.blocks | where: 'type', 'vendor'     | first -%}
+
+{%- unless product.tags contains 'no-buy-now' -%}
+  {%- if section.settings.show_fixed_add_to_cart and product.available and buy_buttons_block -%}
+    {%- capture product_form_id -%}product-form-{{ product.id }}-{{ section.id }}{%- endcapture -%}
+    <product-quick-add form="{{ product_form_id }}" class="product-quick-add">
+      {%- assign button_label = 'product.general.add_to_cart_button' | t -%}
+      <buy-buttons
+        template="{{ product.template_suffix }}"
+        form="{{ product_form_id }}"
+        force-secondary-button
+        class="sm:hidden"
+      >
+        {%- render 'button',
+          type: 'submit',
+          content: button_label,
+          form: product_form_id,
+          background: buy_buttons_block.settings.atc_button_background,
+          text_color: buy_buttons_block.settings.atc_button_text_color,
+          secondary: true,
+          stretch: true,
+          size: 'lg'
+        -%}
+      </buy-buttons>
+
+      <div class="product-quick-add__variant{% if product.selected_or_first_available_variant.featured_media == blank %} no-image{% endif %} hidden sm:grid">
+        {%- assign image = product.selected_or_first_available_variant.featured_media | default: product.featured_media -%}
+        {%- if image -%}
+          <variant-media widths="80,160" form="{{ product_form_id }}">
+            {{- image | image_url: width: image.width | image_tag: loading: 'lazy', sizes: '80px', widths: '80,160', class: 'rounded-xs' -}}
+          </variant-media>
+        {%- endif -%}
+        <div class="v-stack gap-0.5">
+          {%- if vendor_block -%}
+            {%- render 'vendor' with product.vendor, class: 'text-xs' -%}
+          {%- endif -%}
+          <a href="{{ product.url }}" class="bold truncate-text">{{ product.title }}</a>
+          {%- render 'price-list',
+            product: product,
+            variant: product.selected_or_first_available_variant,
+            form_id: product_form_id
+          -%}
+        </div>
+        <buy-buttons template="{{ product.template_suffix }}" form="{{ product_form_id }}" force-secondary-button>
+          {%- render 'button',
+            type: 'submit',
+            content: button_label,
+            form: product_form_id,
+            background: buy_buttons_block.settings.atc_button_background,
+            text_color: buy_buttons_block.settings.atc_button_text_color,
+            secondary: true
+          -%}
+        </buy-buttons>
+      </div>
+    </product-quick-add>
+  {%- endif -%}
+{%- endunless -%}
+
+<template id="quick-buy-content">
+  {%- capture qb_form_id -%}quick-buy-form-{{ product.id }}-{{ section.id }}{%- endcapture -%}
+
+  <div class="quick-buy-drawer__variant text-start h-stack gap-6" slot="header">
+    {%- assign qb_image = product.selected_or_first_available_variant.featured_media | default: product.featured_media -%}
+    {%- if qb_image -%}
+      <variant-media widths="80,160" form="{{ qb_form_id }}">
+        {{- qb_image
+            | image_url: width: qb_image.width
+            | image_tag:
+                loading: 'lazy',
+                sizes: '80px',
+                widths: '80,160',
+                class: 'quick-buy-drawer__media rounded-xs' }}
+      </variant-media>
+    {%- endif -%}
+    <div class="v-stack gap-0.5">
+      <a href="{{ product.url }}" class="bold justify-self-start">{{ product.title }}</a>
+      <div id="{{ qb_form_id }}-price">
+        {%- render 'price-list',
+            product:  product,
+            variant:  product.selected_or_first_available_variant,
+            form_id:  qb_form_id -%}
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-buy-drawer__info">
+    {% if product.variants.size > 1 %}
+      <div class="quick-buy-variant-dropdown mb-4">
+        <label for="{{ qb_form_id }}-variant-select" class="text-subdued">
+          {{ product.options.first }}:
+        </label>
+        <select
+          id="{{ qb_form_id }}-variant-select"
+          name="id"
+          form="{{ qb_form_id }}"
+          class="w-full border border-gray-300 rounded p-2 mt-1"
+          style="padding: 10px; margin-bottom: 10px; border-radius: 0px !important;"
+        >
+          {% for variant in product.variants %}
+            <option
+              value="{{ variant.id }}"
+              {% if variant == product.selected_or_first_available_variant %}selected{% endif %}
+              {% unless variant.available %}disabled{% endunless %}
+            >
+              {{ variant.title | replace: ' / US', '' }}{% unless variant.available %} (Sold out){% endunless %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    {% else %}
+      <input
+        type="hidden"
+        name="id"
+        value="{{ product.selected_or_first_available_variant.id }}"
+        form="{{ qb_form_id }}"
+      >
+    {% endif %}
+
+    {%- render 'buy-buttons',
+        product:             product,
+        form_id:             qb_form_id,
+        show_payment_button: false,
+        button_size:         'lg'
+    -%}
+  </div>
+
+  <script>
+    (function() {
+      var variants = {
+        {% for variant in product.variants %}
+        "{{ variant.id }}": {
+          media: {{ variant.featured_media | default: product.featured_media | json }},
+          priceHtml: `{% render 'price-list', product: product, variant: variant, form_id: qb_form_id %}`
+        }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      };
+
+      var selectEl = document.getElementById('{{ qb_form_id }}-variant-select');
+      var formEl   = document.getElementById('{{ qb_form_id }}');
+      var mediaEl  = document.querySelector('variant-media[form="{{ qb_form_id }}"]');
+      var priceEl  = document.getElementById('{{ qb_form_id }}-price');
+
+      selectEl.addEventListener('change', function(e) {
+        var v = variants[e.target.value];
+
+        if (v.media && mediaEl) {
+          mediaEl.setAttribute('media-id', v.media.id);
+          mediaEl.innerHTML =
+            '<img src="' + v.media.preview_image.src + '"' +
+            ' loading="lazy" sizes="80px"' +
+            ' srcset="' + v.media.preview_image.src + ' 80w, ' + v.media.preview_image.src + ' 160w"' +
+            ' class="quick-buy-drawer__media rounded-xs">';
+        }
+
+        if (priceEl) {
+          priceEl.innerHTML = v.priceHtml;
+        }
+
+        if (formEl) {
+          var hidden = formEl.querySelector('input[name="id"][type="hidden"]');
+          if (hidden) hidden.value = e.target.value;
+        }
+      });
+    })();
+  </script>
+</template>
+</main>
+
+{% schema %}
+{
+  "name": "Product page",
+  "class": "shopify-section--main-product",
+  "tag": "section",
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "product_info_header",
+      "name": "Product Info Header",
+      "settings": [
+        {
+          "type": "text",
+          "id": "yotpo_instance_id",
+          "label": "Yotpo Instance ID",
+          "default": "498700"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_rating",
+          "label": "Show Yotpo Rating",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_subheader",
+          "label": "Show Product Sub Header",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "buy-box",
+      "name": "Buy Box",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "default_purchase_option",
+          "label": "Default Purchase Option",
+          "options": [
+            {
+              "value": "subscribe",
+              "label": "Subscribe & Save"
+            },
+            {
+              "value": "onetime",
+              "label": "One-Time Purchase"
+            }
+          ],
+          "default": "subscribe",
+          "info": "Select which purchase option is selected by default"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_fixed_add_to_cart",
+      "label": "Show add to cart on scroll",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "paragraph",
+      "content": "Learn more about [media types](https://help.shopify.com/en/manual/products/product-media)"
+    },
+    {
+      "type": "range",
+      "id": "desktop_media_width",
+      "label": "Desktop media size",
+      "min": 35,
+      "max": 65,
+      "step": 5,
+      "unit": "%",
+      "default": 55
+    },
+    {
+      "type": "select",
+      "id": "desktop_media_layout",
+      "label": "Desktop media layout",
+      "info": "Thumbnails are positioned below the main image",
+      "options": [
+        {
+          "value": "carousel_thumbnails_bottom",
+          "label": "Carousel (thumbnails bottom)"
+        }
+      ],
+      "default": "carousel_thumbnails_bottom"
+    },
+    {
+      "type":"select",
+      "id": "mobile_media_size",
+      "label": "Mobile media size",
+      "options": [
+        {
+          "value": "expanded",
+          "label": "Expanded"
+        },
+        {
+          "value": "contained",
+          "label": "Contained"
+        }
+      ],
+      "default": "expanded"
+    },
+    {
+      "type": "select",
+      "id": "mobile_carousel_control",
+      "label": "Mobile carousel control",
+      "info": "Thumbnails now appear below the main image on mobile",
+      "options": [
+        {
+          "value": "dots",
+          "label": "Dots"
+        },
+        {
+          "value": "floating_dots",
+          "label": "Floating dots"
+        },
+        {
+          "value": "thumbnails",
+          "label": "Thumbnails below"
+        },
+        {
+          "value": "free_scroll",
+          "label": "Free scroll"
+        }
+      ],
+      "default": "thumbnails"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_video_autoplay",
+      "label": "Enable video autoplay",
+      "info": "Video are muted automatically to allow autoplay. Grid mode on desktop turn off autoplay.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_video_looping",
+      "label": "Enable video looping",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Image zoom"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_image_zoom",
+      "label": "Enable",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "max_image_zoom_level",
+      "min": 1,
+      "max": 4,
+      "step": 0.5,
+      "label": "Max zoom level",
+      "default": 3
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_series_bg_image",
+      "label": "Use Product Series Background Image",
+      "info": "Pulls from the PDP Main Background Image field in the Product Series metaobject",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Fallback Background Image",
+      "info": "Used if series background is not set or checkbox is unchecked"
+    },
+    {
+      "type": "color",
+      "id": "bg_overlay_color",
+      "label": "Background overlay color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "bg_overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Background overlay opacity",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "bg_image_blur",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Background image blur (on scroll)",
+      "info": "Starts blurred, becomes clear after scrolling 150px down",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Gradient replaces solid colors when set."
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text"
+    },
+    {
+      "type": "header",
+      "content": "Input colors",
+      "info": "Applies to elements like quantity selector and variant selectors."
+    },
+    {
+      "type": "color",
+      "id": "input_background",
+      "label": "Background",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Text"
+    }
+  ]
+}
+{% endschema %}
