@@ -501,7 +501,7 @@
           {% assign swatch_name = swatch_obj.name %}
           {% assign swatch_color = swatch_obj.color_swatch %}
           {% assign swatch_main_color = swatch_obj.flavor_swatch_main_color %}
-          {% assign swatch_border_color = swatch_obj.flavor_swatch_border_color %}
+          {% assign swatch_border_color = swatch_obj.flavor_swatch_border_color.value | default: swatch_obj.flavor_swatch_border_color %}
           
           {% assign gradient_list = swatch_obj.flavor_gradient_color.value %}
           {% assign gradient_color_1 = gradient_list[0] %}
@@ -523,7 +523,7 @@
           {% assign v_series_handle = series_handle %}
           
           <div class="buybox-variant-wrapper"
-               style="--swatch-bg: {{ bg_style }}; --name-top-bg: {{ bg_style }};">
+               style="--swatch-bg: {{ bg_style }}; --name-top-bg: {{ bg_style }}; --swatch-border-color: {{ swatch_border_color | default: bg_style }}; --swatch-url: url('{{ swatch_image | image_url: width: 90 }}');">
             {% if variant_sfp.new_badge %}
               <div class="buybox-new-badge">NEW!</div>
             {% endif %}
@@ -702,7 +702,7 @@
       </button>
     </div>
 
- <div class="buybox-payment-options">
+    <div class="buybox-payment-options">
       <div class="buybox-payment-item">
         <div class="payment-main-group">
           <span>or 4 payments of </span>
@@ -710,14 +710,14 @@
           <span> with </span>
           <div class="payment-logos-group">
             <span class="payment-logo-wrapper">
-              {% if series_handle == 'core-series' or series_handle == 'gladiator' %}
+              {% if series_handle == 'core-series' or 'gladiator' %}
                 <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/sezzle-light.svg?v=1761600001" alt="Sezzle" class="payment-logo" style="height: 18px; width: auto; display: block;">
               {% else %}
                 <img src="https://media.sezzle.com/branding/2.0/Sezzle_Logo_FullColor.svg" alt="Sezzle" class="payment-logo" style="height: 18px; width: auto; display: block;">
               {% endif %}
             </span>
             <span class="payment-logo-wrapper">
-              {% if series_handle == 'core-series' or series_handle == 'gladiator' %}
+              {% if series_handle == 'core-series' or 'gladiator'%}
                 <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/Afterpay_logo.svg?v=1763037720" alt="Afterpay" class="payment-logo" style="height: 18px; width: auto; display: block;">
               {% else %}
               <svg class="payment-logo" width="98" height="24" viewBox="0 0 98 24" fill="none" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="height: 18px; width: auto; display: block;">
@@ -743,7 +743,7 @@
         </div>
         <div class="payment-affirm-group">
           <span class="payment-logo-wrapper">
-            {% if series_handle == 'core-series' or series_handle == 'gladiator' %}
+            {% if series_handle == 'core-series' or 'gladiator' %}
               <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/white_logo-solid_bg.svg?v=1762749600" alt="Affirm" class="payment-logo" style="height: 18px; width: auto; display: block;position:relative; top:1px;">
             {% else %}
               <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/black_logo-white_bg.svg?v=1762749598" alt="Affirm" class="payment-logo" style="height: 18px; width: auto; display: block;position:relative; top:1px;">
@@ -1150,24 +1150,6 @@ min-width: unset!important;
 .buybox-container.is-gladiator-series .buybox-flavor-label {
   color: #fff;
 }
-
-.buybox-container.is-gladiator-series .buybox-variant-option {
-background: #f9aa6700 !!important;
-}
-
-.buybox-container.is-gladiator-series .buybox-variant-info{
-color:white!important;
-}
-
-.buybox-container.is-gladiator-series .buybox-variant-inner{
-    border: 2px solid color-mix(in srgb, var(--swatch-bg, #efefef) 60%, white)!important;
-}
-
-.buybox-container.is-gladiator-series .buybox-variant-option:hover:not(.sold-out) .buybox-variant-inner, .buybox-variant-option.active:not(.sold-out) .buybox-variant-inner{
-    border: 2px solid color-mix(in srgb, var(--swatch-bg, #efefef) 60%, white)!important;
-}
-
-
 .buybox-flavor-static {
   display: flex;
   align-items: center;
@@ -1452,24 +1434,6 @@ color:white!important;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.06));
   border-radius: 8px;
 }
-
-.buybox-container.is-gladiator-series .buybox-variant-option {
-background: color-mix(in srgb, var(--swatch-bg,rgba(109, 109, 109, 0.18)) 25%, #2b2b2b26)!important;
-}
-
-.buybox-container.is-gladiator-series .buybox-variant-option:hover:not(.sold-out) .buybox-variant-swatch img,
-.buybox-variant-option.active:not(.sold-out) .buybox-variant-swatch img{
-filter:brightness (2.5)!important;
-}
-
-.buybox-container.is-gladiator-series .buybox-variant-option.user-selected.active {
-background: var(--swatch-bg)!important;
-}
-
-.buybox-container.is-gladiator-series .buybox-variant-option:hover:not(.sold-out) {
-background: var(--swatch-bg)!important;
-}
-
 .buybox-variant-inner {
   position: relative;
   width: 100%;
@@ -1499,9 +1463,22 @@ background: var(--swatch-bg)!important;
   border-color: color-mix(in srgb, var(--swatch-bg, #efefef) 40%, white);
   border-radius: 8px;
 }
+.buybox-container.is-gladiator-series .buybox-variant-option:hover:not(.sold-out) .buybox-variant-inner,
+.buybox-container.is-gladiator-series .buybox-variant-option.active:not(.sold-out) .buybox-variant-inner {
+  border-color: color-mix(in srgb, var(--swatch-border-color, #efefef) 75%, white);
+}
 .buybox-variant-option.active:not(.sold-out) {
   background: var(--swatch-bg, rgba(255, 255, 255, 1));
   border-radius: 8px;
+}
+.buybox-container.is-gladiator-series .buybox-variant-option:not(.active):not(:hover) {
+  background: rgb(18 18 18 / 55%);
+}
+.buybox-container.is-gladiator-series .buybox-variant-option:not(.active):not(:hover) .buybox-variant-inner {
+  border-color: var(--swatch-border-color, #efefef);
+}
+.buybox-container.is-gladiator-series .buybox-variant-option.active:not(.sold-out):not(:hover) {
+  background: var(--swatch-bg, #AE1F24) !important;
 }
 .buybox-variant-option.sold-out {
   opacity: 0.6;
@@ -1555,7 +1532,7 @@ background: var(--swatch-bg)!important;
   max-height: 48px;
   object-fit: contain;
   object-position: center;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition: transform 0.2s ease, filter 0.2s ease, border-color 0.2s ease;
 }
 .buybox-swatch-placeholder {
   width: 100%;
@@ -1623,6 +1600,30 @@ background: var(--swatch-bg)!important;
 .buybox-variant-option:hover:not(.sold-out) .buybox-variant-swatch img,
 .buybox-variant-option.active:not(.sold-out) .buybox-variant-swatch img {
   filter: brightness(0) invert(1) !important;
+}
+.buybox-container.is-gladiator-series .buybox-variant-option:not(.active):not(:hover) .buybox-variant-info {
+  color: #fff;
+}
+.buybox-container.is-gladiator-series .buybox-variant-option:not(.active):not(:hover) .buybox-variant-swatch:has(img) {
+  position: relative;
+}
+.buybox-container.is-gladiator-series .buybox-variant-option:not(.active):not(:hover) .buybox-variant-swatch:has(img) img {
+  display: none;
+}
+.buybox-container.is-gladiator-series .buybox-variant-option:not(.active):not(:hover) .buybox-variant-swatch:has(img)::before {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 48px;
+  background: var(--swatch-border-color, #efefef);
+  -webkit-mask-image: var(--swatch-url);
+  mask-image: var(--swatch-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 .is-core .buybox-variant-option:hover:not(.sold-out) .buybox-variant-swatch img {
