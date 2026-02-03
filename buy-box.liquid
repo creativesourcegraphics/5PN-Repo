@@ -710,14 +710,14 @@
           <span> with </span>
           <div class="payment-logos-group">
             <span class="payment-logo-wrapper">
-              {% if series_handle == 'core-series' or 'gladiator' %}
+              {% if series_handle == 'core-series' or series_handle == 'gladiator' %}
                 <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/sezzle-light.svg?v=1761600001" alt="Sezzle" class="payment-logo" style="height: 18px; width: auto; display: block;">
               {% else %}
                 <img src="https://media.sezzle.com/branding/2.0/Sezzle_Logo_FullColor.svg" alt="Sezzle" class="payment-logo" style="height: 18px; width: auto; display: block;">
               {% endif %}
             </span>
             <span class="payment-logo-wrapper">
-              {% if series_handle == 'core-series' or 'gladiator'%}
+              {% if series_handle == 'core-series' or series_handle == 'gladiator' %}
                 <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/Afterpay_logo.svg?v=1763037720" alt="Afterpay" class="payment-logo" style="height: 18px; width: auto; display: block;">
               {% else %}
               <svg class="payment-logo" width="98" height="24" viewBox="0 0 98 24" fill="none" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="height: 18px; width: auto; display: block;">
@@ -743,7 +743,7 @@
         </div>
         <div class="payment-affirm-group">
           <span class="payment-logo-wrapper">
-            {% if series_handle == 'core-series' or 'gladiator' %}
+           {% if series_handle == 'core-series' or series_handle == 'gladiator' %}
               <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/white_logo-solid_bg.svg?v=1762749600" alt="Affirm" class="payment-logo" style="height: 18px; width: auto; display: block;position:relative; top:1px;">
             {% else %}
               <img src="https://cdn.shopify.com/s/files/1/0063/4218/0928/files/black_logo-white_bg.svg?v=1762749598" alt="Affirm" class="payment-logo" style="height: 18px; width: auto; display: block;position:relative; top:1px;">
@@ -1215,6 +1215,13 @@ min-width: unset!important;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     max-width: 376px;
   }
+  .buybox-variant-grid[data-variant-count="4"] {
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    max-width: 504px;
+  }
+  .buybox-variant-grid[data-variant-count="4"]:has(.buybox-new-badge) {
+    padding-top: 8px;
+  }
 }
 @media (max-width: 767px) {
   .buybox-variant-grid {
@@ -1472,10 +1479,10 @@ min-width: unset!important;
   border-radius: 8px;
 }
 .buybox-container.is-gladiator-series .buybox-variant-option:not(.active):not(:hover) {
-  background: rgb(18 18 18 / 55%);
+  background: color-mix(in srgb, var(--swatch-bg, #efefef) 38%, transparent);
 }
 .buybox-container.is-gladiator-series .buybox-variant-option:not(.active):not(:hover) .buybox-variant-inner {
-  border-color: var(--swatch-border-color, #efefef);
+  border-color: color-mix(in srgb, var(--swatch-border-color, #efefef) 50%, black);
 }
 .buybox-container.is-gladiator-series .buybox-variant-option.active:not(.sold-out):not(:hover) {
   background: var(--swatch-bg, #AE1F24) !important;
