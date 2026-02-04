@@ -1,774 +1,764 @@
-{% schema %}
-{
-  "name": "Main Collection",
-  "settings": [
-    {
-      "type": "text",
-      "id": "section_title",
-      "label": "Section Title",
-      "default": "Featured Products"
-    },
-    {
-      "type": "collection",
-      "id": "collection",
-      "label": "Collection"
-    },
-    {
-      "type": "text",
-      "id": "link_text",
-      "label": "Shop All Link Text",
-      "default": "SHOP ALL"
-    },
-    {
-      "type": "url",
-      "id": "link_url",
-      "label": "Shop All Link URL",
-      "info": "Leave empty to use the collection URL"
-    },
-    {
-      "type": "range",
-      "id": "products_total",
-      "min": 4,
-      "max": 24,
-      "step": 1,
-      "default": 12,
-      "label": "Total Products to Show"
-    },
-    {
-      "type": "range",
-      "id": "products_per_page_desktop",
-      "min": 2,
-      "max": 6,
-      "step": 1,
-      "default": 4,
-      "label": "Products Visible Per Row (Desktop)"
-    },
-    {
-      "type": "range",
-      "id": "products_per_page_mobile",
-      "min": 1,
-      "max": 3,
-      "step": 1,
-      "default": 1,
-      "label": "Products Visible Per Row (Mobile)"
-    },
-    {
-      "type": "select",
-      "id": "section_width",
-      "label": "Section Width",
-      "options": [
-        { "value": "full", "label": "Full Width" },
-        { "value": "container", "label": "Container (1650px)" },
-        { "value": "narrow", "label": "Narrow (1200px)" }
-      ],
-      "default": "container"
-    },
-    {
-      "type": "range",
-      "id": "section_padding_top",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "Section Padding Top",
-      "default": 40
-    },
-    {
-      "type": "range",
-      "id": "section_padding_bottom",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "Section Padding Bottom",
-      "default": 40
-    },
-    {
-      "type": "header",
-      "content": "Card Spacing"
-    },
-    {
-      "type": "range",
-      "id": "card_options_gap_desktop",
-      "min": 0,
-      "max": 40,
-      "step": 2,
-      "unit": "px",
-      "label": "Gap Below Purchase Options (Desktop)",
-      "default": 12,
-      "info": "Space between One-Time Purchase and variant selector/quantity row"
-    },
-    {
-      "type": "range",
-      "id": "card_options_gap_mobile",
-      "min": 0,
-      "max": 40,
-      "step": 2,
-      "unit": "px",
-      "label": "Gap Below Purchase Options (Mobile)",
-      "default": 12,
-      "info": "Space between One-Time Purchase and variant selector/quantity row on mobile"
-    },
-    {
-      "type": "range",
-      "id": "card_single_option_height_desktop",
-      "min": 40,
-      "max": 120,
-      "step": 2,
-      "unit": "px",
-      "label": "Single Option Height (Desktop)",
-      "default": 52,
-      "info": "Height of purchase options area for apparel/gear with only One-Time Purchase"
-    },
-    {
-      "type": "range",
-      "id": "card_single_option_height_mobile",
-      "min": 10,
-      "max": 120,
-      "step": 2,
-      "unit": "px",
-      "label": "Single Option Height (Mobile)",
-      "default": 48,
-      "info": "Height of purchase options area for apparel/gear with only One-Time Purchase on mobile"
-    },
-    {
-      "type": "header",
-      "content": "Section Margins"
-    },
-    {
-      "type": "range",
-      "id": "section_margin_top_desktop",
-      "min": 0,
-      "max": 200,
-      "step": 4,
-      "unit": "px",
-      "label": "Margin Top (Desktop)",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "section_margin_bottom_desktop",
-      "min": 0,
-      "max": 200,
-      "step": 4,
-      "unit": "px",
-      "label": "Margin Bottom (Desktop)",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "section_margin_top_mobile",
-      "min": 0,
-      "max": 200,
-      "step": 4,
-      "unit": "px",
-      "label": "Margin Top (Mobile)",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "section_margin_bottom_mobile",
-      "min": 0,
-      "max": 200,
-      "step": 4,
-      "unit": "px",
-      "label": "Margin Bottom (Mobile)",
-      "default": 0
-    },
-    {
-      "type": "header",
-      "content": "Discount Badge Settings"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_discount_badge",
-      "label": "Show Discount Badge",
-      "default": false,
-      "info": "Display discount savings badge on all products"
-    },
-    {
-      "type": "text",
-      "id": "discount_percentage",
-      "label": "Discount Percentage",
-      "default": "20",
-      "info": "Just the number (e.g., 20 for 20% off)"
-    },
-    {
-      "type": "text",
-      "id": "discount_text",
-      "label": "Discount Text",
-      "default": "Applied in-cart",
-      "info": "Text to display next to the percentage"
-    },
-    {
-      "type": "color",
-      "id": "discount_color",
-      "label": "Discount Badge Color",
-      "default": "#AE1F24"
-    },
-    {
-      "type": "text",
-      "id": "apparel_discount_percentage",
-      "label": "Apparel/Gear Discount Percentage",
-      "default": "20",
-      "info": "Separate discount percentage for apparel and gear items (e.g., 20 for 20% off)"
-    }
-  ],
-  "presets": [
-    {
-      "name": "Main Collection"
-    }
-  ]
-}
-{% endschema %}
-{% assign collection = collections[section.settings.collection] %}
-{% assign products_limit = section.settings.products_total | default: 12 %}
-{% assign per_page_desktop = section.settings.products_per_page_desktop | default: 4 %}
-{% assign per_page_mobile = section.settings.products_per_page_mobile | default: 1 %}
-{% assign section_width = section.settings.section_width | default: 'container' %}
-{% assign section_title = section.settings.section_title | default: 'Featured Products' %}
-{% assign section_margin_top_desktop = section.settings.section_margin_top_desktop | default: 0 %}
-{% assign section_margin_bottom_desktop = section.settings.section_margin_bottom_desktop | default: 0 %}
-{% assign section_margin_top_mobile = section.settings.section_margin_top_mobile | default: 0 %}
-{% assign section_margin_bottom_mobile = section.settings.section_margin_bottom_mobile | default: 0 %}
+{%- render 'section-spacing-collapsing' -%}
 
-<link rel="stylesheet" href="{{ 'splide.min.css' | asset_url }}">
-<script src="{{ 'splide.min.js' | asset_url }}" defer></script>
-
-{% if collection and collection.products.size > 0 %}
-  {% assign first_product_sfp = collection.products.first.metafields.custom.sfp_section.value %}
-  {% assign first_product_sfp_item = first_product_sfp | first | default: first_product_sfp %}
-  {% assign first_product_series = first_product_sfp_item.series.value %}
-  {% assign section_series_color = first_product_series.template_specific_dynamic_featured_color | default: '#AE1F24' %}
-{% else %}
-  {% assign section_series_color = '#AE1F24' %}
-{% endif %}
-
-<section class="featured-carousel-section fcc-width-{{ section_width }}" 
-         data-section-id="{{ section.id }}"
-         style="padding-top: {{ section.settings.section_padding_top }}px; padding-bottom: {{ section.settings.section_padding_bottom }}px; margin-top: {{ section_margin_top_desktop }}px; margin-bottom: {{ section_margin_bottom_desktop }}px; --section-series-color: {{ section_series_color }}; --card-options-gap: {{ section.settings.card_options_gap_desktop | default: 12 }}px; --card-options-gap-mobile: {{ section.settings.card_options_gap_mobile | default: 12 }}px; --card-single-option-height: {{ section.settings.card_single_option_height_desktop | default: 52 }}px; --card-single-option-height-mobile: {{ section.settings.card_single_option_height_mobile | default: 48 }}px;">
-  {% if collection %}
-    <div class="featured-carousel-header full-underline">
-      <h2 class="featured-carousel-title">{{ section_title }}</h2>
-      {% if section.settings.link_text != blank %}
-        {% assign link_url = section.settings.link_url | default: collection.url %}
-        <a href="{{ link_url }}" class="text-with-icon group">
-          <span class="fcc-reversed-link">{{- section.settings.link_text | escape -}}</span>
-          <span class="circle-chevron group-hover:colors">{%- render 'icon' with 'chevron-right-small', direction_aware: true -%}</span>
-        </a>
-      {% endif %}
-    </div>
-
-    <div class="splide featured-collection-splide" 
-         id="featured-splide-{{ section.id }}"
-         data-per-page-desktop="{{ per_page_desktop }}"
-         data-per-page-mobile="{{ per_page_mobile }}">
-      <div class="splide__track">
-        <ul class="splide__list">
-          {%- comment %}<locksmith:d637>{% endcomment -%}
-            {%- assign locksmith_a868_forloop__size = 0 %}{% for product in collection.products limit: products_limit %}{% capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == 'true' %}{% assign locksmith_a868_forloop__size = locksmith_a868_forloop__size | plus: 1 %}{% endif %}{% endfor %}{% assign locksmith_a868_forloop__index = nil -%}
-          {%- comment %}</locksmith:d637>{% endcomment -%}
-          {% for product in collection.products limit: products_limit %}
-            {%- comment %}<locksmith:f5db>{% endcomment -%}
-              {%- capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == "true" %}{% if locksmith_a868_forloop__index == nil %}{% assign locksmith_a868_forloop__index = 1 %}{% assign locksmith_a868_forloop__index0 = 0 %}{% else %}{% assign locksmith_a868_forloop__index = locksmith_a868_forloop__index | plus: 1 %}{% assign locksmith_a868_forloop__index0 = locksmith_a868_forloop__index0 | plus: 1 %}{% endif %}{% if locksmith_a868_forloop__index == 1 %}{% assign locksmith_a868_forloop__first = true %}{% else %}{% assign locksmith_a868_forloop__first = false %}{% endif %}{% if locksmith_a868_forloop__index == locksmith_a868_forloop__size %}{% assign locksmith_a868_forloop__last = true %}{% else %}{% assign locksmith_a868_forloop__last = false %}{% endif %}{% assign locksmith_a868_forloop__rindex = locksmith_a868_forloop__size | minus: locksmith_a868_forloop__index | minus: 1 %}{% assign locksmith_a868_forloop__rindex0 = locksmith_a868_forloop__size | minus: locksmith_a868_forloop__index0 | minus: 1 %}{% else %}{% continue %}{% endif -%}
-            {%- comment %}</locksmith:f5db>{% endcomment -%}
-            {% if product.price == 0 or product.price_min == 0 %}
-              {% continue %}
-            {% endif %}
-            {% if product.tags contains 'hide-from-carousel' %}
-              {% continue %}
-            {% endif %}
-
-            {% assign variant_count = product.variants.size %}
-            {% if variant_count <= 1 %}
-              {% assign sole_variant = product.variants.first %}
-              {% if sole_variant and sole_variant.available == false %}
-                {% continue %}
-              {% endif %}
-            {% endif %}
-
-            {% assign is_apparel_or_gear = false %}
-            {% assign product_type_lower = product.type | downcase %}
-            {% if product_type_lower contains 'apparel' or product_type_lower contains 'gear' or product_type_lower contains 'clothing' or product.tags contains 'apparel' or product.tags contains 'gear' %}
-              {% assign is_apparel_or_gear = true %}
-            {% endif %}
-
-            {% assign selected_variant = nil %}
-            {% assign non_usa_variant_count = 0 %}
-
-            {% if is_apparel_or_gear %}
-              {% assign has_size_option = false %}
-              {% assign has_color_option = false %}
-              {% assign size_option_index = -1 %}
-              {% assign color_option_index = -1 %}
-
-              {% for option in product.options_with_values %}
-                {% assign option_name_lower = option.name | downcase %}
-                {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                  {% assign has_color_option = true %}
-                  {% assign color_option_index = forloop.index0 %}
-                {% elsif option_name_lower contains 'size' %}
-                  {% assign has_size_option = true %}
-                  {% assign size_option_index = forloop.index0 %}
-                {% endif %}
-              {% endfor %}
-
-              {% assign size_values = '' %}
-              {% assign color_values = '' %}
-              {% for variant in product.variants %}
-                {% if variant.available and selected_variant == nil %}
-                  {% assign selected_variant = variant %}
-                {% endif %}
-
-                {% if has_size_option %}
-                  {% assign size_value = variant.options[size_option_index] %}
-                  {% unless size_values contains size_value %}
-                    {% if size_values == '' %}
-                      {% assign size_values = size_value %}
-                    {% else %}
-                      {% assign size_values = size_values | append: ',' | append: size_value %}
-                    {% endif %}
-                  {% endunless %}
-                {% endif %}
-
-                {% if has_color_option %}
-                  {% assign color_value = variant.options[color_option_index] %}
-                  {% unless color_values contains color_value %}
-                    {% if color_values == '' %}
-                      {% assign color_values = color_value %}
-                    {% else %}
-                      {% assign color_values = color_values | append: ',' | append: color_value %}
-                    {% endif %}
-                  {% endunless %}
-                {% endif %}
-              {% endfor %}
-              {% assign size_array = size_values | split: ',' %}
-              {% assign color_array = color_values | split: ',' %}
-
-              {% capture swatches_html %}
-                {% for variant in product.variants %}
-                  <div class="fcc-swatch" style="display: none;"
-                       data-variant-id="{{ variant.id }}"
-                       data-variant-price="{{ variant.price }}"
-                       data-variant-available="{{ variant.available }}"
-                       data-product-id="{{ product.id }}"
-                       data-variant-name="{{ variant.title }}"
-                       {% if variant.featured_image %}data-variant-image="{{ variant.featured_image | image_url: width: 800 }}"{% endif %}></div>
-                {% endfor %}
-                <div class="fcc-apparel-selector"
-                     data-product-id="{{ product.id }}"
-                     data-size-index="{{ size_option_index }}"
-                     data-color-index="{{ color_option_index }}">
-                  {% if has_size_option and size_array.size > 0 %}
-                  <div class="fcc-apparel-size-section">
-                    <span class="fcc-apparel-label">Size</span>
-                    {% if size_array.size > 1 %}
-                      <div class="fcc-size-dropdown">
-                        <select class="fcc-size-select"
-                                data-size-select="{{ product.id }}"
-                                onchange="selectCarouselApparelVariant(this, {{ product.id }}, this.value, null)">
-                          {% for size in size_array %}
-                            {% assign size_available = false %}
-                            {% for variant in product.variants %}
-                              {% if variant.options[size_option_index] == size and variant.available %}
-                                {% assign size_available = true %}
-                                {% break %}
-                              {% endif %}
-                            {% endfor %}
-                            <option value="{{ size }}" {% if selected_variant.options[size_option_index] == size %}selected{% endif %} {% unless size_available %}disabled{% endunless %}>{{ size }}{% unless size_available %} – Out of Stock{% endunless %}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    {% else %}
-                      <div class="fcc-apparel-static">{{ size_array[0] }}</div>
-                    {% endif %}
-                  </div>
-                  {% endif %}
-
-                  {% if has_color_option and color_array.size > 0 %}
-                  <div class="fcc-apparel-color-section">
-                    <span class="fcc-apparel-label">Color</span>
-                    <div class="fcc-apparel-color-swatches">
-                      {% for color in color_array %}
-                        {% assign color_available = false %}
-                        {% for variant in product.variants %}
-                          {% if variant.options[color_option_index] == color and variant.available %}
-                            {% assign color_available = true %}
-                            {% break %}
-                          {% endif %}
-                        {% endfor %}
-                        {% assign lookup_handle = color | handleize %}
-                        {% assign swatch_entry = shop.metaobjects['swatches'][lookup_handle] %}
-                        {% assign color_hex = '#333' %}
-                        {% assign swatch_image = blank %}
-                        {% if swatch_entry %}
-                          {% if swatch_entry.color_swatch %}
-                            {% assign color_hex = swatch_entry.color_swatch.value | default: '#333' %}
-                          {% endif %}
-                          {% if swatch_entry.swatch_image %}
-                            {% assign swatch_image = swatch_entry.swatch_image.value %}
-                          {% endif %}
-                        {% endif %}
-                        <div class="fcc-color-swatch {% if selected_variant.options[color_option_index] == color %}active{% endif %} {% unless color_available %}disabled{% endunless %}" data-color="{{ color }}" onclick="{% if color_available %}selectCarouselApparelVariant(this, {{ product.id }}, null, '{{ color | escape }}'){% endif %}">
-                          {% if swatch_image != blank %}
-                            <span class="fcc-color-circle" style="background-image:url('{{ swatch_image | image_url: width: 40 }}'); background-size: cover; background-position: center;"></span>
-                          {% else %}
-                            <span class="fcc-color-circle" style="background-color: {{ color_hex }};"></span>
-                          {% endif %}
-                        </div>
-                      {% endfor %}
-                    </div>
-                  </div>
-                  {% endif %}
-                </div>
-              {% endcapture %}
-            {% else %}
-              {% capture swatches_html %}
-              {% for variant in product.variants %}
-                {% assign variant_title_lower = variant.title | downcase %}
-                {% assign is_usa_variant = false %}
-                {% if variant_title_lower contains '/ usa' or variant_title_lower contains '/usa' or variant.title == 'USA' or variant.title == 'usa' %}
-                  {% assign is_usa_variant = true %}
-                {% endif %}
-
-                {% unless is_usa_variant %}
-                  {% assign non_usa_variant_count = non_usa_variant_count | plus: 1 %}
-                  {% if selected_variant == nil and variant.available %}
-                    {% assign selected_variant = variant %}
-                  {% endif %}
-
-                  {% assign v_sfp_raw = variant.metafields.custom.sfp_section.value %}
-                  {% assign v_sfp = v_sfp_raw | first | default: v_sfp_raw %}
-                  {% assign swatch_obj = v_sfp.flavor_swatch_image.value %}
-                  {% assign swatch_image = swatch_obj.swatch_image.value %}
-                  {% assign swatch_color = swatch_obj.color_swatch | default: '#000' %}
-
-                  <div class="fcc-swatch {% if variant == selected_variant %}active{% endif %} {% unless variant.available %}fcc-swatch-unavailable{% endunless %}"
-                       data-variant-id="{{ variant.id }}"
-                       data-variant-price="{{ variant.price }}"
-                       data-variant-available="{{ variant.available }}"
-                       data-product-id="{{ product.id }}"
-                       data-variant-name="{{ variant.title }}"
-                       data-swatch-color="{{ swatch_color }}"
-                       style="--swatch-border-color: {{ swatch_color }};"
-                       {% if variant.featured_image %}data-variant-image="{{ variant.featured_image | image_url: width: 400 }}"{% endif %}
-                       onclick="selectCarouselVariant(this, {{ product.id }})">
-                    {% if swatch_image %}
-                      <img src="{{ swatch_image | image_url: width: 40 }}" alt="{{ variant.title }}" loading="lazy">
-                    {% else %}
-                      <div class="fcc-swatch-placeholder">{{ variant.title | slice: 0 }}</div>
-                    {% endif %}
-                  </div>
-                {% endunless %}
-              {% endfor %}
-              {% endcapture %}
-            {% endif %}
-
-            {% if selected_variant == nil %}
-              {% assign selected_variant = product.selected_or_first_available_variant %}
-            {% endif %}
-
-            {% assign product_sfp_raw = product.metafields.custom.sfp_section.value %}
-            {% assign product_sfp = product_sfp_raw | first | default: product_sfp_raw %}
-            {% assign product_series = product_sfp.series.value %}
-            {% assign series_featured_color = product_series.template_specific_dynamic_featured_color | default: '#AE1F24' %}
-            {% assign series_name = product_series.name | default: '' %}
-            {% assign series_handle = product_series.handle %}
-            {% if series_handle == blank %}
-              {% assign series_name_lower = product_series.series_name | downcase | replace: ' ', '-' %}
-              {% assign series_handle = series_name_lower %}
-            {% endif %}
-            {% assign is_core_series = false %}
-            {% if series_handle == 'core-series' %}
-              {% assign is_core_series = true %}
-            {% endif %}
-
-            {% assign variant_display_name = selected_variant.title %}
-            {% if variant_display_name == 'Default Title' %}
-              {% assign variant_display_name = '' %}
-            {% else %}
-              {% assign variant_display_name = variant_display_name | remove: '/ USA' | remove: '/ usa' | remove: '/ US' | remove: '/ us' | remove: '/USA' | remove: '/usa' | remove: '/US' | remove: '/us' | remove: ' USA' | remove: ' usa' | remove: ' US' | remove: ' us' | remove: 'USA' | remove: 'usa' | strip %}
-            {% endif %}
-
-            {% assign product_info = product.metafields.custom.product_info.value %}
-            {% assign product_title = product_info.product_title.value | default: product.title %}
-            {% assign product_subheader = product_info.product_sub_header.value | default: '' %}
-
-            {% if is_apparel_or_gear %}
-              {% assign current_discount_percent = section.settings.apparel_discount_percentage | default: '20' %}
-            {% else %}
-              {% assign current_discount_percent = section.settings.discount_percentage | default: '20' %}
-            {% endif %}
-
-            <li class="splide__slide">
-              <div class="fcc-card{% if is_core_series %} fcc-core-series{% endif %}" 
-                   data-product-id="{{ product.id }}"
-                   data-product-handle="{{ product.handle }}"
-                   data-series="{{ series_name }}"
-                   data-is-apparel="{{ is_apparel_or_gear }}"
-                   style="--card-series-featured: {{ series_featured_color }};">
-
-                <div class="fcc-card__image">
-                  <a href="{{ product.url }}">
-                    {% if product.featured_image %}
-                      <img src="{{ product.featured_image | image_url: width: 800 }}" 
-                           alt="{{ product.title }}"
-                           loading="lazy"
-                           class="fcc-product-image"
-                           data-product-image="{{ product.id }}">
-                    {% else %}
-                      <div class="fcc-placeholder-image">{{ product.title | slice: 0 }}</div>
-                    {% endif %}
-                  </a>
-
-                  {% if section.settings.show_discount_badge or variant_display_name != blank %}
-                  <div class="fcc-image-info" data-image-info="{{ product.id }}">
-                    {% if variant_display_name != blank %}
-                    <div class="fcc-variant-name" data-variant-name-display="{{ product.id }}">{{ variant_display_name }}</div>
-                    {% endif %}
-                    {% if section.settings.show_discount_badge %}
-                    <div class="fcc-discount-badge" data-discount-badge="{{ product.id }}" style="--discount-badge-color: {{ series_featured_color }};">
-                      <span class="fcc-discount-content"><span class="fcc-discount-percent">{{ current_discount_percent }}% OFF</span> {{ section.settings.discount_text }}</span>
-                    </div>
-                    {% endif %}
-                  </div>
-                  {% endif %}
-                </div>
-
-                <div class="fcc-card__content">
-                  <div class="fcc-card__title">
-                    <a href="{{ product.url }}">{{ product_title }}</a>
-                  </div>
-
-                  <div class="fcc-card__subheader{% if product_subheader == blank %} fcc-card__subheader--empty{% endif %}">{{ product_subheader }}</div>
-
-                  <div class="fcc-card__reviews-price">
-                    <div class="fcc-card__reviews">
-                      <div class="yotpo bottomLine" 
-                           data-product-id="{{ product.id }}"
-                           data-url="{{ shop.url }}{{ product.url }}"></div>
-                    </div>
-                    <div class="fcc-card__price" data-card-price="{{ product.id }}" data-show-discount="{{ section.settings.show_discount_badge }}" data-discount-percent="{{ current_discount_percent }}">
-                      {% if section.settings.show_discount_badge %}
-                      {% assign discount_amount = selected_variant.price | times: current_discount_percent | divided_by: 100.0 %}
-                      {% assign discounted_price = selected_variant.price | minus: discount_amount %}
-                      <span class="fcc-price-original">{{ selected_variant.price | money }}</span><span class="fcc-price-display">{{ discounted_price | money }}</span>
-                      {% else %}
-                      <span class="fcc-price-display">{{ selected_variant.price | money }}</span>
-                      {% endif %}
-                    </div>
-                  </div>
-
-                  {% assign has_selling_plans = false %}
-                  {% if product.selling_plan_groups.size > 0 %}
-                    {% assign has_selling_plans = true %}
-                  {% endif %}
-
-                  <form class="fcc-card__form" data-product-form="{{ product.id }}">
-                    <select name="id" data-variant-select="{{ product.id }}" style="display: none;">
-                      {% for variant in product.variants %}
-                        <option value="{{ variant.id }}" {% if variant == selected_variant %}selected{% endif %}>{{ variant.title }}</option>
-                      {% endfor %}
-                    </select>
-                    <input type="hidden" value="" data-selling-plan-input="{{ product.id }}">
-
-                    <div class="fcc-purchase-options{% unless has_selling_plans %} fcc-purchase-options--single{% endunless %}" data-purchase-options="{{ product.id }}">
-                      <label class="fcc-purchase-option">
-                        <input type="radio" name="purchase_type_{{ product.id }}" value="onetime" checked {% unless selected_variant.available %}disabled{% endunless %}>
-                        <div class="fcc-option-content">
-                          <span class="fcc-option-text">One-Time Purchase</span>
-                        </div>
-                      </label>
-
-                      {% if has_selling_plans %}
-                        {% assign first_plan = product.selling_plan_groups.first.selling_plans.first %}
-                        {% assign first_discount = first_plan.price_adjustments[0].value | default: 0 %}
-
-                        <label class="fcc-purchase-option">
-                          <input type="radio" 
-                                 name="purchase_type_{{ product.id }}" 
-                                 value="subscribe"
-                                 data-selling-plan-id="{{ first_plan.id }}"
-                                 {% unless selected_variant.available %}disabled{% endunless %}>
-                          <div class="fcc-option-content">
-                            <span class="fcc-option-text">Subscribe & Save {{ first_discount | round }}%</span>
-                            <div class="fcc-frequency-selector" data-frequency-selector="{{ product.id }}">
-                              <select class="fcc-delivery-frequency" data-frequency-select="{{ product.id }}">
-                                {% for selling_plan_group in product.selling_plan_groups %}
-                                  {% for selling_plan in selling_plan_group.selling_plans %}
-                                    {% assign frequency_parts = selling_plan.name | split: ' - ' | last | split: ' and ' | first | split: 'Delivered ' %}
-                                    {% assign frequency_full = frequency_parts[1] | default: frequency_parts[0] %}
-                                    {% assign frequency_text = frequency_full | split: '.' | first %}
-                                    <option value="{{ selling_plan.id }}" 
-                                            data-discount="{{ selling_plan.price_adjustments[0].value }}"
-                                            {% if forloop.first %}selected{% endif %}>
-                                      {{ frequency_text }}
-                                    </option>
-                                  {% endfor %}
-                                {% endfor %}
-                              </select>
-                            </div>
-                          </div>
-                        </label>
-                      {% else %}
-                        {% unless is_apparel_or_gear %}
-                          <label class="fcc-purchase-option fcc-purchase-option--placeholder">
-                            <div class="fcc-option-content">
-                              <span class="fcc-option-text">&nbsp;</span>
-                            </div>
-                          </label>
-                        {% endunless %}
-                      {% endif %}
-                    </div>
-
-                    {% assign show_swatches = false %}
-                    {% if is_apparel_or_gear %}
-                      {% assign show_swatches = true %}
-                    {% elsif non_usa_variant_count > 1 %}
-                      {% assign show_swatches = true %}
-                    {% elsif non_usa_variant_count == 1 and variant_display_name != blank %}
-                      {% assign show_swatches = true %}
-                    {% endif %}
-
-                    <div class="fcc-swatches" {% unless show_swatches %}style="visibility: hidden;"{% endunless %}>
-                      {{ swatches_html }}
-                    </div>
-
-                    <div class="fcc-actions" data-actions="{{ product.id }}">
-                      <div class="fcc-quantity" data-quantity="{{ product.id }}" {% unless selected_variant.available %}style="display: none;"{% endunless %}>
-                        <button type="button" class="fcc-qty-btn" onclick="updateCarouselQuantity(this, -1)">−</button>
-                        <input type="number" name="quantity" value="1" min="1" class="fcc-qty-input">
-                        <button type="button" class="fcc-qty-btn" onclick="updateCarouselQuantity(this, 1)">+</button>
-                      </div>
-
-                      <button type="submit" class="fcc-add-to-cart {% unless selected_variant.available %}fcc-out-of-stock{% endunless %}" data-add-btn="{{ product.id }}" {% unless selected_variant.available %}disabled{% endunless %}>
-                        {% if selected_variant.available %}<i class="fa-sharp fa-solid fa-cart-circle-plus"></i>{% endif %}
-                        <span>{% if selected_variant.available %}Add to Cart{% else %}Out of Stock{% endif %}</span>
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="splide__controls">
-        <div class="splide__progress">
-          <div class="splide__progress__bar"></div>
-        </div>
-        <div class="splide__arrows"></div>
-      </div>
-    </div>
-
-    <script>
-    {%- comment %}<locksmith:31d5>{% endcomment -%}
-      {%- assign locksmith_4c12_forloop__size = 0 %}{% for product in collection.products limit: products_limit %}{% capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == 'true' %}{% assign locksmith_4c12_forloop__size = locksmith_4c12_forloop__size | plus: 1 %}{% endif %}{% endfor %}{% assign locksmith_4c12_forloop__index = nil -%}
-    {%- comment %}</locksmith:31d5>{% endcomment -%}
-    {% for product in collection.products limit: products_limit %}
-    {%- comment %}<locksmith:dc09>{% endcomment -%}
-      {%- capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == "true" %}{% if locksmith_4c12_forloop__index == nil %}{% assign locksmith_4c12_forloop__index = 1 %}{% assign locksmith_4c12_forloop__index0 = 0 %}{% else %}{% assign locksmith_4c12_forloop__index = locksmith_4c12_forloop__index | plus: 1 %}{% assign locksmith_4c12_forloop__index0 = locksmith_4c12_forloop__index0 | plus: 1 %}{% endif %}{% if locksmith_4c12_forloop__index == 1 %}{% assign locksmith_4c12_forloop__first = true %}{% else %}{% assign locksmith_4c12_forloop__first = false %}{% endif %}{% if locksmith_4c12_forloop__index == locksmith_4c12_forloop__size %}{% assign locksmith_4c12_forloop__last = true %}{% else %}{% assign locksmith_4c12_forloop__last = false %}{% endif %}{% assign locksmith_4c12_forloop__rindex = locksmith_4c12_forloop__size | minus: locksmith_4c12_forloop__index | minus: 1 %}{% assign locksmith_4c12_forloop__rindex0 = locksmith_4c12_forloop__size | minus: locksmith_4c12_forloop__index0 | minus: 1 %}{% else %}{% continue %}{% endif -%}
-    {%- comment %}</locksmith:dc09>{% endcomment -%}
-    window.Product_{{ product.id }} = {
-      variants: [
-        {% for variant in product.variants %}
-        {
-          id: {{ variant.id }},
-          title: "{{ variant.title | escape }}",
-          options: [{% for option in variant.options %}"{{ option | escape }}"{% unless forloop.last %},{% endunless %}{% endfor %}],
-          price: {{ variant.price }},
-          available: {{ variant.available }},
-          featured_image: {% if variant.featured_image %}{ src: "{{ variant.featured_image | image_url: width: 800 }}" }{% else %}null{% endif %}
-        }{% unless forloop.last %},{% endunless %}
-        {% endfor %}
-      ]
-    };
-    {% endfor %}
-    </script>
-  {% endif %}
-</section>
+{%- if section.settings.show_filters and collection.filters.size > 0 -%}
+  {%- assign show_filters = true -%}
+{%- else -%}
+  {%- assign show_filters = false -%}
+{%- endif -%}
 
 <style>
-.fcc-product-image:hover { transition: ease-in-out 0.3s!important; }
-.featured-carousel-section { margin: 0 auto; }
-.fcc-width-full { max-width: 100%; padding-left: 20px; padding-right: 20px; }
-.fcc-width-container { max-width: 1650px; padding-left: 20px; padding-right: 20px; }
-.fcc-width-narrow { max-width: 1200px; padding-left: 20px; padding-right: 20px; }
-.featured-carousel-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-.featured-carousel-header.full-underline { position: relative; padding-bottom: 16px; }
-.featured-carousel-header.full-underline::before { content: ''; position: absolute; bottom: -2px; left: 0; width: 100px; height: 2px; background-color: var(--section-series-color, #AE1F24); }
-.featured-carousel-title { font-family: 'Gunplay', sans-serif; font-size: 1.75rem; text-transform: uppercase; margin: 0; text-align: left; letter-spacing: 0.5px; }
-.featured-collection-splide .splide__list { display: flex !important; align-items: stretch; }
-.featured-collection-splide .splide__slide { height: 100%; display: flex; align-self: stretch; }
-.featured-collection-splide .splide__slide > * { width: 100%; }
-.fcc-card { background: #fff; border: none; border-radius: 0; padding: 0; display: flex; flex-direction: column; height: 100%; min-height: 100%; }
-.fcc-card__image { width: 100%; position: relative; background: #f9f9f9; padding-bottom: calc(100% + 60px); overflow: hidden; }
-@media (max-width: 768px) {
-  .fcc-card__image { padding-bottom: calc(100% + 50px); }
-  .featured-carousel-section { margin-top: {{ section_margin_top_mobile }}px !important; margin-bottom: {{ section_margin_bottom_mobile }}px !important; }
-}
-.fcc-card__image a { position: absolute; top: 0; left: 0; right: 0; bottom: 60px; display: flex; align-items: center; justify-content: center; z-index: 1; }
-@media (max-width: 768px) { .fcc-card__image a { bottom: 50px; } }
-.fcc-image-info { display: flex; width: 100%; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 0px 10px 0px 10px; position: absolute; bottom: 0; left: 0; z-index: 2; margin-bottom:0px!important; }
-.fcc-variant-name { font-family: 'Acumin Pro Condensed', sans-serif; color: var(--active-swatch-color, #333); display:flex; width: fit-content;justify-content: flex-start; align-items: center; padding: 8px; border-radius:4px;}
-.fcc-discount-percent { font-family: 'Acumin Pro Condensed Black', sans-serif; }
-.fcc-discount-badge { font-family: 'Acumin Pro Condensed', sans-serif; display: flex; justify-content: flex-end; align-items: flex-start; width: 100px; color: #000; border-radius: 4px; line-height: 1; }
-.fcc-discount-content { display: inline-block; font-weight: 700; text-transform: uppercase; text-align: center; }
-.fcc-image-info:has(.fcc-variant-name) .fcc-discount-content { max-width: 140px; }
-.fcc-image-info:not(:has(.fcc-variant-name)) .fcc-discount-badge { width: 100%; justify-content: center; line-height: unset!important; align-items: center; }
-.fcc-image-info:not(:has(.fcc-variant-name)) .fcc-discount-content { white-space: nowrap; padding: 8px; display: flex; align-items: center; justify-content: center;gap:3px; }
-.fcc-product-image { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.3s ease-in-out; }
-.fcc-product-image:hover { opacity: 0.7; }
-.fcc-placeholder-image { font-size: 16px; font-weight: bold; color: #999; }
-.fcc-card__content { border: 2px solid #f9f9f9; display: flex; flex-direction: column; flex: 1; }
-.fcc-card__title { font-family: 'Gunplay', sans-serif; font-size: 1.4rem; line-height: 1.3; min-height: 50px; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 12px 12px 0; text-transform: uppercase; }
-.fcc-card__title a { color: #000; text-decoration: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fcc-card__subheader { font-family: 'Acumin Pro', sans-serif; font-size: 16px; color: #000; line-height: 1.4; display: flex; align-items: flex-start; padding: 0 12px; min-height: 22px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.fcc-card__subheader--empty { visibility: hidden; }
-.fcc-card__reviews-price { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; min-height: 32px; padding: 0 12px; }
-.fcc-card__reviews { flex: 0 0 auto; }
-.fcc-card__reviews .yotpo .text-m, .fcc-card__reviews .yotpo .yotpo-bottomline-box-1, .fcc-card__reviews .yotpo .yotpo-bottomline .text-m, .fcc-card__reviews .yotpo .standalone-bottomline .text-m { display: none !important; }
-.fcc-card__reviews .yotpo-sr-bottom-line-left-panel, .fcc-card__reviews .yotpo-sr-bottom-line-score, .fcc-card__reviews .yotpo-sr-bottom-line-right-panel, .fcc-card__reviews .yotpo-sr-vertical-border { display: none !important; }
-.fcc-card .yotpo-sr-star-full path, .fcc-card .yotpo-icon-star, .fcc-card svg.star-container path { fill: var(--card-series-featured, #AE1F24) !important; stroke: var(--card-series-featured, #AE1F24) !important; }
-.fcc-card__price { display: flex; justify-content: flex-end; align-items: baseline; gap: 8px; flex-shrink: 0; }
-.fcc-price-display { font-family: 'Acumin Pro', sans-serif; font-size: 16px; font-weight: 400; color: black; }
-.fcc-price-original { text-decoration: line-through; color: #999; font-size: 16px; font-weight: 400; }
-.fcc-price-subscribe { color: black; font-size: 16px; font-weight: 400; }
-.fcc-card__form { display: flex; flex-direction: column; gap: 12px; padding: 0 12px 12px; margin-top: auto; }
-.fcc-purchase-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 0; align-items: stretch; min-height: 104px; }
-.fcc-purchase-options--single { min-height: var(--card-single-option-height, 52px); }
-.fcc-purchase-option { cursor: pointer; display: block; width: 100%; }
-.fcc-purchase-option input[type="radio"] { display: none; }
-.fcc-option-content { border: 2px solid #e0e0e0; border-radius: 4px; padding: 12px 16px; background: #fff; position: relative; display: flex; align-items: center; min-height: 48px; gap: 8px; }
-.fcc-option-content::before { content: ''; width: 16px; height: 16px; border: 2px solid #ccc; border-radius: 50%; flex-shrink: 0; }
-.fcc-purchase-option input[type="radio"]:checked + .fcc-option-content { border-color: #ccc; background: #f9f9f9; padding-right: 130px; }
-.fcc-purchase-option input[type="radio"]:checked + .fcc-option-content::before { border-color: #666; background: #666; box-shadow: inset 0 0 0 3px #fff; }
-.fcc-purchase-option input[type="radio"]:disabled + .fcc-option-content { opacity: 0.5; cursor: not-allowed; }
-.fcc-purchase-option input[type="radio"]:disabled:checked + .fcc-option-content { border-color: #ccc; background: #f5f5f5; }
-.fcc-purchase-option input[type="radio"]:disabled:checked + .fcc-option-content::before { border-color: #ccc; background: #ccc; }
-.fcc-purchase-option--placeholder .fcc-option-content { visibility: hidden; }
-.fcc-option-text { font-family: 'Acumin Pro', sans-serif; font-size: 15px; font-weight: 600; color: #000; flex: 1; text-align: left; white-space: nowrap; }
-.fcc-frequency-selector { display: none; margin-left: auto; flex-shrink: 0; width: auto; max-width: 110px; position: absolute; right: 16px; }
-.fcc-purchase-option input[type="radio"]:checked + .fcc-option-content .fcc-frequency-selector { display: block; }
-.fcc-delivery-frequency { width: 100%; padding: 6px 24px 6px 8px; border: 1px solid #e0e0e0; border-radius: 4px; font-family: 'Acumin Pro', sans-serif; font-size: 12px; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat; background-position: right 6px center; background-size: 10px; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fcc-delivery-frequency option { white-space: normal; }
-.fcc-swatches { display: flex; flex-wrap: nowrap; gap: 6px; margin-top: var(--card-options-gap, 12px); min-height: 44px; align-items:center; overflow: visible; }
-.fcc-swatch { width: 100%; min-width: 24px; max-width: 36px; height: 36px; border: 2px solid #e0e0e0; border-radius: 4px; cursor: pointer; overflow: hidden; flex-shrink: 1; flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #fff; padding: 5px; }
-.fcc-swatch img { width: 100%; height: 100%; object-fit: contain; }
-.fcc-swatch:hover:not(.fcc-swatch-unavailable), .fcc-swatch.active { border: 2px solid var(--swatch-border-color, #000); padding: 5px; }
-.fcc-card:has(.fcc-out-of-stock) .fcc-swatch.active { border-color: #ccc; }
-.fcc-swatch.fcc-swatch-unavailable { opacity: 1; cursor: not-allowed; }
-.fcc-swatch.fcc-swatch-unavailable img { filter: grayscale(100%); opacity: 0.5; }
-.fcc-swatch-placeholder { font-size: 16px; font-weight: bold; color: #999; }
+  {%- assign card_blends = false -%}
 
-.fcc-apparel-selector { display: flex; flex-direction: row; width:100%; align-items: center; gap: 12px; min-height: 44px; flex-wrap: nowrap; overflow: visible; }
-.fcc-apparel-size-section { display: flex; flex-direction: row; gap: 6px; align-items: center; flex: 1 1 auto; min-width: 150px; }
-.fcc-apparel-color-section { display: flex; flex-direction: row; gap: 6px; align-items: center; flex: 0 0 auto; margin-left: auto; }
-.fcc-size-dropdown, .fcc-size-select { width: 100%; }
-.fcc-apparel-label { display: none; }
-.fcc-size-dropdown { width: 100%; }
-.fcc-size-select { width: 100%; padding: 8px 32px 8px 12px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Acumin Pro', sans-serif; font-size: 14px; font-weight: 600; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat; background-position: right 10px center; background-size: 12px; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
-.fcc-size-select {
+  {%- unless settings.background != 'rgba(0,0,0,0)' and settings.product_card_background != 'rgba(0,0,0,0)' and settings.background != settings.product_card_background -%}
+    {%- assign card_blends = true -%}
+  {%- endunless -%}
+
+  #shopify-section-{{ section.id }} {
+    --product-list-gap: {% if section.settings.products_per_row_mobile == '2' %}{% if card_blends %}var(--product-list-row-gap){% endif %} var(--spacing-2){% else %}var(--product-list-row-gap) var(--product-list-column-gap){% endif %};
+    --product-list-items-per-row: {{ section.settings.products_per_row_mobile | times: 1 }};
+    --product-list-grid: auto-flow dense / repeat(var(--product-list-items-per-row), minmax(0, 1fr));
+    --product-list-promo-grid-column: span {{ section.settings.products_per_row_mobile }};
+
+    --content-over-media-gap: var(--spacing-8);
+  }
+
+  @media screen and (min-width: 700px) {
+    #shopify-section-{{ section.id }} {
+      --product-list-gap: var(--product-list-row-gap) var(--product-list-column-gap);
+      --product-list-items-per-row: 2;
+      --product-list-promo-grid-column: span 1;
+    }
+  }
+
+  @media screen and (min-width: 1000px) {
+    #shopify-section-{{ section.id }} {
+      --product-list-items-per-row: {% if section.settings.filter_layout == 'sidebar' %}2{% else %}{{ section.settings.products_per_row_desktop | at_most: 3 }}{% endif %};
+      --product-list-promo-grid-column: span 2;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    #shopify-section-{{ section.id }} {
+      --product-list-items-per-row: {% if section.settings.filter_layout == 'sidebar' %}{{ section.settings.products_per_row_desktop | at_most: 3 }}{% else %}{{ section.settings.products_per_row_desktop }}{% endif %};
+    }
+  }
+
+  @media screen and (min-width: 1400px) {
+    #shopify-section-{{ section.id }} {
+      --product-list-items-per-row: {{ section.settings.products_per_row_desktop }};
+    }
+
+    {%- for block in section.blocks -%}
+      #block-{{ section.id }}-{{ block.id }} {
+        --product-list-promo-grid-column: span {{ block.settings.column_span }};
+
+        {%- if block.settings.column_span == '2' -%}
+          --content-over-media-column-gap: var(--spacing-12);
+        {%- endif -%}
+      }
+    {%- endfor -%}
+  }
+</style>
+
+<div class="container">
+  {%- if collection.all_products_count == 0 -%}
+    <div class="empty-state">
+      <div class="empty-state__icon-wrapper">
+        {%- render 'icon' with 'picto-stop', width: 32, height: 32, stroke_width: 1 -%}
+        <span class="count-bubble count-bubble--lg">0</span>
+      </div>
+
+      <div class="prose">
+        <p class="h4">{{ 'collection.general.empty_collection' | t }}</p>
+
+        {%- assign button_content = 'collection.general.continue_shopping' | t -%}
+        {%- render 'button', href: routes.all_products_collection_url, size: 'xl', content: button_content -%}
+      </div>
+    </div>
+  {%- else -%}
+    {%- paginate collection.products by section.settings.products_per_page -%}
+      <div class="collection {% if show_filters %}collection--filters-{{ section.settings.filter_layout | escape }}{% endif %}">
+        {%- if show_filters or section.settings.show_sort_by -%}
+          {%- comment -%}
+          IMPLEMENTATION NOTE: we have to output the drawer no matter what, as it is used on mobile (all the time) or desktop (when in drawer mode)
+          {%- endcomment -%}
+
+          <facet-drawer header-bordered id="facets-drawer" class="facets-drawer drawer" open-from="left">
+            <p class="h5" slot="header">{{ 'collection.faceting.filters' | t }}</p>
+            {%- render 'facets-vertical', results: collection, show_filters: true, show_sort_by: section.settings.show_sort_by, update_on_change: false -%}
+          </facet-drawer>
+
+          {%- if section.settings.filter_layout == 'horizontal' -%}
+            {%- render 'collection-top-bar', results: collection, show_filters: show_filters, show_active_filters: show_filters, show_sort_by: section.settings.show_sort_by -%}
+          {%- else -%}
+            {%- render 'collection-top-bar', results: collection, show_filters: false, show_active_filters: show_filters, show_sort_by: section.settings.show_sort_by -%}
+          {%- endif -%}
+
+          {%- comment -%}We also need to render the button, that is floating on mobile{%- endcomment -%}
+          <facet-floating-filter class="facets__floating-filter md:hidden">
+            {%- assign filter_label = 'collection.faceting.filter_and_sort' | t -%}
+            {%- render 'button', size: 'xl', content: filter_label, icon: 'filter', style: 'fill', background: settings.text_color, text_color: settings.background, aria_controls: 'facets-drawer' -%}
+          </facet-floating-filter>
+        {%- endif -%}
+
+        {%- if show_filters and section.settings.filter_layout == 'sidebar' -%}
+          <div class="collection__facets">
+            <safe-sticky class="collection__facets-scroller">
+              {%- render 'facets-vertical', results: collection, show_filters: true, show_sort_by: false, update_on_change: true -%}
+            </safe-sticky>
+          </div>
+        {%- endif -%}
+
+        <div class="collection__results">
+          {%- if collection.products_count == 0 -%}
+            <div class="empty-state">
+              <div class="empty-state__icon-wrapper">
+                {%- render 'icon' with 'picto-stop', width: 32, height: 32, stroke_width: 1 -%}
+                <span class="count-bubble count-bubble--lg">0</span>
+              </div>
+
+              <div class="prose">
+                <p class="h5">{{ 'collection.faceting.no_results' | t }}</p>
+
+                {%- assign button_content = 'collection.faceting.clear_filters' | t -%}
+                {%- render 'button', href: collection.url, is: 'facet-link', size: 'xl', content: button_content -%}
+              </div>
+            </div>
+          {%- else -%}
+            <div class="v-stack gap-6">
+              <div class="v-stack gap-4 md:hidden">
+                {%- comment -%}We have to duplicate some information on mobile and tablet here{%- endcomment -%}
+                <p class="text-center">{{ 'collection.products_count' | t: count: collection.products_count }}</p>
+                {%- render 'active-facets', results: collection -%}
+              </div>
+
+              {%- if collection and collection.products.size > 0 -%}
+  {%- assign first_product_sfp = collection.products.first.metafields.custom.sfp_section.value -%}
+  {%- assign first_product_sfp_item = first_product_sfp | first | default: first_product_sfp -%}
+  {%- assign first_product_series = first_product_sfp_item.series.value -%}
+  {%- assign section_series_color = first_product_series.template_specific_dynamic_featured_color | default: '#AE1F24' -%}
+{%- else -%}
+  {%- assign section_series_color = '#AE1F24' -%}
+{%- endif -%}
+
+<reveal-items selector=".fgc-grid-list > *">
+  <section class="featured-grid-section" style="--section-series-color: {{ section_series_color }}; --grid-cols-desktop: {{ section.settings.products_per_row_desktop }}; --grid-cols-mobile: {{ section.settings.products_per_row_mobile | times: 1 }}; --grid-gap-x: 14px; --grid-gap-y: {{ section.settings.grid_row_gap_desktop | default: 32 }}px; --grid-gap-y-mobile: {{ section.settings.grid_row_gap_mobile | default: 24 }}px; --card-options-gap: 12px; --card-options-gap-mobile: 12px; --card-single-option-height: 52px; --card-single-option-height-mobile: 48px; --grid-min-col-tablet: 260px; --fgc-image-padding-top: {{ section.settings.image_padding_top | default: 0 }}px; --fgc-swatch-size: {{ section.settings.swatch_size | default: 32 }}px;">
+    <div class="featured-collection-grid">
+                    <ul class="fgc-grid-list">
+                              {%- comment %}<locksmith:d637>{% endcomment -%}
+                                {%- assign locksmith_a868_forloop__size = 0 %}{% for product in collection.products %}{% capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == 'true' %}{% assign locksmith_a868_forloop__size = locksmith_a868_forloop__size | plus: 1 %}{% endif %}{% endfor %}{% assign locksmith_a868_forloop__index = nil -%}
+                              {%- comment %}</locksmith:d637>{% endcomment -%}
+                              {% for product in collection.products %}
+                                {%- comment %}<locksmith:f5db>{% endcomment -%}
+                                  {%- capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == "true" %}{% if locksmith_a868_forloop__index == nil %}{% assign locksmith_a868_forloop__index = 1 %}{% assign locksmith_a868_forloop__index0 = 0 %}{% else %}{% assign locksmith_a868_forloop__index = locksmith_a868_forloop__index | plus: 1 %}{% assign locksmith_a868_forloop__index0 = locksmith_a868_forloop__index0 | plus: 1 %}{% endif %}{% if locksmith_a868_forloop__index == 1 %}{% assign locksmith_a868_forloop__first = true %}{% else %}{% assign locksmith_a868_forloop__first = false %}{% endif %}{% if locksmith_a868_forloop__index == locksmith_a868_forloop__size %}{% assign locksmith_a868_forloop__last = true %}{% else %}{% assign locksmith_a868_forloop__last = false %}{% endif %}{% assign locksmith_a868_forloop__rindex = locksmith_a868_forloop__size | minus: locksmith_a868_forloop__index | minus: 1 %}{% assign locksmith_a868_forloop__rindex0 = locksmith_a868_forloop__size | minus: locksmith_a868_forloop__index0 | minus: 1 %}{% else %}{% continue %}{% endif -%}
+                                {%- comment %}</locksmith:f5db>{% endcomment -%}
+                    {%- for block in section.blocks -%}
+                      {%- if forloop.parentloop.index != block.settings.position -%}
+                        {%- continue -%}
+                      {%- endif -%}
+
+                      <li id="block-{{ section.id }}-{{ block.id }}" class="fgc-grid-item fgc-grid-item--promo" style="grid-column: var(--product-list-promo-grid-column, span 1);" {{ block.shopify_attributes }}>
+                        <div {% render 'surface', class: 'product-list__promo group', text_color: block.settings.text_color %}>
+                          <a {% if block.settings.link_url %}href="{{ block.settings.link_url }}"{% endif %} class="content-over-media h-full rounded-sm" style="--content-over-media-overlay: {{ block.settings.overlay_color.rgb }} / {{ block.settings.overlay_opacity | divided_by: 100.0 }}">
+                            {%- case block.type -%}
+                              {%- when 'promotion_image' -%}
+                                {%- if block.settings.image != blank -%}
+                                  {%- capture image_class -%}zoom-image {% if block.settings.mobile_image != blank %}hidden sm:block{% endif %}{%- endcapture -%}
+                                  {%- capture sizes -%}(max-width: 699px) 100vw, {{ 400 | times: block.settings.column_span }}px{%- endcapture -%}
+                                  {{- block.settings.image | image_url: width: block.settings.image.width | image_tag: loading: 'lazy', sizes: sizes, widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600', class: image_class -}}
+                                {%- endif -%}
+
+                                {%- if block.settings.mobile_image != blank -%}
+                                  {{- block.settings.mobile_image | image_url: width: block.settings.mobile_image.width | image_tag: loading: 'lazy', widths: '200,300,400,500,600,700,800,900,1000,1200', class: 'zoom-image sm:hidden' -}}
+                                {%- endif -%}
+
+                              {%- when 'promotion_video' -%}
+                                {%- if block.settings.video -%}
+                                  <video-media autoplay>
+                                    {{- block.settings.video | video_tag: playsinline: true, muted: true, loop: true, preload: 'metadata' -}}
+                                  </video-media>
+                                {%- else -%}
+                                  <video-media host="{{ block.settings.external_video_url.type }}" autoplay>
+                                    <template>
+                                      {%- if block.settings.external_video_url.type == 'youtube' -%}
+                                        <iframe src="https://www.youtube.com/embed/{{ block.settings.external_video_url.id }}?playsinline=1&autoplay=1&controls=0&mute=1&loop=1&playlist={{ block.settings.external_video_url.id }}&enablejsapi=1&rel=0&modestbranding=1&origin={{ 'https://' | append: request.host | url_encode }}" allow="autoplay; encrypted-media" allowfullscreen="allowfullscreen"></iframe>
+                                      {%- elsif block.settings.external_video_url.type == 'vimeo' -%}
+                                        <iframe src="https://player.vimeo.com/video/{{ block.settings.external_video_url.id }}?autoplay=1&autopause=1&background=1&loop=1&muted=1&transparent=0&responsive=1&portrait=0&title=0&byline=0&color={{ settings.text_color | remove_first: '#' }}" allow="autoplay; encrypted-media;" allowfullscreen="allowfullscreen"></iframe>
+                                      {%- endif -%}
+                                    </template>
+                                  </video-media>
+                                {%- endif -%}
+                            {%- endcase -%}
+
+                            {%- if block.settings.title != blank or block.settings.link_text != blank -%}
+                              <div class="{{ block.settings.text_position }}">
+                                <div class="v-stack gap-4 sm:gap-6 {% if block.settings.text_position contains 'text-center' %}justify-items-center{% elsif block.settings.text_position contains 'text-end' %}justify-items-end{% endif %}">
+                                  {%- if block.settings.title != blank or block.settings.content != blank -%}
+                                    <div class="prose">
+                                      {%- if block.settings.title != blank -%}
+                                        <p class="{{ block.settings.heading_tag }}">{{ block.settings.title | escape }}</p>
+                                      {%- endif -%}
+
+                                      {{- block.settings.content -}}
+                                    </div>
+                                  {%- endif -%}
+
+                                  {%- if block.settings.link_text != blank -%}
+                                    <div class="h-stack gap-4">
+                                      <span class="bold">{{- block.settings.link_text | escape -}}</span>
+
+                                      <div class="circle-button circle-button--sm ring-current">
+                                        <span class="sr-only">{{ 'general.accessibility.previous' | t }}</span>
+                                        <span class="animated-arrow"></span>
+                                      </div>
+                                    </div>
+                                  {%- endif -%}
+                                </div>
+                              </div>
+                            {%- endif -%}
+                          </a>
+                        </div>
+                      </li>
+                    {%- endfor -%}
+                                {% if product.price == 0 or product.price_min == 0 %}
+                                  {% continue %}
+                                {% endif %}
+                                {% if product.tags contains 'hide-from-carousel' %}
+                                  {% continue %}
+                                {% endif %}
+
+                                {% assign variant_count = product.variants.size %}
+                                {% if variant_count <= 1 %}
+                                  {% assign sole_variant = product.variants.first %}
+                                  {% if sole_variant and sole_variant.available == false %}
+                                    {% continue %}
+                                  {% endif %}
+                                {% endif %}
+
+                                {% assign is_apparel_or_gear = false %}
+                                {% assign product_type_lower = product.type | downcase %}
+                                {% if product_type_lower contains 'apparel' or product_type_lower contains 'gear' or product_type_lower contains 'clothing' or product.tags contains 'apparel' or product.tags contains 'gear' %}
+                                  {% assign is_apparel_or_gear = true %}
+                                {% endif %}
+
+                                {% assign is_prebuilt_stack = false %}
+                                {% if product.type == 'Custom Bundle' %}
+                                  {% assign is_prebuilt_stack = true %}
+                                {% endif %}
+
+                                {% assign selected_variant = nil %}
+                                {% assign non_usa_variant_count = 0 %}
+
+                                {% if is_apparel_or_gear %}
+                                  {% assign has_size_option = false %}
+                                  {% assign has_color_option = false %}
+                                  {% assign size_option_index = -1 %}
+                                  {% assign color_option_index = -1 %}
+
+                                  {% for option in product.options_with_values %}
+                                    {% assign option_name_lower = option.name | downcase %}
+                                    {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+                                      {% assign has_color_option = true %}
+                                      {% assign color_option_index = forloop.index0 %}
+                                    {% elsif option_name_lower contains 'size' %}
+                                      {% assign has_size_option = true %}
+                                      {% assign size_option_index = forloop.index0 %}
+                                    {% endif %}
+                                  {% endfor %}
+
+                                  {% assign size_values = '' %}
+                                  {% assign color_values = '' %}
+                                  {% for variant in product.variants %}
+                                    {% if variant.available and selected_variant == nil %}
+                                      {% assign selected_variant = variant %}
+                                    {% endif %}
+
+                                    {% if has_size_option %}
+                                      {% assign size_value = variant.options[size_option_index] %}
+                                      {% unless size_values contains size_value %}
+                                        {% if size_values == '' %}
+                                          {% assign size_values = size_value %}
+                                        {% else %}
+                                          {% assign size_values = size_values | append: ',' | append: size_value %}
+                                        {% endif %}
+                                      {% endunless %}
+                                    {% endif %}
+
+                                    {% if has_color_option %}
+                                      {% assign color_value = variant.options[color_option_index] %}
+                                      {% unless color_values contains color_value %}
+                                        {% if color_values == '' %}
+                                          {% assign color_values = color_value %}
+                                        {% else %}
+                                          {% assign color_values = color_values | append: ',' | append: color_value %}
+                                        {% endif %}
+                                      {% endunless %}
+                                    {% endif %}
+                                  {% endfor %}
+                                  {% assign size_array = size_values | split: ',' %}
+                                  {% assign color_array = color_values | split: ',' %}
+
+                                  {% capture swatches_html %}
+                                    {% for variant in product.variants %}
+                                      <div class="fgc-swatch" style="display: none;"
+                                           data-variant-id="{{ variant.id }}"
+                                           data-variant-price="{{ variant.price }}"
+                                           data-variant-available="{{ variant.available }}"
+                                           data-product-id="{{ product.id }}"
+                                           data-variant-name="{{ variant.title }}"
+                                           {% if variant.featured_image %}data-variant-image="{{ variant.featured_image | image_url: width: 800 }}"{% endif %}></div>
+                                    {% endfor %}
+                                    <div class="fgc-apparel-selector"
+                                         data-product-id="{{ product.id }}"
+                                         data-size-index="{{ size_option_index }}"
+                                         data-color-index="{{ color_option_index }}">
+                                      {% if has_size_option and size_array.size > 0 %}
+                                      <div class="fgc-apparel-size-section">
+                                        <span class="fgc-apparel-label">Size</span>
+                                        {% if size_array.size > 1 %}
+                                          <div class="fgc-size-dropdown">
+                                            <select class="fgc-size-select"
+                                                    data-size-select="{{ product.id }}"
+                                                    onchange="selectGridApparelVariant(this, {{ product.id }}, this.value, null)">
+                                              {% for size in size_array %}
+                                                {% assign size_available = false %}
+                                                {% for variant in product.variants %}
+                                                  {% if variant.options[size_option_index] == size and variant.available %}
+                                                    {% assign size_available = true %}
+                                                    {% break %}
+                                                  {% endif %}
+                                                {% endfor %}
+                                                <option value="{{ size }}" {% if selected_variant.options[size_option_index] == size %}selected{% endif %} {% unless size_available %}disabled{% endunless %}>{{ size }}{% unless size_available %} – Out of Stock{% endunless %}</option>
+                                              {% endfor %}
+                                            </select>
+                                          </div>
+                                        {% else %}
+                                          <div class="fgc-apparel-static">{{ size_array[0] }}</div>
+                                        {% endif %}
+                                      </div>
+                                      {% endif %}
+
+                                      {% if has_color_option and color_array.size > 0 %}
+                                      <div class="fgc-apparel-color-section">
+                                        <span class="fgc-apparel-label">Color</span>
+                                        <div class="fgc-apparel-color-swatches">
+                                          {% for color in color_array %}
+                                            {% assign color_available = false %}
+                                            {% for variant in product.variants %}
+                                              {% if variant.options[color_option_index] == color and variant.available %}
+                                                {% assign color_available = true %}
+                                                {% break %}
+                                              {% endif %}
+                                            {% endfor %}
+                                            {% assign lookup_handle = color | handleize %}
+                                            {% assign swatch_entry = shop.metaobjects['swatches'][lookup_handle] %}
+                                            {% assign color_hex = '#333' %}
+                                            {% assign swatch_image = blank %}
+                                            {% if swatch_entry %}
+                                              {% if swatch_entry.color_swatch %}
+                                                {% assign color_hex = swatch_entry.color_swatch.value | default: '#333' %}
+                                              {% endif %}
+                                              {% if swatch_entry.swatch_image %}
+                                                {% assign swatch_image = swatch_entry.swatch_image.value %}
+                                              {% endif %}
+                                            {% endif %}
+                                            <div class="fgc-color-swatch {% if selected_variant.options[color_option_index] == color %}active{% endif %} {% unless color_available %}disabled{% endunless %}" data-color="{{ color }}" onclick="{% if color_available %}selectGridApparelVariant(this, {{ product.id }}, null, '{{ color | escape }}'){% endif %}">
+                                              {% if swatch_image != blank %}
+                                                <span class="fgc-color-circle" style="background-image:url('{{ swatch_image | image_url: width: 40 }}'); background-size: cover; background-position: center;"></span>
+                                              {% else %}
+                                                <span class="fgc-color-circle" style="background-color: {{ color_hex }};"></span>
+                                              {% endif %}
+                                            </div>
+                                          {% endfor %}
+                                        </div>
+                                      </div>
+                                      {% endif %}
+                                    </div>
+                                  {% endcapture %}
+                                {% else %}
+                                  {% capture swatches_html %}
+                                  {% for variant in product.variants %}
+                                    {% assign variant_title_lower = variant.title | downcase %}
+                                    {% assign is_usa_variant = false %}
+                                    {% if variant_title_lower contains '/ usa' or variant_title_lower contains '/usa' or variant.title == 'USA' or variant.title == 'usa' %}
+                                      {% assign is_usa_variant = true %}
+                                    {% endif %}
+
+                                    {% unless is_usa_variant %}
+                                      {% assign non_usa_variant_count = non_usa_variant_count | plus: 1 %}
+                                      {% if selected_variant == nil and variant.available %}
+                                        {% assign selected_variant = variant %}
+                                      {% endif %}
+
+                                      {% assign v_sfp_raw = variant.metafields.custom.sfp_section.value %}
+                                      {% assign v_sfp = v_sfp_raw | first | default: v_sfp_raw %}
+                                      {% assign swatch_obj = v_sfp.flavor_swatch_image.value %}
+                                      {% assign swatch_image = swatch_obj.swatch_image.value %}
+                                      {% assign swatch_color = swatch_obj.color_swatch | default: '#000' %}
+
+                                      <div class="fgc-swatch {% if variant == selected_variant %}active{% endif %} {% unless variant.available %}fgc-swatch-unavailable{% endunless %}"
+                                           data-variant-id="{{ variant.id }}"
+                                           data-variant-price="{{ variant.price }}"
+                                           data-variant-available="{{ variant.available }}"
+                                           data-product-id="{{ product.id }}"
+                                           data-variant-name="{{ variant.title }}"
+                                           data-swatch-color="{{ swatch_color }}"
+                                           style="--swatch-border-color: {{ swatch_color }};"
+                                           {% if variant.featured_image %}data-variant-image="{{ variant.featured_image | image_url: width: 400 }}"{% endif %}
+                                           onclick="selectGridVariant(this, {{ product.id }})">
+                                        {% if swatch_image %}
+                                          <img src="{{ swatch_image | image_url: width: 40 }}" alt="{{ variant.title }}" loading="lazy">
+                                        {% else %}
+                                          <div class="fgc-swatch-placeholder">{{ variant.title | slice: 0 }}</div>
+                                        {% endif %}
+                                      </div>
+                                    {% endunless %}
+                                  {% endfor %}
+                                  {% endcapture %}
+                                {% endif %}
+
+                                {% if selected_variant == nil %}
+                                  {% assign selected_variant = product.selected_or_first_available_variant %}
+                                {% endif %}
+
+                                {% assign product_sfp_raw = product.metafields.custom.sfp_section.value %}
+                                {% assign product_sfp = product_sfp_raw | first | default: product_sfp_raw %}
+                                {% assign product_series = product_sfp.series.value %}
+                                {% assign series_featured_color = product_series.template_specific_dynamic_featured_color | default: '#AE1F24' %}
+                                {% assign series_name = product_series.name | default: '' %}
+                                {% assign series_handle = product_series.handle %}
+                                {% if series_handle == blank %}
+                                  {% assign series_name_lower = product_series.series_name | downcase | replace: ' ', '-' %}
+                                  {% assign series_handle = series_name_lower %}
+                                {% endif %}
+                                {% assign is_core_series = false %}
+                                {% if series_handle == 'core-series' %}
+                                  {% assign is_core_series = true %}
+                                {% endif %}
+
+                                {% assign variant_display_name = selected_variant.title %}
+                                {% if variant_display_name == 'Default Title' %}
+                                  {% assign variant_display_name = '' %}
+                                {% else %}
+                                  {% assign variant_display_name = variant_display_name | remove: '/ USA' | remove: '/ usa' | remove: '/ US' | remove: '/ us' | remove: '/USA' | remove: '/usa' | remove: '/US' | remove: '/us' | remove: ' USA' | remove: ' usa' | remove: ' US' | remove: ' us' | remove: 'USA' | remove: 'usa' | strip %}
+                                {% endif %}
+
+                                {% assign product_info = product.metafields.custom.product_info.value %}
+                                {% assign product_title = product_info.product_title.value | default: product.title %}
+                                {% assign product_subheader = product_info.product_sub_header.value | default: '' %}
+
+                                {% if is_apparel_or_gear %}
+                                  {% assign current_discount_percent = section.settings.apparel_discount_percentage | default: '20' %}
+                                {% else %}
+                                  {% assign current_discount_percent = section.settings.discount_percentage | default: '20' %}
+                                {% endif %}
+
+                                <li class="fgc-grid-item">
+                                  <div class="fgc-card{% if is_core_series %} fgc-core-series{% endif %}" 
+                                       data-product-id="{{ product.id }}"
+                                       data-product-handle="{{ product.handle }}"
+                                       data-series="{{ series_name }}"
+                                       data-is-apparel="{{ is_apparel_or_gear }}"
+                                       data-product-type="{{ product.type }}"
+                                       style="--card-series-featured: {{ series_featured_color }};">
+
+                                    <div class="fgc-card__image">
+                                      <a href="{{ product.url }}">
+                                        {% if product.featured_image %}
+                                          <img src="{{ product.featured_image | image_url: width: 800 }}" 
+                                               alt="{{ product.title }}"
+                                               loading="lazy"
+                                               class="fgc-product-image"
+                                               data-product-image="{{ product.id }}">
+                                        {% else %}
+                                          <div class="fgc-placeholder-image">{{ product.title | slice: 0 }}</div>
+                                        {% endif %}
+                                      </a>
+
+                                      {% if section.settings.show_discount_badge or variant_display_name != blank %}
+                                      <div class="fgc-image-info" data-image-info="{{ product.id }}">
+                                        {% if variant_display_name != blank %}
+                                        <div class="fgc-variant-name" data-variant-name-display="{{ product.id }}">{{ variant_display_name }}</div>
+                                        {% endif %}
+                                        {% if section.settings.show_discount_badge %}
+                                        <div class="fgc-discount-badge" data-discount-badge="{{ product.id }}" style="--discount-badge-color: {{ series_featured_color }};">
+                                          <span class="fgc-discount-content"><span class="fgc-discount-percent">{{ current_discount_percent }}% OFF</span> {{ section.settings.discount_text }}</span>
+                                        </div>
+                                        {% endif %}
+                                      </div>
+                                      {% endif %}
+                                    </div>
+
+                                    <div class="fgc-card__content">
+                                      <div class="fgc-card__title">
+                                        <a href="{{ product.url }}">{{ product_title }}</a>
+                                      </div>
+
+                                      <div class="fgc-card__subheader{% if product_subheader == blank %} fgc-card__subheader--empty{% endif %}">{{ product_subheader }}</div>
+
+                                      <div class="fgc-card__reviews-price">
+                                        <div class="fgc-card__reviews">
+                                          <div class="yotpo bottomLine" 
+                                               data-product-id="{{ product.id }}"
+                                               data-url="{{ shop.url }}{{ product.url }}"></div>
+                                        </div>
+                                        <div class="fgc-card__price" data-card-price="{{ product.id }}" data-show-discount="{{ section.settings.show_discount_badge }}" data-discount-percent="{{ current_discount_percent }}">
+                                          {% if section.settings.show_discount_badge %}
+                                          {% assign discount_amount = selected_variant.price | times: current_discount_percent | divided_by: 100.0 %}
+                                          {% assign discounted_price = selected_variant.price | minus: discount_amount %}
+                                          <span class="fgc-price-original">{{ selected_variant.price | money }}</span><span class="fgc-price-display">{{ discounted_price | money }}</span>
+                                          {% else %}
+                                          <span class="fgc-price-display">{{ selected_variant.price | money }}</span>
+                                          {% endif %}
+                                        </div>
+                                      </div>
+
+                                      {% assign has_selling_plans = false %}
+                                      {% if product.selling_plan_groups.size > 0 %}
+                                        {% assign has_selling_plans = true %}
+                                      {% endif %}
+                                      {% assign first_plan = nil %}
+                                      {% assign first_discount = 0 %}
+                                      {% if has_selling_plans %}
+                                        {% assign first_plan = product.selling_plan_groups.first.selling_plans.first %}
+                                        {% assign first_discount = first_plan.price_adjustments[0].value | default: 0 %}
+                                      {% endif %}
+
+                                      <form class="fgc-card__form" data-product-form="{{ product.id }}">
+                                        <select name="id" data-variant-select="{{ product.id }}" style="display: none;">
+                                          {% for variant in product.variants %}
+                                            <option value="{{ variant.id }}" {% if variant == selected_variant %}selected{% endif %}>{{ variant.title }}</option>
+                                          {% endfor %}
+                                        </select>
+                                        <input type="hidden" value="{% if section.settings.default_subscribe and first_plan %}{{ first_plan.id }}{% endif %}" data-selling-plan-input="{{ product.id }}">
+
+                                        {% unless is_prebuilt_stack %}
+                                        <div class="fgc-purchase-options{% unless has_selling_plans %} fgc-purchase-options--single{% endunless %}" data-purchase-options="{{ product.id }}">
+                                          <label class="fgc-purchase-option">
+                                            <input type="radio" name="purchase_type_{{ product.id }}" value="onetime" {% unless section.settings.default_subscribe and has_selling_plans %}checked{% endunless %} {% unless selected_variant.available %}disabled{% endunless %}>
+                                            <div class="fgc-option-content">
+                                              <span class="fgc-option-text">One-Time Purchase</span>
+                                            </div>
+                                          </label>
+
+                                          {% if has_selling_plans %}
+                                            <label class="fgc-purchase-option">
+                                              <input type="radio" 
+                                                     name="purchase_type_{{ product.id }}" 
+                                                     value="subscribe"
+                                                     data-selling-plan-id="{{ first_plan.id }}"
+                                                     {% if section.settings.default_subscribe and has_selling_plans %}checked{% endif %}
+                                                     {% unless selected_variant.available %}disabled{% endunless %}>
+                                              <div class="fgc-option-content">
+                                                <span class="fgc-option-text">Subscribe & Save {{ first_discount | round }}%</span>
+                                                <div class="fgc-frequency-selector" data-frequency-selector="{{ product.id }}">
+                                                  <select class="fgc-delivery-frequency" data-frequency-select="{{ product.id }}">
+                                                    {% for selling_plan_group in product.selling_plan_groups %}
+                                                      {% for selling_plan in selling_plan_group.selling_plans %}
+                                                        {% assign frequency_parts = selling_plan.name | split: ' - ' | last | split: ' and ' | first | split: 'Delivered ' %}
+                                                        {% assign frequency_full = frequency_parts[1] | default: frequency_parts[0] %}
+                                                        {% assign frequency_text = frequency_full | split: '.' | first %}
+                                                        <option value="{{ selling_plan.id }}" 
+                                                                data-discount="{{ selling_plan.price_adjustments[0].value }}"
+                                                                {% if forloop.first %}selected{% endif %}>
+                                                          {{ frequency_text }}
+                                                        </option>
+                                                      {% endfor %}
+                                                    {% endfor %}
+                                                  </select>
+                                                </div>
+                                              </div>
+                                            </label>
+                                          {% else %}
+                                            {% unless is_apparel_or_gear %}
+                                              <label class="fgc-purchase-option fgc-purchase-option--placeholder">
+                                                <div class="fgc-option-content">
+                                                  <span class="fgc-option-text">&nbsp;</span>
+                                                </div>
+                                              </label>
+                                            {% endunless %}
+                                          {% endif %}
+                                        </div>
+                                        {% endunless %}
+
+                                        {% assign show_swatches = false %}
+                                        {% if is_apparel_or_gear %}
+                                          {% assign show_swatches = true %}
+                                        {% elsif non_usa_variant_count > 1 %}
+                                          {% assign show_swatches = true %}
+                                        {% elsif non_usa_variant_count == 1 and variant_display_name != blank %}
+                                          {% assign show_swatches = true %}
+                                        {% endif %}
+
+                                        <div class="fgc-swatches" {% unless show_swatches %}style="visibility: hidden;"{% endunless %}>
+                                          {{ swatches_html }}
+                                        </div>
+
+                                        <div class="fgc-actions" data-actions="{{ product.id }}">
+                                          {% if is_prebuilt_stack %}
+                                          <a href="{{ product.url }}" class="fgc-add-to-cart fgc-see-options" style="text-decoration: none;">
+                                            <span>See Options</span>
+                                          </a>
+                                          {% else %}
+                                          <div class="fgc-quantity" data-quantity="{{ product.id }}" {% unless selected_variant.available %}style="display: none;"{% endunless %}>
+                                            <button type="button" class="fgc-qty-btn" onclick="updateGridQuantity(this, -1)">−</button>
+                                            <input type="number" name="quantity" value="1" min="1" class="fgc-qty-input">
+                                            <button type="button" class="fgc-qty-btn" onclick="updateGridQuantity(this, 1)">+</button>
+                                          </div>
+
+                                          <button type="submit" class="fgc-add-to-cart {% unless selected_variant.available %}fgc-out-of-stock{% endunless %}" data-add-btn="{{ product.id }}" {% unless selected_variant.available %}disabled{% endunless %}>
+                                            {% if selected_variant.available %}<i class="fa-sharp fa-solid fa-cart-circle-plus"></i>{% endif %}
+                                            <span>{% if selected_variant.available %}Add to Cart{% else %}Out of Stock{% endif %}</span>
+                                          </button>
+                                          {% endif %}
+                                        </div>
+                                      </form>
+                                    </div>
+                                  </div>
+                                </li>
+                              {% endfor %}
+                          </ul>
+
+</div>
+
+              <script>
+                  {%- comment %}<locksmith:31d5>{% endcomment -%}
+                    {%- assign locksmith_4c12_forloop__size = 0 %}{% for product in collection.products %}{% capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == 'true' %}{% assign locksmith_4c12_forloop__size = locksmith_4c12_forloop__size | plus: 1 %}{% endif %}{% endfor %}{% assign locksmith_4c12_forloop__index = nil -%}
+                  {%- comment %}</locksmith:31d5>{% endcomment -%}
+                  {% for product in collection.products %}
+                  {%- comment %}<locksmith:dc09>{% endcomment -%}
+                    {%- capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == "true" %}{% if locksmith_4c12_forloop__index == nil %}{% assign locksmith_4c12_forloop__index = 1 %}{% assign locksmith_4c12_forloop__index0 = 0 %}{% else %}{% assign locksmith_4c12_forloop__index = locksmith_4c12_forloop__index | plus: 1 %}{% assign locksmith_4c12_forloop__index0 = locksmith_4c12_forloop__index0 | plus: 1 %}{% endif %}{% if locksmith_4c12_forloop__index == 1 %}{% assign locksmith_4c12_forloop__first = true %}{% else %}{% assign locksmith_4c12_forloop__first = false %}{% endif %}{% if locksmith_4c12_forloop__index == locksmith_4c12_forloop__size %}{% assign locksmith_4c12_forloop__last = true %}{% else %}{% assign locksmith_4c12_forloop__last = false %}{% endif %}{% assign locksmith_4c12_forloop__rindex = locksmith_4c12_forloop__size | minus: locksmith_4c12_forloop__index | minus: 1 %}{% assign locksmith_4c12_forloop__rindex0 = locksmith_4c12_forloop__size | minus: locksmith_4c12_forloop__index0 | minus: 1 %}{% else %}{% continue %}{% endif -%}
+                  {%- comment %}</locksmith:dc09>{% endcomment -%}
+                  window.Product_{{ product.id }} = {
+                    variants: [
+                      {% for variant in product.variants %}
+                      {
+                        id: {{ variant.id }},
+                        title: "{{ variant.title | escape }}",
+                        options: [{% for option in variant.options %}"{{ option | escape }}"{% unless forloop.last %},{% endunless %}{% endfor %}],
+                        price: {{ variant.price }},
+                        available: {{ variant.available }},
+                        featured_image: {% if variant.featured_image %}{ src: "{{ variant.featured_image | image_url: width: 800 }}" }{% else %}null{% endif %}
+                      }{% unless forloop.last %},{% endunless %}
+                      {% endfor %}
+                    ]
+                  };
+                  {% endfor %}
+                  </script>
+
+  </section>
+</reveal-items>
+
+            </div>
+          {%- endif -%}
+        </div>
+
+        {%- render 'pagination', paginate: paginate, facet: true, class: 'collection__pagination' -%}
+      </div>
+    {%- endpaginate -%}
+  {%- endif -%}
+</div>
+
+
+
+<style>
+.fgc-product-image:hover { transition: ease-in-out 0.3s!important; }
+.featured-grid-section { margin: 0 auto; }
+.fgc-width-full { max-width: 100%; padding-left: 20px; padding-right: 20px; }
+.fgc-width-container { max-width: 1650px; padding-left: 20px; padding-right: 20px; }
+.fgc-width-narrow { max-width: 1200px; padding-left: 20px; padding-right: 20px; }
+.featured-grid-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.featured-grid-header.full-underline { position: relative; padding-bottom: 16px; }
+.featured-grid-header.full-underline::before { content: ''; position: absolute; bottom: -2px; left: 0; width: 100px; height: 2px; background-color: var(--section-series-color, #AE1F24); }
+.featured-grid-title { font-family: 'Gunplay', sans-serif; font-size: 1.75rem; text-transform: uppercase; margin: 0; text-align: left; letter-spacing: 0.5px; }
+.featured-grid-section .fgc-grid-list { display: grid; grid-template-columns: repeat(var(--grid-cols-desktop, 4), minmax(0, 1fr)); column-gap: var(--grid-gap-x, 14px); row-gap: var(--grid-gap-y, 32px); list-style: none; padding: 0; margin: 0; align-items: stretch; justify-items: stretch; }
+.featured-grid-section .fgc-grid-item { display: flex; width: 100%; min-width: 0; }
+.featured-grid-section .fgc-grid-item--promo { grid-column: var(--product-list-promo-grid-column, span 1); }
+@media (max-width: 1200px) {
+  .featured-grid-section .fgc-grid-list { grid-template-columns: repeat(auto-fit, minmax(var(--grid-min-col-tablet, 230px), 1fr)); column-gap: calc(var(--grid-gap-x, 14px) * 0.85); row-gap: calc(var(--grid-gap-y, 32px) * 0.9); }
+}
+@media (max-width: 768px) {
+  .featured-grid-section .fgc-grid-list { grid-template-columns: repeat(var(--grid-cols-mobile, 1), minmax(0, 1fr)); column-gap: calc(var(--grid-gap-x, 14px) * 0.7); row-gap: var(--grid-gap-y-mobile, 24px); }
+}
+
+.featured-grid-section .fgc-grid-list,
+.featured-grid-section .fgc-grid-item,
+.fgc-card { box-sizing: border-box; }
+
+.fgc-card { background: #fff; border: none; border-radius: 0; padding: 0; display: flex; flex-direction: column; height: 100%; min-height: 100%; width: 100%; min-width: 0; }
+.fgc-card__image { width: 100%; position: relative; background: #f9f9f9; padding-top: var(--fgc-image-padding-top, 0px); padding-bottom: calc(100% + 60px); overflow: hidden; }
+@media (max-width: 768px) {
+  .fgc-card__image { padding-bottom: calc(100% + 50px); }
+  .featured-grid-section { margin-top: 0 !important; margin-bottom: 0 !important; }
+}
+.fgc-card__image a { position: absolute; top: 0; left: 0; right: 0; bottom: 60px; display: flex; align-items: center; justify-content: center; z-index: 1; }
+@media (max-width: 768px) { .fgc-card__image a { bottom: 50px; } }
+.fgc-image-info { display: flex; width: 100%; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 0px 10px 0px 10px; position: absolute; bottom: 0; left: 0; z-index: 2; margin-bottom:0px!important; }
+.fgc-variant-name { font-family: 'Acumin Pro Condensed', sans-serif; color: var(--active-swatch-color, #333); display:flex; width: fit-content;justify-content: flex-start; align-items: center; padding: 8px; border-radius:4px;}
+.fgc-discount-percent { font-family: 'Acumin Pro Condensed Black', sans-serif; }
+.fgc-discount-badge { font-family: 'Acumin Pro Condensed', sans-serif; display: flex; justify-content: flex-end; align-items: flex-start; width: 100px; color: #000; border-radius: 4px; line-height: 1; }
+.fgc-discount-content { display: inline-block; font-weight: 700; text-transform: uppercase; text-align: center; }
+.fgc-image-info:has(.fgc-variant-name) .fgc-discount-content { max-width: 140px; }
+.fgc-image-info:not(:has(.fgc-variant-name)) .fgc-discount-badge { width: 100%; justify-content: center; line-height: unset!important; align-items: center; }
+.fgc-image-info:not(:has(.fgc-variant-name)) .fgc-discount-content { white-space: nowrap; padding: 8px; display: flex; align-items: center; justify-content: center;gap:3px; }
+.fgc-product-image { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.3s ease-in-out; }
+.fgc-product-image:hover { opacity: 0.7; }
+.fgc-placeholder-image { font-size: 16px; font-weight: bold; color: #999; }
+.fgc-card__content { border: 2px solid #f9f9f9; display: flex; flex-direction: column; flex: 1; }
+.fgc-card__title { font-family: 'Gunplay', sans-serif; font-size: 1.4rem; line-height: 1.3; min-height: 50px; height: 50px; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 12px 12px 0; text-transform: uppercase; }
+.fgc-card__title a { color: #000; text-decoration: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fgc-card__subheader { font-family: 'Acumin Pro', sans-serif; font-size: 16px; color: #000; line-height: 1.4; display: flex; align-items: flex-start; padding: 0 12px; min-height: 22px; height: 22px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.fgc-card__subheader--empty { visibility: hidden; }
+.fgc-card__reviews-price { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; min-height: 32px; height: 32px; padding: 0 12px; }
+.fgc-card__reviews { flex: 0 0 auto; }
+.fgc-card__reviews .yotpo .text-m, .fgc-card__reviews .yotpo .yotpo-bottomline-box-1, .fgc-card__reviews .yotpo .yotpo-bottomline .text-m, .fgc-card__reviews .yotpo .standalone-bottomline .text-m { display: none !important; }
+.fgc-card__reviews .yotpo-sr-bottom-line-left-panel, .fgc-card__reviews .yotpo-sr-bottom-line-score, .fgc-card__reviews .yotpo-sr-bottom-line-right-panel, .fgc-card__reviews .yotpo-sr-vertical-border { display: none !important; }
+.fgc-card .yotpo-sr-star-full path, .fgc-card .yotpo-icon-star, .fgc-card svg.star-container path { fill: var(--card-series-featured, #AE1F24) !important; stroke: var(--card-series-featured, #AE1F24) !important; }
+.fgc-card__price { display: flex; justify-content: flex-end; align-items: baseline; gap: 8px; flex-shrink: 0; }
+.fgc-price-display { font-family: 'Acumin Pro', sans-serif; font-size: 16px; font-weight: 400; color: black; }
+.fgc-price-original { text-decoration: line-through; color: #999; font-size: 16px; font-weight: 400; }
+.fgc-price-subscribe { color: black; font-size: 16px; font-weight: 400; }
+.fgc-card__form { display: flex; flex-direction: column; gap: 12px; padding: 0 12px 12px; flex: 1; min-height: 0; }
+.fgc-card[data-product-type="Custom Bundle"] .fgc-card__subheader { display: none; }
+.fgc-card[data-product-type="Custom Bundle"] .fgc-swatches { display: none; }
+.fgc-card[data-product-type="Custom Bundle"] .fgc-card__reviews-price { margin-bottom: 0; }
+.fgc-card[data-product-type="Custom Bundle"] .fgc-card__form { padding-top: 8px; }
+.fgc-purchase-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 0; align-items: stretch; min-height: 104px; }
+.fgc-purchase-options--single { min-height: var(--card-single-option-height, 52px); }
+.fgc-purchase-option { cursor: pointer; display: block; width: 100%; }
+.fgc-purchase-option input[type="radio"] { display: none; }
+.fgc-option-content { border: 2px solid #e0e0e0; border-radius: 4px; padding: 12px 16px; background: #fff; position: relative; display: flex; align-items: center; min-height: 48px; gap: 8px; }
+.fgc-option-content::before { content: ''; width: 16px; height: 16px; border: 2px solid #ccc; border-radius: 50%; flex-shrink: 0; }
+.fgc-purchase-option input[type="radio"]:checked + .fgc-option-content { border-color: #ccc; background: #f9f9f9; padding-right: 110px; }
+.fgc-purchase-option input[type="radio"]:checked + .fgc-option-content::before { border-color: #666; background: #666; box-shadow: inset 0 0 0 3px #fff; }
+.fgc-purchase-option input[type="radio"]:disabled + .fgc-option-content { opacity: 0.5; cursor: not-allowed; }
+.fgc-purchase-option input[type="radio"]:disabled:checked + .fgc-option-content { border-color: #ccc; background: #f5f5f5; }
+.fgc-purchase-option input[type="radio"]:disabled:checked + .fgc-option-content::before { border-color: #ccc; background: #ccc; }
+.fgc-purchase-option--placeholder .fgc-option-content { visibility: hidden; }
+.fgc-option-content { min-width: 0; }
+.fgc-purchase-option { min-width: 0; }
+.fgc-option-text { font-family: 'Acumin Pro', sans-serif; font-size: 14px; font-weight: 600; color: #000; flex: 1; text-align: left; white-space: nowrap; line-height: 1; margin-top:2px; word-break: normal; overflow: hidden; text-overflow: ellipsis; }
+.fgc-frequency-selector { display: none; margin-left: auto; flex-shrink: 0; width: auto; max-width: 110px; position: absolute; right: 16px; }
+.fgc-purchase-option input[type="radio"]:checked + .fgc-option-content .fgc-frequency-selector { display: block; }
+.fgc-delivery-frequency { width: 100%; padding: 6px 24px 6px 8px; border: 1px solid #e0e0e0; border-radius: 4px; font-family: 'Acumin Pro', sans-serif; font-size: 12px; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat; background-position: right 6px center; background-size: 10px; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fgc-delivery-frequency option { white-space: normal; }
+.fgc-swatches { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--card-options-gap, 12px); min-height: 44px; align-items:center; overflow: visible; width: 100%; box-sizing: border-box; }
+.fgc-swatch { flex: 0 0 var(--fgc-swatch-size, 32px); width: var(--fgc-swatch-size, 32px); height: var(--fgc-swatch-size, 32px); border: 2px solid #e0e0e0; border-radius: 4px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; padding: 5px; }
+.fgc-swatch img { width: 100%; height: 100%; object-fit: contain; }
+.fgc-swatch:hover:not(.fgc-swatch-unavailable), .fgc-swatch.active { border: 2px solid var(--swatch-border-color, #000); padding: 5px; }
+.fgc-card:has(.fgc-out-of-stock) .fgc-swatch.active { border-color: #ccc; }
+.fgc-swatch.fgc-swatch-unavailable { opacity: 1; cursor: not-allowed; }
+.fgc-swatch.fgc-swatch-unavailable img { filter: grayscale(100%); opacity: 0.5; }
+.fgc-swatch-placeholder { font-size: 16px; font-weight: bold; color: #999; }
+
+.fgc-apparel-selector { display: flex; flex-direction: row; width:100%; align-items: center; gap: 12px; min-height: 44px; flex-wrap: nowrap; overflow: visible; }
+.fgc-apparel-size-section { display: flex; flex-direction: row; gap: 6px; align-items: center; flex: 1 1 auto; min-width: 150px; }
+.fgc-apparel-color-section { display: flex; flex-direction: row; gap: 6px; align-items: center; flex: 0 0 auto; margin-left: auto; }
+.fgc-size-dropdown, .fgc-size-select { width: 100%; }
+.fgc-apparel-label { display: none; }
+.fgc-size-dropdown { width: 100%; }
+.fgc-size-select { width: 100%; padding: 8px 32px 8px 12px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Acumin Pro', sans-serif; font-size: 14px; font-weight: 600; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat; background-position: right 10px center; background-size: 12px; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+.fgc-size-select {
   height: 36px;
   padding-top: 0;
   padding-bottom: 0;
@@ -777,128 +767,116 @@
 }
 
 @media (max-width: 768px) {
-  .fcc-size-select {
+  .fgc-size-select {
     height: 40px;
   }
 }
-.fcc-size-select:disabled { opacity: 0.5; cursor: not-allowed; }
-.fcc-size-select option:disabled { color: #999; }
-.fcc-apparel-static { font-family: 'Acumin Pro', sans-serif; font-size: 14px; font-weight: 600; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 4px; background: #f9f9f9; }
-.fcc-apparel-color-swatches { display: flex; flex-wrap: nowrap; gap: 8px; justify-content: flex-end; margin-left: auto; }
-.fcc-color-swatch { width: 36px; height: 36px; border: 2px solid #e0e0e0; border-radius: 4px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; padding: 1px; transition: border-color 0.2s ease; }
-.fcc-color-swatch.active { border-color: #000; border-width: 2px; padding: 1px; }
-.fcc-color-swatch.disabled { opacity: 0.5; cursor: not-allowed; }
-.fcc-color-swatch:not(.disabled):hover { border-color: #666; }
-.fcc-color-circle { width: 100%; height: 100%; border-radius: 4px; display: block; }
+.fgc-size-select:disabled { opacity: 0.5; cursor: not-allowed; }
+.fgc-size-select option:disabled { color: #999; }
+.fgc-apparel-static { font-family: 'Acumin Pro', sans-serif; font-size: 14px; font-weight: 600; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 4px; background: #f9f9f9; }
+.fgc-apparel-color-swatches { display: flex; flex-wrap: nowrap; gap: 8px; justify-content: flex-end; margin-left: auto; }
+.fgc-color-swatch { width: 36px; height: 36px; border: 2px solid #e0e0e0; border-radius: 4px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; padding: 1px; transition: border-color 0.2s ease; }
+.fgc-color-swatch.active { border-color: #000; border-width: 2px; padding: 1px; }
+.fgc-color-swatch.disabled { opacity: 0.5; cursor: not-allowed; }
+.fgc-color-swatch:not(.disabled):hover { border-color: #666; }
+.fgc-color-circle { width: 100%; height: 100%; border-radius: 4px; display: block; }
 
-.fcc-actions { display: flex; gap: 8px; align-items: stretch; }
-.fcc-quantity { display: flex; border: 2px solid #e0e0e0; border-radius: 4px; overflow: hidden; width: 90px; flex-shrink: 0; }
-.fcc-qty-btn { width: 28px; border: none; background: #fff; font-size: 18px; cursor: pointer; color: #000; display: flex; align-items: center; justify-content: center; padding: 0; }
-.fcc-qty-input { width: 34px; border: none; text-align: center; font-size: 15px; font-weight: 600; -moz-appearance: textfield; padding: 0; }
-.fcc-qty-input::-webkit-outer-spin-button, .fcc-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.fcc-add-to-cart { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--card-series-featured, #AE1F24); color: white; border: none; padding: 12px 16px; border-radius: 4px; font-family: 'Gunplay', sans-serif; font-size: 16px; text-transform: uppercase; cursor: pointer; letter-spacing: 0.5px; position: relative; overflow: hidden; z-index: 1; }
-.fcc-add-to-cart i, .fcc-add-to-cart svg { font-size: 18px; position: relative; z-index: 2; transition: color 0.3s ease; color: white; }
-.fcc-add-to-cart span { position: relative; z-index: 2; }
-.fcc-add-to-cart::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: #000; transition: left 0.4s ease; z-index: -1; }
-.fcc-add-to-cart:hover { color: #fff; }
-.fcc-add-to-cart:hover::before { left: 0; }
-.fcc-add-to-cart:not(:hover)::before { left: -100%; transition: left 0.4s ease; }
-.fcc-add-to-cart.fcc-out-of-stock, .fcc-add-to-cart:disabled { background: #999; opacity: 0.6; cursor: not-allowed; color: white; }
-.fcc-add-to-cart.fcc-out-of-stock i, .fcc-add-to-cart:disabled i { display: none !important; }
-.fcc-add-to-cart.fcc-out-of-stock::before, .fcc-add-to-cart.fcc-out-of-stock::after, .fcc-add-to-cart:disabled::before, .fcc-add-to-cart:disabled::after { display: none; }
-.fcc-add-to-cart.fcc-out-of-stock:hover, .fcc-add-to-cart:disabled:hover { background: #999; color: white; }
-.fcc-add-to-cart.adding { background: color-mix(in srgb, var(--card-series-featured, #AE1F24) 60%, white); transition: background 0.3s ease; }
-.fcc-add-to-cart::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: #35bf86; z-index: 0; transition: none; }
-.fcc-add-to-cart.success::before { display: none; }
-.fcc-add-to-cart.adding.success { color: var(--card-series-featured, #AE1F24); }
-.fcc-add-to-cart.adding.success::after { z-index: 1; animation: fccFillSuccess 0.6s ease forwards; }
+.fgc-actions { display: flex; gap: 6px; align-items: stretch; margin-top: auto; }
+.fgc-quantity { display: flex; border: 2px solid #e0e0e0; border-radius: 4px; overflow: hidden; width: 78px; flex-shrink: 0; }
+.fgc-qty-btn { width: 26px; border: none; background: #fff; font-size: 17px; cursor: pointer; color: #000; display: flex; align-items: center; justify-content: center; padding: 0; }
+.fgc-qty-input { width: 30px; border: none; text-align: center; font-size: 15px; font-weight: 600; -moz-appearance: textfield; padding: 0; }
+.fgc-qty-input::-webkit-outer-spin-button, .fgc-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.fgc-add-to-cart { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--card-series-featured, #AE1F24); color: white; border: none; padding: 11px 14px; border-radius: 4px; font-family: 'Gunplay', sans-serif; font-size: 15px; text-transform: uppercase; cursor: pointer; letter-spacing: 0.5px; position: relative; overflow: hidden; z-index: 1; white-space: nowrap; }
+.fgc-add-to-cart i, .fgc-add-to-cart svg { font-size: 18px; position: relative; z-index: 2; transition: color 0.3s ease; color: white; }
+.fgc-add-to-cart span { position: relative; z-index: 2; }
+.fgc-add-to-cart::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: #000; transition: left 0.4s ease; z-index: -1; }
+.fgc-add-to-cart:hover { color: #fff; }
+.fgc-add-to-cart:hover::before { left: 0; }
+.fgc-add-to-cart:not(:hover)::before { left: -100%; transition: left 0.4s ease; }
+.fgc-add-to-cart.fgc-out-of-stock, .fgc-add-to-cart:disabled { background: #999; opacity: 0.6; cursor: not-allowed; color: white; }
+.fgc-add-to-cart.fgc-out-of-stock i, .fgc-add-to-cart:disabled i { display: none !important; }
+.fgc-add-to-cart.fgc-out-of-stock::before, .fgc-add-to-cart.fgc-out-of-stock::after, .fgc-add-to-cart:disabled::before, .fgc-add-to-cart:disabled::after { display: none; }
+.fgc-add-to-cart.fgc-out-of-stock:hover, .fgc-add-to-cart:disabled:hover { background: #999; color: white; }
+.fgc-add-to-cart.adding { background: color-mix(in srgb, var(--card-series-featured, #AE1F24) 60%, white); transition: background 0.3s ease; }
+.fgc-add-to-cart::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: #35bf86; z-index: 0; transition: none; }
+.fgc-add-to-cart.success::before { display: none; }
+.fgc-add-to-cart.adding.success { color: var(--card-series-featured, #AE1F24); }
+.fgc-add-to-cart.adding.success::after { z-index: 1; animation: fccFillSuccess 0.6s ease forwards; }
 @keyframes fccFillSuccess { 0% { left: -100%; } 100% { left: 0; } }
 
-.featured-carousel-section .fcc-core-series .fcc-add-to-cart { color: #000 !important; border: none !important; }
-.featured-carousel-section .fcc-core-series .fcc-add-to-cart i, .featured-carousel-section .fcc-core-series .fcc-add-to-cart svg { color: #000 !important; }
-.featured-carousel-section .fcc-core-series .fcc-add-to-cart:hover { color: var(--card-series-featured, #AE1F24) !important; }
-.featured-carousel-section .fcc-core-series .fcc-add-to-cart:hover i, .featured-carousel-section .fcc-core-series .fcc-add-to-cart:hover svg { color: var(--card-series-featured, #AE1F24) !important; }
-.featured-carousel-section:has(.fcc-core-series) .splide__arrow svg { fill: #000; }
-.featured-carousel-section:has(.fcc-core-series) .splide__arrow:hover svg { fill: var(--section-series-color, #AE1F24); }
+.featured-grid-section .fgc-core-series .fgc-add-to-cart { color: #000 !important; border: none !important; }
+.featured-grid-section .fgc-core-series .fgc-add-to-cart i, .featured-grid-section .fgc-core-series .fgc-add-to-cart svg { color: #000 !important; }
+.featured-grid-section .fgc-core-series .fgc-add-to-cart:hover { color: var(--card-series-featured, #AE1F24) !important; }
+.featured-grid-section .fgc-core-series .fgc-add-to-cart:hover i, .featured-grid-section .fgc-core-series .fgc-add-to-cart:hover svg { color: var(--card-series-featured, #AE1F24) !important; }
 
-.fcc-reversed-link { font-family: "gunplay", sans-serif; font-weight: 400; font-style: normal; letter-spacing: 0px; text-transform: uppercase; }
-.splide__progress { background: #0000001a; height: 2px; margin-top: 0; position: relative; flex: 1; overflow: hidden; }
-.splide__progress__bar { background: var(--section-series-color, #AE1F24); height: 100%; width: 0; transition: width 0.3s ease; }
-.featured-collection-splide { position: relative; }
-.featured-collection-splide .splide__track { margin-bottom: 36px; }
-.splide__controls { display: flex; align-items: center; gap: 12px; flex: 1; }
-.splide__controls .splide__progress { flex: 1; }
-.splide__controls .splide__arrows { margin-left: auto; display: flex; gap: 8px; }
-.splide__arrow { background: var(--section-series-color, #AE1F24); opacity: 1; width: 48px; height: 48px; border-radius: 50%; position: relative; transform: none; transition: background 0.4s ease; overflow: hidden; }
-.splide__arrow svg { fill: #fff; width: 12px; height: 12px; position: relative; z-index: 2; transition: fill 0.4s ease; }
-.splide__arrow::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: #000; transition: left 0.4s ease; z-index: 1; }
-.splide__arrow:hover::before { left: 0; }
-.splide__arrow--prev { left: auto; }
-.splide__arrow--next { right: auto; }
+.fgc-reversed-link { font-family: "gunplay", sans-serif; font-weight: 400; font-style: normal; letter-spacing: 0px; text-transform: uppercase; }
+.featured-collection-grid { position: relative; }
 .fc-shop-all-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #f5f5f5; border-radius: 50px; text-decoration: none; color: #000; font-family: 'Gunplay', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.5px; transition: background 0.3s ease; }
 .fc-shop-all-btn:hover { background: #e0e0e0; }
 .fc-shop-all-btn svg { transition: transform 0.3s ease; }
 .fc-shop-all-btn:hover svg { transform: translateX(3px); }
 
 @media (max-width: 1024px) {
-  .fcc-swatches { gap: 4px; }
-  .fcc-swatch { min-width: 28px; max-width: 32px; height: 32px; }
-  .fcc-actions { gap: 6px; }
-  .fcc-quantity { width: 80px; }
+  .fgc-swatches { gap: 4px; }
+  .fgc-swatch { flex: 0 0 calc(var(--fgc-swatch-size, 32px) * 0.9); width: calc(var(--fgc-swatch-size, 32px) * 0.9); height: calc(var(--fgc-swatch-size, 32px) * 0.9); }
+  .fgc-actions { gap: 6px; }
+  .fgc-quantity { width: 64px; }
+  .fgc-qty-btn { width: 24px; font-size: 15px; }
+  .fgc-qty-input { width: 28px; font-size: 14px; }
+  .fgc-add-to-cart { padding: 10px 12px; font-size: 14px; }
+  .fgc-option-text { white-space: nowrap; font-size: 13.5px; }
 }
 
 @media (max-width: 768px) {
-  .featured-carousel-header { flex-direction: column; align-items: flex-start; }
-  .featured-carousel-header .text-with-icon { width: 100%; }
-  .featured-carousel-title { font-size: 24px; }
-  .fcc-card__title { font-size: 1.5rem; }
-  .fcc-card__subheader { font-size: 14px; }
-  .fcc-swatches:has(.fcc-apparel-selector.fcc-single-row) { min-height: 50px; }
-  .fcc-swatches { gap: 10px; flex-wrap: wrap; min-height: 92px; height: auto; margin-top: var(--card-options-gap-mobile, 12px); overflow: visible; }
-  .fcc-swatches.fcc-single-row { align-items: flex-end; }
-  .fcc-swatch { min-width: 40px; max-width: 40px; height: 40px; padding: 5px; flex-grow: 0; }
-  .fcc-swatch:hover:not(.fcc-swatch-unavailable), .fcc-swatch.active { border: 2px solid var(--swatch-border-color, #000); padding: 5px; }
-  .fcc-apparel-selector { flex-wrap: wrap; min-height: 50px; height: auto; align-items: flex-start; width:100%; }
-  .fcc-purchase-options--single { min-height: var(--card-single-option-height-mobile, 48px); }
-  .fcc-apparel-selector.fcc-single-row { align-items: flex-end; align-content: flex-end; }
-  .fcc-apparel-selector.fcc-single-row .fcc-apparel-size-section,
-  .fcc-apparel-selector.fcc-single-row .fcc-apparel-color-section { align-self: flex-end; }
-  .fcc-apparel-selector.fcc-single-row .fcc-apparel-color-swatches { align-items: flex-end; }
-  .fcc-apparel-size-section { flex: 1 1 auto; min-width: 150px; }
-  .fcc-apparel-color-section { margin-left: auto; align-self: flex-start; }
-  .fcc-apparel-color-swatches { justify-content: flex-end; flex-wrap: wrap; margin-left: auto; }
-  .fcc-color-swatch { width: 40px; height: 40px; }
-  .fcc-product-image { max-width: 85%; max-height: 85%; width: auto; height: auto; }
-  .fcc-quantity { width: 70px; }
-  .fcc-qty-btn { width: 24px; font-size: 16px; }
-  .fcc-qty-input { width: 22px; font-size: 14px; }
-  .fcc-add-to-cart i { font-size: 16px; gap: 8px; }
-  .fcc-option-content { padding: 10px 12px; min-height: 42px; }
-  .fcc-purchase-option input[type="radio"]:checked + .fcc-option-content { padding-right: 90px; }
-  .fcc-option-text { font-size: 14px; }
-  .fcc-frequency-selector { max-width: 105px; right: 12px; }
-  .fcc-delivery-frequency { font-size: 14px; padding: 4px 20px 4px 6px; }
-  .fcc-variant-name { font-size: 1rem; padding: 6px; }
-  .fcc-discount-content { font-size: 1rem; max-width: 100px; }
-  .fcc-image-info:not(:has(.fcc-variant-name)) { align-items: center; }
-  .fcc-image-info:not(:has(.fcc-variant-name)) .fcc-discount-badge { width: 100%; justify-content: center; align-items: center; }
-  .fcc-image-info:not(:has(.fcc-variant-name)) .fcc-discount-content { width: 100%; text-align: center; align-items: center; justify-content: center; }
-  .splide__controls{margin-top:32px;}  
-  .splide__controls .splide__arrows {display: none;}
-  .featured-collection-splide .splide__track {margin-bottom:0;}
-  .fcc-image-info{ margin-bottom:12px!important;}
+  .featured-grid-header { flex-direction: column; align-items: flex-start; }
+  .featured-grid-header .text-with-icon { width: 100%; }
+  .featured-grid-title { font-size: 24px; }
+  .fgc-card__title { font-size: 1.5rem; }
+  .fgc-card__subheader { font-size: 14px; }
+  .fgc-swatches:has(.fgc-apparel-selector.fgc-single-row) { min-height: 50px; }
+  .fgc-swatches { gap: 10px; flex-wrap: wrap; min-height: 92px; height: auto; margin-top: var(--card-options-gap-mobile, 12px); overflow: visible; }
+  .fgc-swatches.fgc-single-row { align-items: flex-end; }
+  .fgc-swatch { flex: 0 0 calc(var(--fgc-swatch-size, 32px) * 0.85); width: calc(var(--fgc-swatch-size, 32px) * 0.85); height: calc(var(--fgc-swatch-size, 32px) * 0.85); padding: 4px; }
+  .fgc-swatch:hover:not(.fgc-swatch-unavailable), .fgc-swatch.active { border: 2px solid var(--swatch-border-color, #000); padding: 5px; }
+  .fgc-apparel-selector { flex-wrap: wrap; min-height: 50px; height: auto; align-items: flex-start; width:100%; }
+  .fgc-purchase-options--single { min-height: var(--card-single-option-height-mobile, 48px); }
+  .fgc-apparel-selector.fgc-single-row { align-items: flex-end; align-content: flex-end; }
+  .fgc-apparel-selector.fgc-single-row .fgc-apparel-size-section,
+  .fgc-apparel-selector.fgc-single-row .fgc-apparel-color-section { align-self: flex-end; }
+  .fgc-apparel-selector.fgc-single-row .fgc-apparel-color-swatches { align-items: flex-end; }
+  .fgc-apparel-size-section { flex: 1 1 auto; min-width: 150px; }
+  .fgc-apparel-color-section { margin-left: auto; align-self: flex-start; }
+  .fgc-apparel-color-swatches { justify-content: flex-end; flex-wrap: wrap; margin-left: auto; }
+  .fgc-color-swatch { width: 40px; height: 40px; }
+  .fgc-product-image { max-width: 85%; max-height: 85%; width: auto; height: auto; }
+  .fgc-quantity { width: 58px; }
+  .fgc-qty-btn { width: 22px; font-size: 15px; }
+  .fgc-qty-input { width: 24px; font-size: 13px; }
+  .fgc-add-to-cart i { font-size: 16px; gap: 8px; }
+  .fgc-add-to-cart { padding: 10px 10px; font-size: 14px; }
+  .fgc-option-content { padding: 10px 12px; min-height: 42px; }
+  .fgc-purchase-option input[type="radio"]:checked + .fgc-option-content { padding-right: 90px; }
+  .fgc-option-text { font-size: 13px; white-space: normal; }
+  .fgc-frequency-selector { max-width: 105px; right: 12px; }
+  .fgc-delivery-frequency { font-size: 14px; padding: 4px 20px 4px 6px; }
+  .fgc-variant-name { font-size: 1rem; padding: 6px; }
+  .fgc-discount-content { font-size: 1rem; max-width: 100px; }
+  .fgc-image-info:not(:has(.fgc-variant-name)) { align-items: center; }
+  .fgc-image-info:not(:has(.fgc-variant-name)) .fgc-discount-badge { width: 100%; justify-content: center; align-items: center; }
+  .fgc-image-info:not(:has(.fgc-variant-name)) .fgc-discount-content { width: 100%; text-align: center; align-items: center; justify-content: center; }
+  .fgc-image-info{ margin-bottom:12px!important;}
 }
 
 @media (min-width: 768px) {
-  .featured-carousel-title{font-size:2rem;}
-  .featured-carousel-header{margin-bottom: 55px;}
+  .featured-grid-title{font-size:2rem;}
+  .featured-grid-header{margin-bottom: 55px;}
 }
 </style>
 
 <script>
-function selectCarouselVariant(el, pid) {
-  if (!el || el.classList.contains('fcc-swatch-unavailable')) return;
-  const card = el.closest('.fcc-card');
+function selectGridVariant(el, pid) {
+  if (!el || el.classList.contains('fgc-swatch-unavailable')) return;
+  const card = el.closest('.fgc-card');
   if (!card) return;
   const vid = el.getAttribute('data-variant-id');
   const vp = el.getAttribute('data-variant-price');
@@ -906,7 +884,7 @@ function selectCarouselVariant(el, pid) {
   const va = el.getAttribute('data-variant-available') === 'true';
   const vname = el.getAttribute('data-variant-name');
   const swatchColor = el.getAttribute('data-swatch-color');
-  card.querySelectorAll('.fcc-swatch').forEach(function(s) { s.classList.remove('active'); });
+  card.querySelectorAll('.fgc-swatch').forEach(function(s) { s.classList.remove('active'); });
   el.classList.add('active');
   if (swatchColor) card.style.setProperty('--active-swatch-color', swatchColor);
   const inp = card.querySelector('[data-variant-input="' + pid + '"]');
@@ -929,22 +907,22 @@ function selectCarouselVariant(el, pid) {
     if (cleanedName) { vnd.textContent = cleanedName; vnd.style.display = 'flex'; }
     else vnd.style.display = 'none';
   }
-  updateCarouselPrice(card, pid, vp);
+  updateGridPrice(card, pid, vp);
   const btn = card.querySelector('[data-add-btn="' + pid + '"]');
   if (btn) {
     btn.disabled = !va;
-    if (va) { btn.classList.remove('fcc-out-of-stock'); btn.querySelector('span').textContent = 'Add to Cart'; }
-    else { btn.classList.add('fcc-out-of-stock'); btn.querySelector('span').textContent = 'Out of Stock'; }
+    if (va) { btn.classList.remove('fgc-out-of-stock'); btn.querySelector('span').textContent = 'Add to Cart'; }
+    else { btn.classList.add('fgc-out-of-stock'); btn.querySelector('span').textContent = 'Out of Stock'; }
   }
   const qty = card.querySelector('[data-quantity="' + pid + '"]');
   if (qty) qty.style.display = va ? 'flex' : 'none';
   const purchaseOpts = card.querySelector('[data-purchase-options="' + pid + '"]');
   if (purchaseOpts) purchaseOpts.querySelectorAll('input[type="radio"]').forEach(function(r) { r.disabled = !va; });
   updateImageInfoDisplay(card, pid);
-  applyApparelSingleRowAlignment();
+  applyGridApparelSingleRowAlignment();
 }
 
-function updateCarouselPrice(card, pid, bp) {
+function updateGridPrice(card, pid, bp) {
   const pc = card.querySelector('[data-card-price="' + pid + '"]');
   if (!pc) return;
   const sr = card.querySelector('input[value="subscribe"]:checked');
@@ -956,20 +934,20 @@ function updateCarouselPrice(card, pid, bp) {
     const opt = fs.options[fs.selectedIndex];
     const d = parseFloat(opt.getAttribute('data-discount')) || 0;
     const dp = bp * (1 - d / 100);
-    h = '<span class="fcc-price-original">' + formatMoney(bp) + '</span><span class="fcc-price-subscribe">' + formatMoney(dp) + '</span>';
+    h = '<span class="fgc-price-original">' + formatMoney(bp) + '</span><span class="fgc-price-subscribe">' + formatMoney(dp) + '</span>';
   } else if (showDiscount && discountPercent > 0) {
     const discountedPrice = bp * (1 - discountPercent / 100);
-    h = '<span class="fcc-price-original">' + formatMoney(bp) + '</span><span class="fcc-price-display">' + formatMoney(discountedPrice) + '</span>';
+    h = '<span class="fgc-price-original">' + formatMoney(bp) + '</span><span class="fgc-price-display">' + formatMoney(discountedPrice) + '</span>';
   } else {
-    h = '<span class="fcc-price-display">' + formatMoney(bp) + '</span>';
+    h = '<span class="fgc-price-display">' + formatMoney(bp) + '</span>';
   }
   pc.innerHTML = h;
 }
 
 function formatMoney(c) { return '$' + (c / 100).toFixed(2); }
 
-function updateCarouselQuantity(btn, ch) {
-  const inp = btn.parentElement.querySelector('.fcc-qty-input');
+function updateGridQuantity(btn, ch) {
+  const inp = btn.parentElement.querySelector('.fgc-qty-input');
   let v = parseInt(inp.value) || 1;
   v += ch;
   if (v < 1) v = 1;
@@ -987,12 +965,12 @@ function updateImageInfoDisplay(card, pid) {
   else { imgInfo.style.display = 'flex'; imgInfo.style.marginBottom = '12px'; }
 }
 
-function selectCarouselApparelVariant(triggerEl, pid, newSize, newColor) {
-  const card = triggerEl.closest('.fcc-card');
+function selectGridApparelVariant(triggerEl, pid, newSize, newColor) {
+  const card = triggerEl.closest('.fgc-card');
   if (!card) return;
   const variantSelect = card.querySelector('[data-variant-select="' + pid + '"]');
   if (!variantSelect) return;
-  const apparelSelector = card.querySelector('.fcc-apparel-selector[data-product-id="' + pid + '"]');
+  const apparelSelector = card.querySelector('.fgc-apparel-selector[data-product-id="' + pid + '"]');
   if (!apparelSelector) return;
   const sizeIndex = parseInt(apparelSelector.getAttribute('data-size-index'), 10);
   const colorIndex = parseInt(apparelSelector.getAttribute('data-color-index'), 10);
@@ -1015,94 +993,61 @@ function selectCarouselApparelVariant(triggerEl, pid, newSize, newColor) {
   for (let i = 0; i < variantSelect.options.length; i++) {
     if (String(variantSelect.options[i].value) === vid) { variantSelect.selectedIndex = i; break; }
   }
-  const hiddenSwatch = card.querySelector('.fcc-swatch[data-variant-id="' + vid + '"]');
-  if (hiddenSwatch) selectCarouselVariant(hiddenSwatch, pid);
+  const hiddenSwatch = card.querySelector('.fgc-swatch[data-variant-id="' + vid + '"]');
+  if (hiddenSwatch) selectGridVariant(hiddenSwatch, pid);
   else {
-    updateCarouselPrice(card, pid, matchVariant.price);
+    updateGridPrice(card, pid, matchVariant.price);
     const vnd = card.querySelector('[data-variant-name-display="' + pid + '"]');
     if (vnd) vnd.textContent = matchVariant.title || '';
   }
   if (newColor != null) {
-    card.querySelectorAll('.fcc-color-swatch').forEach(function(sw) {
+    card.querySelectorAll('.fgc-color-swatch').forEach(function(sw) {
       sw.classList.toggle('active', sw.getAttribute('data-color') === newColor);
     });
   }
   if (newSize != null) {
-    const sizeSelect = card.querySelector('.fcc-size-select[data-size-select="' + pid + '"]');
+    const sizeSelect = card.querySelector('.fgc-size-select[data-size-select="' + pid + '"]');
     if (sizeSelect) sizeSelect.value = newSize;
   }
-  applyApparelSingleRowAlignment();
+  applyGridApparelSingleRowAlignment();
 }
 
-function applyApparelSingleRowAlignment() {
+function applyGridApparelSingleRowAlignment() {
   if (window.innerWidth > 768) return;
-  document.querySelectorAll('.fcc-apparel-selector').forEach(function(sel) {
-    sel.classList.remove('fcc-single-row');
-    const swWrap = sel.querySelector('.fcc-apparel-color-swatches');
+  document.querySelectorAll('.fgc-apparel-selector').forEach(function(sel) {
+    sel.classList.remove('fgc-single-row');
+    const swWrap = sel.querySelector('.fgc-apparel-color-swatches');
     if (!swWrap) return;
-    const swatches = Array.prototype.slice.call(swWrap.querySelectorAll('.fcc-color-swatch'));
+    const swatches = Array.prototype.slice.call(swWrap.querySelectorAll('.fgc-color-swatch'));
     if (swatches.length === 0) return;
     const firstTop = swatches[0].offsetTop;
     let wrapped = false;
     for (let i = 1; i < swatches.length; i++) {
       if (swatches[i].offsetTop > firstTop) { wrapped = true; break; }
     }
-    if (!wrapped) sel.classList.add('fcc-single-row');
+    if (!wrapped) sel.classList.add('fgc-single-row');
   });
-  document.querySelectorAll('.fcc-swatches').forEach(function(cont) {
-    if (cont.querySelector('.fcc-apparel-selector')) return;
-    cont.classList.remove('fcc-single-row');
-    const swatches = Array.prototype.slice.call(cont.querySelectorAll('.fcc-swatch:not([style*="display: none"])'));
+  document.querySelectorAll('.fgc-swatches').forEach(function(cont) {
+    if (cont.querySelector('.fgc-apparel-selector')) return;
+    cont.classList.remove('fgc-single-row');
+    const swatches = Array.prototype.slice.call(cont.querySelectorAll('.fgc-swatch:not([style*="display: none"])'));
     if (swatches.length === 0) return;
     const firstTop = swatches[0].offsetTop;
     let wrapped = false;
     for (let i = 1; i < swatches.length; i++) {
       if (swatches[i].offsetTop > firstTop) { wrapped = true; break; }
     }
-    if (!wrapped) cont.classList.add('fcc-single-row');
+    if (!wrapped) cont.classList.add('fgc-single-row');
   });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  try {
-    const se = document.querySelector('#featured-splide-{{ section.id }}');
-    if (se && typeof Splide !== 'undefined') {
-      const ppd = parseInt(se.getAttribute('data-per-page-desktop')) || 4;
-      const ppm = parseInt(se.getAttribute('data-per-page-mobile')) || 1;
-      const splide = new Splide(se, {
-        type: 'loop',
-        perPage: ppd,
-        perMove: 1,
-        gap: '20px',
-        padding: { left: 0, right: 0 },
-        pagination: false,
-        arrows: true,
-        autoHeight: false,
-        breakpoints: {
-          1400: { perPage: 3, gap: '16px' },
-          1100: { perPage: 2, gap: '16px' },
-          768: { perPage: ppm, gap: '12px' }
-        }
-      });
-      const bar = se.querySelector('.splide__progress__bar');
-      if (bar) {
-        splide.on('mounted move', function() {
-          const end = splide.Components.Controller.getEnd() + 1;
-          const rate = Math.min((splide.index + 1) / end, 1);
-          bar.style.width = String(100 * rate) + '%';
-        });
-      }
-      splide.on('mounted', function(){ applyApparelSingleRowAlignment(); });
-      splide.on('move', function(){ applyApparelSingleRowAlignment(); });
-      splide.mount();
-    }
-  } catch (e) {}
 
-  document.querySelectorAll('.fcc-purchase-option input[type="radio"]').forEach(function(r) {
+  document.querySelectorAll('.fgc-purchase-option input[type="radio"]').forEach(function(r) {
     r.addEventListener('change', function() {
       try {
         const pid = this.name.replace('purchase_type_', '');
-        const card = this.closest('.fcc-card');
+        const card = this.closest('.fgc-card');
         if (!card) return;
         const fselt = card.querySelector('[data-frequency-select="' + pid + '"]');
         const spin = card.querySelector('[data-selling-plan-input="' + pid + '"]');
@@ -1111,30 +1056,48 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           if (spin) spin.value = '';
         }
-        const av = card.querySelector('.fcc-swatch.active');
+        const av = card.querySelector('.fgc-swatch.active');
         if (av) {
           const vp = av.getAttribute('data-variant-price');
-          updateCarouselPrice(card, pid, vp);
+          updateGridPrice(card, pid, vp);
         }
       } catch (e) {}
     });
   });
 
-  document.querySelectorAll('.fcc-delivery-frequency').forEach(function(sel) {
+  document.querySelectorAll('.fgc-delivery-frequency').forEach(function(sel) {
     sel.addEventListener('change', function() {
       try {
         const pid = this.getAttribute('data-frequency-select');
-        const card = this.closest('.fcc-card');
+        const card = this.closest('.fgc-card');
         if (!card) return;
         const spin = card.querySelector('[data-selling-plan-input="' + pid + '"]');
         if (spin) spin.value = this.value;
-        const av = card.querySelector('.fcc-swatch.active');
+        const av = card.querySelector('.fgc-swatch.active');
         if (av) {
           const vp = av.getAttribute('data-variant-price');
-          updateCarouselPrice(card, pid, vp);
+          updateGridPrice(card, pid, vp);
         }
       } catch (e) {}
     });
+  });
+
+  document.querySelectorAll('.fgc-card__form').forEach(function(frm) {
+    try {
+      const pid = frm.getAttribute('data-product-form');
+      const sub = frm.querySelector('input[value="subscribe"]');
+      if (sub && sub.checked) {
+        const fselt = frm.querySelector('[data-frequency-select="' + pid + '"]');
+        const spin = frm.querySelector('[data-selling-plan-input="' + pid + '"]');
+        if (fselt && spin) spin.value = fselt.value;
+        const card = frm.closest('.fgc-card');
+        const av = card ? card.querySelector('.fgc-swatch.active') : null;
+        if (card && av) {
+          const vp = av.getAttribute('data-variant-price');
+          updateGridPrice(card, pid, vp);
+        }
+      }
+    } catch (e) {}
   });
 
   document.querySelectorAll('[data-product-form]').forEach(function(frm) {
@@ -1157,7 +1120,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const fd = new FormData();
         fd.append('id', selectedVariantId);
 
-        const qtyInput = this.querySelector('.fcc-qty-input');
+        const qtyInput = this.querySelector('.fgc-qty-input');
         if (qtyInput) fd.append('quantity', qtyInput.value);
 
         const sr = this.querySelector('input[value="subscribe"]:checked');
@@ -1195,10 +1158,10 @@ document.addEventListener('DOMContentLoaded', function() {
   try {
     document.querySelectorAll('[data-image-info]').forEach(function(info) {
       const pid = info.getAttribute('data-image-info');
-      const card = info.closest('.fcc-card');
+      const card = info.closest('.fgc-card');
       if (card) {
         updateImageInfoDisplay(card, pid);
-        const activeSwatchColor = card.querySelector('.fcc-swatch.active') ? card.querySelector('.fcc-swatch.active').getAttribute('data-swatch-color') : null;
+        const activeSwatchColor = card.querySelector('.fgc-swatch.active') ? card.querySelector('.fgc-swatch.active').getAttribute('data-swatch-color') : null;
         if (activeSwatchColor) {
           card.style.setProperty('--active-swatch-color', activeSwatchColor);
         }
@@ -1206,7 +1169,515 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   } catch (e) {}
 
-  applyApparelSingleRowAlignment();
-  window.addEventListener('resize', function(){ applyApparelSingleRowAlignment(); });
+  applyGridApparelSingleRowAlignment();
+  window.addEventListener('resize', function(){ applyGridApparelSingleRowAlignment(); });
 });
 </script>
+
+{% schema %}
+{
+  "name": "Collection page",
+  "class": "shopify-section--main-collection",
+  "tag": "section",
+  "max_blocks": 5,
+  "blocks": [
+    {
+      "type": "promotion_image",
+      "name": "Promotion image",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Blocks may be hidden if not enough products are visible."
+        },
+        {
+          "type": "range",
+          "id": "position",
+          "min": 1,
+          "max": 50,
+          "label": "Position in grid",
+          "default": 4
+        },
+        {
+          "type": "select",
+          "id": "column_span",
+          "label": "Desktop item size",
+          "info": "Size is adjusted automatically on smaller screen to improve user experience.",
+          "options": [
+            {
+              "value": "1",
+              "label": "1 column"
+            },
+            {
+              "value": "2",
+              "label": "2 columns"
+            }
+          ],
+          "default": "1"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "1600 x 1000px .jpg recommended"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile image",
+          "info": "1000 x 1000px .jpg recommended. Default to desktop image."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Promote a product or a temporary offer"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link URL"
+        },
+        {
+          "type": "text",
+          "id": "link_text",
+          "label": "Link text",
+          "default": "View all"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading style",
+          "options": [
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "h6",
+              "label": "H6"
+            }
+          ],
+          "default": "h4"
+        },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Content position",
+          "options": [
+            {
+              "value": "place-self-start text-start",
+              "label": "Top left"
+            },
+            {
+              "value": "place-self-start-center text-center",
+              "label": "Top center"
+            },
+            {
+              "value": "place-self-start-end text-end",
+              "label": "Top right"
+            },
+            {
+              "value": "place-self-center-start text-start",
+              "label": "Middle left"
+            },
+            {
+              "value": "place-self-center text-center",
+              "label": "Middle center"
+            },
+            {
+              "value": "place-self-center-end text-end",
+              "label": "Middle right"
+            },
+            {
+              "value": "place-self-end-start text-start",
+              "label": "Bottom left"
+            },
+            {
+              "value": "place-self-end-center text-center",
+              "label": "Bottom center"
+            },
+            {
+              "value": "place-self-end text-end",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "place-self-end-start text-start"
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "Overlay",
+          "default": "#000000"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Overlay opacity",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 30
+        }
+      ]
+    },
+    {
+      "type": "promotion_video",
+      "name": "Promotion video",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Blocks may be hidden if not enough products are visible. Video are muted to allow autoplay. For best visual results and avoid platform branding, we recommend uploading a MP4 file."
+        },
+        {
+          "type": "range",
+          "id": "position",
+          "min": 1,
+          "max": 50,
+          "label": "Position in grid",
+          "default": 4
+        },
+        {
+          "type": "select",
+          "id": "column_span",
+          "label": "Desktop item size",
+          "info": "Size is adjusted automatically on smaller screen to improve user experience.",
+          "options": [
+            {
+              "value": "1",
+              "label": "1 column"
+            },
+            {
+              "value": "2",
+              "label": "2 columns"
+            }
+          ],
+          "default": "1"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video",
+          "info": "Replaces external video if both are set."
+        },
+        {
+          "type": "video_url",
+          "id": "external_video_url",
+          "accept": ["vimeo", "youtube"],
+          "label": "External video URL",
+          "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Promote a product or a temporary offer"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link URL"
+        },
+        {
+          "type": "text",
+          "id": "link_text",
+          "label": "Link text",
+          "default": "View all"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading style",
+          "options": [
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "h6",
+              "label": "H6"
+            }
+          ],
+          "default": "h4"
+        },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Content position",
+          "options": [
+            {
+              "value": "place-self-start text-start",
+              "label": "Top left"
+            },
+            {
+              "value": "place-self-start-center text-center",
+              "label": "Top center"
+            },
+            {
+              "value": "place-self-start-end text-end",
+              "label": "Top right"
+            },
+            {
+              "value": "place-self-center-start text-start",
+              "label": "Middle left"
+            },
+            {
+              "value": "place-self-center text-center",
+              "label": "Middle center"
+            },
+            {
+              "value": "place-self-center-end text-end",
+              "label": "Middle right"
+            },
+            {
+              "value": "place-self-end-start text-start",
+              "label": "Bottom left"
+            },
+            {
+              "value": "place-self-end-center text-center",
+              "label": "Bottom center"
+            },
+            {
+              "value": "place-self-end text-end",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "place-self-end-start text-start"
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "Overlay",
+          "default": "#000000"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Overlay opacity",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 30
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 8,
+      "max": 50,
+      "step": 1,
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "products_per_row_mobile",
+      "label": "Products per row (mobile)",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "range",
+      "min": 2,
+      "max": 5,
+      "id": "products_per_row_desktop",
+      "label": "Products per row (desktop)",
+      "info": "For best results, limit to 4 when using sidebar filtering. On small screen size, products per row is limited to 2 (with sidebar) or 3 (without sidebar) to maximize readability",
+      "default": 3
+    },
+    {
+      "type": "header",
+      "content": "Grid Options"
+    },
+    {
+      "type": "range",
+      "id": "grid_row_gap_desktop",
+      "label": "Row Gap (Desktop)",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "grid_row_gap_mobile",
+      "label": "Row Gap (Mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "image_padding_top",
+      "label": "Product Image Padding Top",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "swatch_size",
+      "label": "Flavor Swatch Size",
+      "min": 20,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "checkbox",
+      "id": "default_subscribe",
+      "label": "Default to Subscribe & Save",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Filters & sort"
+    },
+    {
+      "type": "select",
+      "id": "filter_layout",
+      "label": "Desktop layout",
+      "options": [
+        {
+          "value": "sidebar",
+          "label": "Sidebar"
+        },
+        {
+          "value": "horizontal",
+          "label": "Horizontal"
+        },
+        {
+          "value": "drawer",
+          "label": "Drawer"
+        }
+      ],
+      "default": "sidebar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sort_by",
+      "label": "Show sort by",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filters",
+      "label": "Show filters",
+      "info": "[Customize filters](/admin/menus)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filter_group_name",
+      "label": "Show group name",
+      "info": "Group name will be shown inside selected filters.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_color_swatch",
+      "label": "Show filter color swatch",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_empty_filter_values",
+      "label": "Show empty filter values",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filter_values_count",
+      "label": "Show filter values count",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "open_first_filter_group",
+      "label": "Open first group by default",
+      "default": false
+    }
+  ]
+}
+{% endschema %}
