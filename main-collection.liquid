@@ -421,6 +421,15 @@
                                   {% assign selected_variant = product.selected_or_first_available_variant %}
                                 {% endif %}
 
+                                {% comment %} Get the selected variant's swatch color for the CSS variable {% endcomment %}
+                                {% assign selected_variant_swatch_color = '#000' %}
+                                {% assign sv_sfp_raw = selected_variant.metafields.custom.sfp_section.value %}
+                                {% assign sv_sfp = sv_sfp_raw | first | default: sv_sfp_raw %}
+                                {% assign sv_swatch_obj = sv_sfp.flavor_swatch_image.value %}
+                                {% if sv_swatch_obj.color_swatch %}
+                                  {% assign selected_variant_swatch_color = sv_swatch_obj.color_swatch %}
+                                {% endif %}
+
                                 {% assign product_sfp_raw = product.metafields.custom.sfp_section.value %}
                                 {% assign product_sfp = product_sfp_raw | first | default: product_sfp_raw %}
                                 {% assign product_series = product_sfp.series.value %}
@@ -460,7 +469,7 @@
                                        data-series="{{ series_name }}"
                                        data-is-apparel="{{ is_apparel_or_gear }}"
                                        data-product-type="{{ product.type }}"
-                                       style="--card-series-featured: {{ series_featured_color }};">
+                                       style="--card-series-featured: {{ series_featured_color }}; --active-swatch-color: {{ selected_variant_swatch_color }};">
 
                                     <div class="fgc-card__image">
                                       <a href="{{ product.url }}">
@@ -712,8 +721,9 @@
 .fgc-card__reviews-price { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; min-height: 32px; height: 32px; padding: 0 12px; }
 .fgc-card__reviews { flex: 0 0 auto; }
 .fgc-card__reviews .yotpo .text-m, .fgc-card__reviews .yotpo .yotpo-bottomline-box-1, .fgc-card__reviews .yotpo .yotpo-bottomline .text-m, .fgc-card__reviews .yotpo .standalone-bottomline .text-m { display: none !important; }
-.fgc-card__reviews .yotpo-sr-bottom-line-left-panel, .fgc-card__reviews .yotpo-sr-bottom-line-score, .fgc-card__reviews .yotpo-sr-bottom-line-right-panel, .fgc-card__reviews .yotpo-sr-vertical-border { display: none !important; }
+.fgc-card__reviews .yotpo-sr-bottom-line-right-panel, .fgc-card__reviews .yotpo-sr-vertical-border { display: none !important; }
 .fgc-card .yotpo-sr-star-full path, .fgc-card .yotpo-icon-star, .fgc-card svg.star-container path { fill: var(--card-series-featured, #AE1F24) !important; stroke: var(--card-series-featured, #AE1F24) !important; }
+.fgc-card .yotpo-sr-bottom-line-left-panel.yotpo-sr-bottom-line-score, .fgc-card .yotpo-sr-bottom-line-score { color: var(--card-series-featured, #AE1F24) !important; }
 .fgc-card__price { display: flex; justify-content: flex-end; align-items: baseline; gap: 8px; flex-shrink: 0; }
 .fgc-price-display { font-family: 'Acumin Pro', sans-serif; font-size: 16px; font-weight: 400; color: black; }
 .fgc-price-original { text-decoration: line-through; color: #999; font-size: 16px; font-weight: 400; }
@@ -874,8 +884,20 @@
 </style>
 
 <script>
+// Active filters from Liquid (available immediately on page load)
+window.activeFlavorFilters = [
+  {%- for filter in collection.filters -%}
+    {%- assign filter_label = filter.label | downcase -%}
+    {%- if filter_label contains 'flavor' -%}
+      {%- for value in filter.active_values -%}
+        "{{ value.label | escape }}"{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endfor -%}
+];
+
 function selectGridVariant(el, pid) {
-  if (!el || el.classList.contains('fgc-swatch-unavailable')) return;
+  if (!el) return;
   const card = el.closest('.fgc-card');
   if (!card) return;
   const vid = el.getAttribute('data-variant-id');
@@ -886,14 +908,33 @@ function selectGridVariant(el, pid) {
   const swatchColor = el.getAttribute('data-swatch-color');
   card.querySelectorAll('.fgc-swatch').forEach(function(s) { s.classList.remove('active'); });
   el.classList.add('active');
-  if (swatchColor) card.style.setProperty('--active-swatch-color', swatchColor);
+  if (swatchColor) {
+    card.style.setProperty('--active-swatch-color', swatchColor);
+    console.log('Set CSS variable --active-swatch-color to:', swatchColor);
+  }
   const inp = card.querySelector('[data-variant-input="' + pid + '"]');
-  if (inp) inp.value = vid;
+  if (inp) {
+    inp.value = vid;
+    console.log('Set variant input to:', vid);
+  }
   const variantSelect = card.querySelector('[data-variant-select="' + pid + '"]');
   if (variantSelect) {
+    let found = false;
     for (let i = 0; i < variantSelect.options.length; i++) {
-      if (variantSelect.options[i].value === vid) { variantSelect.selectedIndex = i; break; }
+      if (variantSelect.options[i].value === vid) { 
+        variantSelect.selectedIndex = i;
+        found = true;
+        console.log('Set variant select to:', vid, 'at index', i);
+        break;
+      }
     }
+    if (!found) {
+      console.warn('Variant ID', vid, 'not found in select options');
+      // Try setting the value directly as fallback
+      variantSelect.value = vid;
+    }
+  } else {
+    console.warn('No variant select found for product', pid);
   }
   if (vi) {
     const img = card.querySelector('[data-product-image="' + pid + '"]');
@@ -1043,43 +1084,61 @@ function applyGridApparelSingleRowAlignment() {
 
 document.addEventListener('DOMContentLoaded', function() {
 
-  document.querySelectorAll('.fgc-purchase-option input[type="radio"]').forEach(function(r) {
-    r.addEventListener('change', function() {
+  // Use event delegation for purchase option changes (persists through AJAX)
+  document.addEventListener('change', function(e) {
+    const target = e.target;
+    
+    // Handle purchase option radio button changes
+    if (target.type === 'radio' && target.closest('.fgc-purchase-option')) {
       try {
-        const pid = this.name.replace('purchase_type_', '');
-        const card = this.closest('.fgc-card');
+        const pid = target.name.replace('purchase_type_', '');
+        const card = target.closest('.fgc-card');
         if (!card) return;
         const fselt = card.querySelector('[data-frequency-select="' + pid + '"]');
         const spin = card.querySelector('[data-selling-plan-input="' + pid + '"]');
-        if (this.value === 'subscribe') {
-          if (fselt && spin) spin.value = fselt.value;
+        
+        if (target.value === 'subscribe') {
+          if (fselt && spin) {
+            spin.value = fselt.value;
+            console.log('Set selling plan to:', fselt.value);
+          }
         } else {
-          if (spin) spin.value = '';
+          if (spin) {
+            spin.value = '';
+            console.log('Cleared selling plan (one-time purchase)');
+          }
         }
+        
         const av = card.querySelector('.fgc-swatch.active');
         if (av) {
           const vp = av.getAttribute('data-variant-price');
           updateGridPrice(card, pid, vp);
         }
-      } catch (e) {}
-    });
-  });
-
-  document.querySelectorAll('.fgc-delivery-frequency').forEach(function(sel) {
-    sel.addEventListener('change', function() {
+      } catch (e) {
+        console.error('Error handling purchase option change:', e);
+      }
+    }
+    
+    // Handle delivery frequency select changes
+    if (target.classList.contains('fgc-delivery-frequency')) {
       try {
-        const pid = this.getAttribute('data-frequency-select');
-        const card = this.closest('.fgc-card');
+        const pid = target.getAttribute('data-frequency-select');
+        const card = target.closest('.fgc-card');
         if (!card) return;
         const spin = card.querySelector('[data-selling-plan-input="' + pid + '"]');
-        if (spin) spin.value = this.value;
+        if (spin) {
+          spin.value = target.value;
+          console.log('Updated selling plan to:', target.value);
+        }
         const av = card.querySelector('.fgc-swatch.active');
         if (av) {
           const vp = av.getAttribute('data-variant-price');
           updateGridPrice(card, pid, vp);
         }
-      } catch (e) {}
-    });
+      } catch (e) {
+        console.error('Error handling frequency change:', e);
+      }
+    }
   });
 
   document.querySelectorAll('.fgc-card__form').forEach(function(frm) {
@@ -1100,12 +1159,18 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (e) {}
   });
 
-  document.querySelectorAll('[data-product-form]').forEach(function(frm) {
-    frm.addEventListener('submit', function(e) {
+  // Use event delegation for form submissions (persists through AJAX updates)
+  document.addEventListener('submit', function(e) {
+    const form = e.target;
+    
+    // Check if this is a product form
+    if (form.hasAttribute('data-product-form')) {
       e.preventDefault();
+      e.stopPropagation();
+      
       try {
-        const pid = this.getAttribute('data-product-form');
-        const btn = this.querySelector('[data-add-btn="' + pid + '"]');
+        const pid = form.getAttribute('data-product-form');
+        const btn = form.querySelector('[data-add-btn="' + pid + '"]');
         if (!btn || btn.disabled) return;
         const txt = btn.querySelector('span');
         if (!txt) return;
@@ -1114,18 +1179,50 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.classList.add('adding');
         txt.textContent = 'Adding...';
 
-        const variantSelect = this.querySelector('[data-variant-select="' + pid + '"]');
-        const selectedVariantId = variantSelect ? variantSelect.value : null;
+        const variantSelect = form.querySelector('[data-variant-select="' + pid + '"]');
+        let selectedVariantId = variantSelect ? variantSelect.value : null;
+        
+        // Fallback: get variant ID from active swatch if select is empty
+        if (!selectedVariantId) {
+          const activeSwatch = form.querySelector('.fgc-swatch.active');
+          if (activeSwatch) {
+            selectedVariantId = activeSwatch.getAttribute('data-variant-id');
+            console.log('Using variant ID from active swatch:', selectedVariantId);
+          }
+        }
+        
+        // Validate we have a variant ID before submitting
+        if (!selectedVariantId) {
+          console.error('No variant selected! Cannot add to cart.');
+          btn.disabled = false;
+          btn.classList.remove('adding');
+          txt.textContent = 'Select a variant';
+          setTimeout(function() {
+            txt.textContent = ot;
+          }, 2000);
+          return;
+        }
 
+        console.log('Adding variant to cart:', selectedVariantId);
         const fd = new FormData();
         fd.append('id', selectedVariantId);
 
-        const qtyInput = this.querySelector('.fgc-qty-input');
+        const qtyInput = form.querySelector('.fgc-qty-input');
         if (qtyInput) fd.append('quantity', qtyInput.value);
 
-        const sr = this.querySelector('input[value="subscribe"]:checked');
-        const spin = this.querySelector('[data-selling-plan-input="' + pid + '"]');
-        if (sr && spin && spin.value) fd.append('selling_plan', spin.value);
+        const sr = form.querySelector('input[value="subscribe"]:checked');
+        const spin = form.querySelector('[data-selling-plan-input="' + pid + '"]');
+        
+        console.log('Subscribe radio checked:', !!sr);
+        console.log('Selling plan input found:', !!spin);
+        if (spin) console.log('Selling plan value:', spin.value);
+        
+        if (sr && spin && spin.value) {
+          fd.append('selling_plan', spin.value);
+          console.log('Adding selling_plan to cart:', spin.value);
+        } else if (sr && (!spin || !spin.value)) {
+          console.warn('Subscribe selected but no selling plan value available!');
+        }
 
         fetch('/cart/add.js', { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } })
           .then(function(r) { return r.json(); })
@@ -1146,14 +1243,17 @@ document.addEventListener('DOMContentLoaded', function() {
               txt.textContent = ot;
             }, 2000);
           })
-          .catch(function() {
+          .catch(function(err) {
+            console.error('Error adding to cart:', err);
             txt.textContent = ot;
             btn.disabled = false;
             btn.classList.remove('adding');
           });
-      } catch (e) {}
-    });
-  });
+      } catch (e) {
+        console.error('Form submission error:', e);
+      }
+    }
+  }, true); // Use capture phase
 
   try {
     document.querySelectorAll('[data-image-info]').forEach(function(info) {
@@ -1168,6 +1268,319 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   } catch (e) {}
+
+  // Function to handle flavor filter selection
+  function applyFlavorFilter() {
+    try {
+      const flavorFilters = [];
+      
+      // Method 1: Check URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      for (const [key, value] of urlParams.entries()) {
+        if (key.toLowerCase().includes('flavor')) {
+          const decoded = decodeURIComponent(value);
+          flavorFilters.push(decoded);
+          console.log('Found flavor from URL:', decoded);
+        }
+      }
+      
+      // Method 2: Find checked flavor filter inputs in the sidebar
+      const checkedInputs = document.querySelectorAll('input[type="checkbox"]:checked');
+      checkedInputs.forEach(function(input) {
+        const inputName = input.name || '';
+        const inputId = input.id || '';
+        
+        // Check if this is a flavor filter
+        if (inputName.toLowerCase().includes('flavor') || inputId.toLowerCase().includes('flavor')) {
+          // Try to get the value from data attribute or value
+          let flavorValue = input.getAttribute('data-option-value') || 
+                           input.getAttribute('data-tooltip') || 
+                           input.value;
+          
+          // If still no value, try to get from the label
+          if (!flavorValue || flavorValue === 'on') {
+            const label = document.querySelector('label[for="' + input.id + '"]');
+            if (label) {
+              flavorValue = label.textContent.replace(/\(\d+\)/g, '').trim();
+            }
+          }
+          
+          if (flavorValue && !flavorFilters.includes(flavorValue)) {
+            flavorFilters.push(flavorValue);
+            console.log('Found flavor from checkbox:', flavorValue);
+          }
+        }
+      });
+      
+      console.log('=== All Active Flavor Filters ===');
+      console.log(flavorFilters);
+      
+      if (flavorFilters.length > 0) {
+        // Only use the first flavor filter (single-select behavior)
+        const activeFlavor = flavorFilters[0];
+        const decodedFlavor = activeFlavor.toLowerCase().trim();
+        console.log('=== Processing flavor:', decodedFlavor, '===');
+        
+        document.querySelectorAll('.fgc-card').forEach(function(card) {
+          const pid = card.getAttribute('data-product-id');
+          if (!pid) return;
+          
+          const swatches = card.querySelectorAll('.fgc-swatch[data-variant-name]');
+          let matchedSwatch = null;
+          let bestMatch = null;
+          
+          swatches.forEach(function(swatch) {
+            const variantName = swatch.getAttribute('data-variant-name');
+            if (!variantName) return;
+            
+            const variantNameLower = variantName.toLowerCase().trim();
+            const isAvailable = !swatch.classList.contains('fgc-swatch-unavailable');
+            
+            // Exact match (prioritize available)
+            if (variantNameLower === decodedFlavor) {
+              if (isAvailable) {
+                matchedSwatch = swatch;
+              } else if (!bestMatch) {
+                bestMatch = swatch;
+              }
+            }
+            // Partial match (only if no exact match found)
+            else if (!matchedSwatch && !bestMatch && (variantNameLower.includes(decodedFlavor) || decodedFlavor.includes(variantNameLower))) {
+              if (isAvailable) {
+                bestMatch = swatch;
+              }
+            }
+          });
+          
+          // Use matched swatch (available) or best match (might be unavailable)
+          const swatchToSelect = matchedSwatch || bestMatch;
+          
+          if (swatchToSelect) {
+            const isAvailable = !swatchToSelect.classList.contains('fgc-swatch-unavailable');
+            console.log('Selecting', isAvailable ? 'available' : 'unavailable', 'variant for product', pid);
+            selectGridVariant(swatchToSelect, parseInt(pid));
+            
+            // Ensure CSS variable is set on the card
+            const swatchColor = swatchToSelect.getAttribute('data-swatch-color');
+            if (swatchColor) {
+              card.style.setProperty('--active-swatch-color', swatchColor);
+              console.log('Applied --active-swatch-color:', swatchColor, 'to product', pid);
+            }
+          }
+        });
+        
+        // After applying all flavor filters, re-initialize Yotpo
+        console.log('Flavor filter applied, scheduling Yotpo re-initialization...');
+        setTimeout(reinitializeYotpo, 300);
+      } else {
+        console.log('No flavor filters active');
+      }
+    } catch (e) {
+      console.error('Error in applyFlavorFilter:', e);
+    }
+  }
+
+  // Call immediately
+  applyFlavorFilter();
+  
+  // Call after a delay to catch late-loading elements
+  setTimeout(applyFlavorFilter, 500);
+  setTimeout(applyFlavorFilter, 1000);
+  
+  // Function to reinitialize Yotpo widgets
+  function reinitializeYotpo() {
+    const yotpoElements = document.querySelectorAll('.yotpo.bottomLine');
+    
+    if (yotpoElements.length === 0) {
+      console.log('No Yotpo elements found yet');
+      return;
+    }
+    
+    console.log('=== Reinitializing', yotpoElements.length, 'Yotpo widgets ===');
+    
+    // Try all available Yotpo methods
+    try {
+      // Method 1: New Yotpo widgets use yotpoWidgetsContainer
+      if (typeof window.yotpoWidgetsContainer !== 'undefined') {
+        console.log('yotpoWidgetsContainer is available');
+        if (typeof window.yotpoWidgetsContainer.initWidgets === 'function') {
+          console.log('Calling yotpoWidgetsContainer.initWidgets()');
+          window.yotpoWidgetsContainer.initWidgets();
+        }
+      }
+      
+      // Method 2: Legacy yotpo object
+      if (typeof window.yotpo !== 'undefined') {
+        console.log('window.yotpo is available');
+        
+        if (typeof window.yotpo.initWidgets === 'function') {
+          console.log('Calling window.yotpo.initWidgets()');
+          window.yotpo.initWidgets();
+        }
+        
+        if (typeof window.yotpo.refreshWidgets === 'function') {
+          console.log('Calling window.yotpo.refreshWidgets()');
+          window.yotpo.refreshWidgets();
+        }
+      }
+      
+      // Method 3: Global yotpo variable
+      if (typeof yotpo !== 'undefined' && yotpo !== window.yotpo) {
+        console.log('yotpo global is available');
+        
+        if (typeof yotpo.initWidgets === 'function') {
+          console.log('Calling yotpo.initWidgets()');
+          yotpo.initWidgets();
+        }
+        
+        if (typeof yotpo.refreshWidgets === 'function') {
+          console.log('Calling yotpo.refreshWidgets()');
+          yotpo.refreshWidgets();
+        }
+      }
+      
+      // Method 4: Dispatch custom event that Yotpo might listen to
+      document.dispatchEvent(new CustomEvent('yotpo:init'));
+      window.dispatchEvent(new CustomEvent('yotpo:init'));
+      
+    } catch (e) {
+      console.error('Error reinitializing Yotpo:', e);
+    }
+  }
+
+  // Debounce function to prevent excessive calls
+  let yotpoDebounceTimer = null;
+  function debouncedYotpoInit() {
+    if (yotpoDebounceTimer) {
+      clearTimeout(yotpoDebounceTimer);
+    }
+    yotpoDebounceTimer = setTimeout(function() {
+      console.log('Debounced Yotpo initialization starting...');
+      // Multiple attempts with increasing delays
+      setTimeout(reinitializeYotpo, 100);
+      setTimeout(reinitializeYotpo, 500);
+      setTimeout(reinitializeYotpo, 1000);
+      setTimeout(reinitializeYotpo, 1500);
+      setTimeout(reinitializeYotpo, 2000);
+      setTimeout(reinitializeYotpo, 2500);
+      setTimeout(reinitializeYotpo, 3000);
+    }, 300);
+  }
+  
+  // Watch for changes to the collection results (when filters are applied)
+  const collectionResults = document.querySelector('.collection__results, .featured-collection-grid, #product-grid');
+  if (collectionResults) {
+    const observer = new MutationObserver(function(mutations) {
+      console.log('DOM changed, reapplying flavor filter...');
+      setTimeout(applyFlavorFilter, 200);
+      
+      // Use debounced Yotpo initialization
+      debouncedYotpoInit();
+    });
+    observer.observe(collectionResults, { childList: true, subtree: true });
+  }
+  
+  // Also initialize Yotpo on page load
+  setTimeout(reinitializeYotpo, 1000);
+  setTimeout(reinitializeYotpo, 2000);
+  
+  // Listen for clicks on "Clear all" or filter removal buttons
+  document.addEventListener('click', function(e) {
+    const target = e.target;
+    const targetText = (target.textContent || '').toLowerCase();
+    const targetClass = target.className || '';
+    const parentClass = (target.parentElement && target.parentElement.className) || '';
+    
+    // Check if clicking on clear/remove filter elements
+    if (targetText.includes('clear') || 
+        targetClass.includes('clear') || 
+        targetClass.includes('remove') ||
+        parentClass.includes('clear') ||
+        parentClass.includes('remove') ||
+        target.closest('[class*="clear"]') ||
+        target.closest('[class*="remove"]') ||
+        target.closest('facet-remove') ||
+        target.closest('a[href*="filter"]')) {
+      console.log('Filter clear/remove clicked, scheduling Yotpo re-initialization...');
+      // Use debounced initialization for consistency
+      debouncedYotpoInit();
+      // Also schedule additional attempts with longer delays
+      setTimeout(debouncedYotpoInit, 1000);
+      setTimeout(debouncedYotpoInit, 2000);
+    }
+  }, true);
+  
+  // Track the last clicked flavor filter
+  let lastClickedFlavorFilter = null;
+  
+  // Use click event to capture which flavor was clicked BEFORE change event
+  document.addEventListener('click', function(e) {
+    const target = e.target;
+    
+    if (target.type === 'checkbox') {
+      const inputName = target.name || '';
+      const inputId = target.id || '';
+      
+      if (inputName.toLowerCase().includes('flavor') || inputId.toLowerCase().includes('flavor')) {
+        console.log('Flavor filter clicked:', target.value || target.id);
+        lastClickedFlavorFilter = target;
+        
+        // Immediately uncheck all other flavor filters
+        const allFlavorInputs = document.querySelectorAll('input[type="checkbox"]');
+        allFlavorInputs.forEach(function(input) {
+          const name = input.name || '';
+          const id = input.id || '';
+          
+          if ((name.toLowerCase().includes('flavor') || id.toLowerCase().includes('flavor')) && input !== target) {
+            if (input.checked) {
+              console.log('Immediately unchecking:', input.value || input.id);
+              input.checked = false;
+            }
+          }
+        });
+      }
+    }
+  }, true);
+  
+  // Use change event to handle the filter application
+  document.addEventListener('change', function(e) {
+    const target = e.target;
+    
+    // Check if changed element is a flavor filter checkbox
+    if (target.type === 'checkbox') {
+      const inputName = target.name || '';
+      const inputId = target.id || '';
+      
+      if (inputName.toLowerCase().includes('flavor') || inputId.toLowerCase().includes('flavor')) {
+        console.log('Flavor filter changed:', target.value || target.id, 'Checked:', target.checked);
+        
+        // Enforce single-select again in case AJAX restored other checkboxes
+        if (target.checked) {
+          const allFlavorInputs = document.querySelectorAll('input[type="checkbox"]');
+          allFlavorInputs.forEach(function(input) {
+            const name = input.name || '';
+            const id = input.id || '';
+            
+            if ((name.toLowerCase().includes('flavor') || id.toLowerCase().includes('flavor')) && input !== target && input.checked) {
+              console.log('Re-unchecking after change:', input.value || input.id);
+              input.checked = false;
+            }
+          });
+          
+          console.log('Waiting for AJAX update, then will apply flavor filter...');
+          setTimeout(applyFlavorFilter, 400);
+          setTimeout(applyFlavorFilter, 800);
+          setTimeout(applyFlavorFilter, 1200);
+        }
+      }
+    }
+  }, false);
+  
+  // Listen for Shopify's custom events
+  document.addEventListener('shopify:section:load', function() {
+    console.log('Shopify section loaded');
+    setTimeout(applyFlavorFilter, 200);
+  });
 
   applyGridApparelSingleRowAlignment();
   window.addEventListener('resize', function(){ applyGridApparelSingleRowAlignment(); });
