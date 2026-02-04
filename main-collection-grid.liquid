@@ -314,6 +314,11 @@
               {% assign is_apparel_or_gear = true %}
             {% endif %}
 
+            {% assign is_prebuilt_stack = false %}
+            {% if product.type == 'Custom Bundle' %}
+              {% assign is_prebuilt_stack = true %}
+            {% endif %}
+
             {% assign selected_variant = nil %}
             {% assign non_usa_variant_count = 0 %}
 
@@ -489,6 +494,15 @@
               {% assign selected_variant = product.selected_or_first_available_variant %}
             {% endif %}
 
+            {% comment %} Get the selected variant's swatch color for the CSS variable {% endcomment %}
+            {% assign selected_variant_swatch_color = '#000' %}
+            {% assign sv_sfp_raw = selected_variant.metafields.custom.sfp_section.value %}
+            {% assign sv_sfp = sv_sfp_raw | first | default: sv_sfp_raw %}
+            {% assign sv_swatch_obj = sv_sfp.flavor_swatch_image.value %}
+            {% if sv_swatch_obj.color_swatch %}
+              {% assign selected_variant_swatch_color = sv_swatch_obj.color_swatch %}
+            {% endif %}
+
             {% assign product_sfp_raw = product.metafields.custom.sfp_section.value %}
             {% assign product_sfp = product_sfp_raw | first | default: product_sfp_raw %}
             {% assign product_series = product_sfp.series.value %}
@@ -527,7 +541,8 @@
                    data-product-handle="{{ product.handle }}"
                    data-series="{{ series_name }}"
                    data-is-apparel="{{ is_apparel_or_gear }}"
-                   style="--card-series-featured: {{ series_featured_color }};">
+                   data-product-type="{{ product.type }}"
+                   style="--card-series-featured: {{ series_featured_color }}; --active-swatch-color: {{ selected_variant_swatch_color }};">
 
                 <div class="fgc-card__image">
                   <a href="{{ product.url }}">
@@ -586,14 +601,15 @@
                   {% endif %}
 
                   <form class="fgc-card__form" data-product-form="{{ product.id }}">
-                    <select name="id" data-variant-select="{{ product.id }}" style="display: none;">
-                      {% for variant in product.variants %}
-                        <option value="{{ variant.id }}" {% if variant == selected_variant %}selected{% endif %}>{{ variant.title }}</option>
-                      {% endfor %}
-                    </select>
-                    <input type="hidden" value="" data-selling-plan-input="{{ product.id }}">
+                    {% unless is_prebuilt_stack %}
+                      <select name="id" data-variant-select="{{ product.id }}" style="display: none;">
+                        {% for variant in product.variants %}
+                          <option value="{{ variant.id }}" {% if variant == selected_variant %}selected{% endif %}>{{ variant.title }}</option>
+                        {% endfor %}
+                      </select>
+                      <input type="hidden" value="" data-selling-plan-input="{{ product.id }}">
 
-                    <div class="fgc-purchase-options{% unless has_selling_plans %} fgc-purchase-options--single{% endunless %}" data-purchase-options="{{ product.id }}">
+                      <div class="fgc-purchase-options{% unless has_selling_plans %} fgc-purchase-options--single{% endunless %}" data-purchase-options="{{ product.id }}">
                       <label class="fgc-purchase-option">
                         <input type="radio" name="purchase_type_{{ product.id }}" value="onetime" checked {% unless selected_variant.available %}disabled{% endunless %}>
                         <div class="fgc-option-content">
@@ -642,6 +658,8 @@
                       {% endif %}
                     </div>
 
+                    {% endunless %}
+
                     {% assign show_swatches = false %}
                     {% if is_apparel_or_gear %}
                       {% assign show_swatches = true %}
@@ -655,18 +673,24 @@
                       {{ swatches_html }}
                     </div>
 
-                    <div class="fgc-actions" data-actions="{{ product.id }}">
-                      <div class="fgc-quantity" data-quantity="{{ product.id }}" {% unless selected_variant.available %}style="display: none;"{% endunless %}>
-                        <button type="button" class="fgc-qty-btn" onclick="updateGridQuantity(this, -1)">−</button>
-                        <input type="number" name="quantity" value="1" min="1" class="fgc-qty-input">
-                        <button type="button" class="fgc-qty-btn" onclick="updateGridQuantity(this, 1)">+</button>
-                      </div>
+                    {% if is_prebuilt_stack %}
+                      <a href="{{ product.url }}" class="fgc-add-to-cart fgc-see-options-btn">
+                        <span>See Options</span>
+                      </a>
+                    {% else %}
+                      <div class="fgc-actions" data-actions="{{ product.id }}">
+                        <div class="fgc-quantity" data-quantity="{{ product.id }}" {% unless selected_variant.available %}style="display: none;"{% endunless %}>
+                          <button type="button" class="fgc-qty-btn" onclick="updateGridQuantity(this, -1)">−</button>
+                          <input type="number" name="quantity" value="1" min="1" class="fgc-qty-input">
+                          <button type="button" class="fgc-qty-btn" onclick="updateGridQuantity(this, 1)">+</button>
+                        </div>
 
-                      <button type="submit" class="fgc-add-to-cart {% unless selected_variant.available %}fgc-out-of-stock{% endunless %}" data-add-btn="{{ product.id }}" {% unless selected_variant.available %}disabled{% endunless %}>
-                        {% if selected_variant.available %}<i class="fa-sharp fa-solid fa-cart-circle-plus"></i>{% endif %}
-                        <span>{% if selected_variant.available %}Add to Cart{% else %}Out of Stock{% endif %}</span>
-                      </button>
-                    </div>
+                        <button type="submit" class="fgc-add-to-cart {% unless selected_variant.available %}fgc-out-of-stock{% endunless %}" data-add-btn="{{ product.id }}" {% unless selected_variant.available %}disabled{% endunless %}>
+                          {% if selected_variant.available %}<i class="fa-sharp fa-solid fa-cart-circle-plus"></i>{% endif %}
+                          <span>{% if selected_variant.available %}Add to Cart{% else %}Out of Stock{% endif %}</span>
+                        </button>
+                      </div>
+                    {% endif %}
                   </form>
                 </div>
               </div>
@@ -750,10 +774,15 @@
 .fgc-card__subheader { font-family: 'Acumin Pro', sans-serif; font-size: 16px; color: #000; line-height: 1.4; display: flex; align-items: flex-start; padding: 0 12px; min-height: 22px; height: 22px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .fgc-card__subheader--empty { visibility: hidden; }
 .fgc-card__reviews-price { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; min-height: 32px; height: 32px; padding: 0 12px; }
+.fgc-card[data-product-type="Custom Bundle"] .fgc-card__reviews-price { margin-bottom: 0; }
+.fgc-card[data-product-type="Custom Bundle"] .fgc-card__form { padding-top: 8px; }
+.fgc-card[data-product-type="Custom Bundle"] .fgc-card__subheader { display: none; }
+.fgc-card[data-product-type="Custom Bundle"] .fgc-swatches { display: none; }
 .fgc-card__reviews { flex: 0 0 auto; }
 .fgc-card__reviews .yotpo .text-m, .fgc-card__reviews .yotpo .yotpo-bottomline-box-1, .fgc-card__reviews .yotpo .yotpo-bottomline .text-m, .fgc-card__reviews .yotpo .standalone-bottomline .text-m { display: none !important; }
-.fgc-card__reviews .yotpo-sr-bottom-line-left-panel, .fgc-card__reviews .yotpo-sr-bottom-line-score, .fgc-card__reviews .yotpo-sr-bottom-line-right-panel, .fgc-card__reviews .yotpo-sr-vertical-border { display: none !important; }
+.fgc-card__reviews .yotpo-sr-bottom-line-right-panel, .fgc-card__reviews .yotpo-sr-vertical-border { display: none !important; }
 .fgc-card .yotpo-sr-star-full path, .fgc-card .yotpo-icon-star, .fgc-card svg.star-container path { fill: var(--card-series-featured, #AE1F24) !important; stroke: var(--card-series-featured, #AE1F24) !important; }
+.fgc-card .yotpo-sr-bottom-line-left-panel.yotpo-sr-bottom-line-score, .fgc-card .yotpo-sr-bottom-line-score { color: var(--card-series-featured, #AE1F24) !important; }
 .fgc-card__price { display: flex; justify-content: flex-end; align-items: baseline; gap: 8px; flex-shrink: 0; }
 .fgc-price-display { font-family: 'Acumin Pro', sans-serif; font-size: 16px; font-weight: 400; color: black; }
 .fgc-price-original { text-decoration: line-through; color: #999; font-size: 16px; font-weight: 400; }
@@ -839,6 +868,8 @@
 .fgc-add-to-cart.adding.success { color: var(--card-series-featured, #AE1F24); }
 .fgc-add-to-cart.adding.success::after { z-index: 1; animation: fccFillSuccess 0.6s ease forwards; }
 @keyframes fccFillSuccess { 0% { left: -100%; } 100% { left: 0; } }
+.fgc-see-options-btn { text-decoration: none; display: flex; align-items: center; justify-content: center; }
+.fgc-see-options-btn:hover { text-decoration: none; }
 
 .featured-grid-section .fgc-core-series .fgc-add-to-cart { color: #000 !important; border: none !important; }
 .featured-grid-section .fgc-core-series .fgc-add-to-cart i, .featured-grid-section .fgc-core-series .fgc-add-to-cart svg { color: #000 !important; }
