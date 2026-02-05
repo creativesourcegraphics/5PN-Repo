@@ -265,7 +265,13 @@
          data-per-page-mobile="{{ per_page_mobile }}">
       <div class="splide__track">
         <ul class="splide__list">
+          {%- comment %}<locksmith:d637>{% endcomment -%}
+            {%- assign locksmith_a868_forloop__size = 0 %}{% for product in collection.products limit: products_limit %}{% capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == 'true' %}{% assign locksmith_a868_forloop__size = locksmith_a868_forloop__size | plus: 1 %}{% endif %}{% endfor %}{% assign locksmith_a868_forloop__index = nil -%}
+          {%- comment %}</locksmith:d637>{% endcomment -%}
           {% for product in collection.products limit: products_limit %}
+            {%- comment %}<locksmith:f5db>{% endcomment -%}
+              {%- capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == "true" %}{% if locksmith_a868_forloop__index == nil %}{% assign locksmith_a868_forloop__index = 1 %}{% assign locksmith_a868_forloop__index0 = 0 %}{% else %}{% assign locksmith_a868_forloop__index = locksmith_a868_forloop__index | plus: 1 %}{% assign locksmith_a868_forloop__index0 = locksmith_a868_forloop__index0 | plus: 1 %}{% endif %}{% if locksmith_a868_forloop__index == 1 %}{% assign locksmith_a868_forloop__first = true %}{% else %}{% assign locksmith_a868_forloop__first = false %}{% endif %}{% if locksmith_a868_forloop__index == locksmith_a868_forloop__size %}{% assign locksmith_a868_forloop__last = true %}{% else %}{% assign locksmith_a868_forloop__last = false %}{% endif %}{% assign locksmith_a868_forloop__rindex = locksmith_a868_forloop__size | minus: locksmith_a868_forloop__index | minus: 1 %}{% assign locksmith_a868_forloop__rindex0 = locksmith_a868_forloop__size | minus: locksmith_a868_forloop__index0 | minus: 1 %}{% else %}{% continue %}{% endif -%}
+            {%- comment %}</locksmith:f5db>{% endcomment -%}
             {% if product.price == 0 or product.price_min == 0 %}
               {% continue %}
             {% endif %}
@@ -617,18 +623,14 @@
 
                     {% assign show_swatches = false %}
                     {% if is_apparel_or_gear %}
-                      {% if has_size_option and size_array.size > 0 %}
-                        {% assign show_swatches = true %}
-                      {% elsif has_color_option and color_array.size > 0 %}
-                        {% assign show_swatches = true %}
-                      {% endif %}
+                      {% assign show_swatches = true %}
                     {% elsif non_usa_variant_count > 1 %}
                       {% assign show_swatches = true %}
                     {% elsif non_usa_variant_count == 1 and variant_display_name != blank %}
                       {% assign show_swatches = true %}
                     {% endif %}
 
-                    <div class="fcc-swatches" {% unless show_swatches %}style="display: none;"{% endunless %}>
+                    <div class="fcc-swatches" {% unless show_swatches %}style="visibility: hidden;"{% endunless %}>
                       {{ swatches_html }}
                     </div>
 
@@ -660,7 +662,13 @@
     </div>
 
     <script>
+    {%- comment %}<locksmith:31d5>{% endcomment -%}
+      {%- assign locksmith_4c12_forloop__size = 0 %}{% for product in collection.products limit: products_limit %}{% capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == 'true' %}{% assign locksmith_4c12_forloop__size = locksmith_4c12_forloop__size | plus: 1 %}{% endif %}{% endfor %}{% assign locksmith_4c12_forloop__index = nil -%}
+    {%- comment %}</locksmith:31d5>{% endcomment -%}
     {% for product in collection.products limit: products_limit %}
+    {%- comment %}<locksmith:dc09>{% endcomment -%}
+      {%- capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == "true" %}{% if locksmith_4c12_forloop__index == nil %}{% assign locksmith_4c12_forloop__index = 1 %}{% assign locksmith_4c12_forloop__index0 = 0 %}{% else %}{% assign locksmith_4c12_forloop__index = locksmith_4c12_forloop__index | plus: 1 %}{% assign locksmith_4c12_forloop__index0 = locksmith_4c12_forloop__index0 | plus: 1 %}{% endif %}{% if locksmith_4c12_forloop__index == 1 %}{% assign locksmith_4c12_forloop__first = true %}{% else %}{% assign locksmith_4c12_forloop__first = false %}{% endif %}{% if locksmith_4c12_forloop__index == locksmith_4c12_forloop__size %}{% assign locksmith_4c12_forloop__last = true %}{% else %}{% assign locksmith_4c12_forloop__last = false %}{% endif %}{% assign locksmith_4c12_forloop__rindex = locksmith_4c12_forloop__size | minus: locksmith_4c12_forloop__index | minus: 1 %}{% assign locksmith_4c12_forloop__rindex0 = locksmith_4c12_forloop__size | minus: locksmith_4c12_forloop__index0 | minus: 1 %}{% else %}{% continue %}{% endif -%}
+    {%- comment %}</locksmith:dc09>{% endcomment -%}
     window.Product_{{ product.id }} = {
       variants: [
         {% for variant in product.variants %}
@@ -720,8 +728,11 @@
 .fcc-card__reviews-price { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; min-height: 32px; padding: 0 12px; }
 .fcc-card__reviews { flex: 0 0 auto; }
 .fcc-card__reviews .yotpo .text-m, .fcc-card__reviews .yotpo .yotpo-bottomline-box-1, .fcc-card__reviews .yotpo .yotpo-bottomline .text-m, .fcc-card__reviews .yotpo .standalone-bottomline .text-m { display: none !important; }
-.fcc-card__reviews .yotpo-sr-bottom-line-left-panel, .fcc-card__reviews .yotpo-sr-bottom-line-score, .fcc-card__reviews .yotpo-sr-bottom-line-right-panel, .fcc-card__reviews .yotpo-sr-vertical-border { display: none !important; }
-.fcc-card .yotpo-sr-star-full path, .fcc-card .yotpo-icon-star, .fcc-card svg.star-container path { fill: var(--card-series-featured, #AE1F24) !important; stroke: var(--card-series-featured, #AE1F24) !important; }
+.fcc-card__reviews .yotpo-sr-bottom-line-right-panel, .fcc-card__reviews .yotpo-sr-vertical-border { display: none !important; }
+.fcc-card .yotpo-sr-star-full path, .fcc-card .yotpo-sr-star-full svg path { fill: var(--card-series-featured, #AE1F24) !important; stroke: var(--card-series-featured, #AE1F24) !important; }
+.fcc-card .yotpo-sr-star-empty path, .fcc-card .yotpo-sr-star-empty svg path { fill: #ccc !important; stroke: #ccc !important; }
+.fcc-card .yotpo-sr-bottom-line-left-panel, .fcc-card .yotpo-sr-bottom-line-score, .fcc-card__reviews .yotpo-sr-bottom-line-left-panel, .fcc-card__reviews .yotpo-sr-bottom-line-score { display: flex !important; visibility: visible !important; }
+.fcc-card .yotpo-sr-bottom-line-score, .fcc-card__reviews .yotpo-sr-bottom-line-score { color: var(--card-series-featured, #AE1F24) !important; }
 .fcc-card__price { display: flex; justify-content: flex-end; align-items: baseline; gap: 8px; flex-shrink: 0; }
 .fcc-price-display { font-family: 'Acumin Pro', sans-serif; font-size: 16px; font-weight: 400; color: black; }
 .fcc-price-original { text-decoration: line-through; color: #999; font-size: 16px; font-weight: 400; }
@@ -845,8 +856,8 @@
   .featured-carousel-title { font-size: 24px; }
   .fcc-card__title { font-size: 1.5rem; }
   .fcc-card__subheader { font-size: 14px; }
-  .fcc-swatches { gap: 10px; flex-wrap: wrap; min-height: 92px; height: auto; margin-top: var(--card-options-gap-mobile, 12px); overflow: visible; }
   .fcc-swatches:has(.fcc-apparel-selector.fcc-single-row) { min-height: 50px; }
+  .fcc-swatches { gap: 10px; flex-wrap: wrap; min-height: 92px; height: auto; margin-top: var(--card-options-gap-mobile, 12px); overflow: visible; }
   .fcc-swatches.fcc-single-row { align-items: flex-end; }
   .fcc-swatch { min-width: 40px; max-width: 40px; height: 40px; padding: 5px; flex-grow: 0; }
   .fcc-swatch:hover:not(.fcc-swatch-unavailable), .fcc-swatch.active { border: 2px solid var(--swatch-border-color, #000); padding: 5px; }
@@ -876,7 +887,8 @@
   .fcc-image-info:not(:has(.fcc-variant-name)) .fcc-discount-badge { width: 100%; justify-content: center; align-items: center; }
   .fcc-image-info:not(:has(.fcc-variant-name)) .fcc-discount-content { width: 100%; text-align: center; align-items: center; justify-content: center; }
   .splide__controls{margin-top:32px;}  
-  .splide__controls .splide__arrows {display: none;}
+  .splide__controls .splide__arrows { display: flex; gap: 6px; }
+  .splide__controls .splide__arrows .splide__arrow { width: 36px; height: 36px; }
   .featured-collection-splide .splide__track {margin-bottom:0;}
   .fcc-image-info{ margin-bottom:12px!important;}
 }
@@ -1066,10 +1078,9 @@ document.addEventListener('DOMContentLoaded', function() {
         perPage: ppd,
         perMove: 1,
         gap: '20px',
-        padding: { left: 0, right: 0 },
         pagination: false,
         arrows: true,
-        autoHeight: false,
+        speed: 300,
         breakpoints: {
           1400: { perPage: 3, gap: '16px' },
           1100: { perPage: 2, gap: '16px' },
@@ -1078,17 +1089,29 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       const bar = se.querySelector('.splide__progress__bar');
       if (bar) {
-        splide.on('mounted move', function() {
+        splide.on('mounted move dragged scrolled', function() {
           const end = splide.Components.Controller.getEnd() + 1;
           const rate = Math.min((splide.index + 1) / end, 1);
           bar.style.width = String(100 * rate) + '%';
         });
       }
-      splide.on('mounted', function(){ applyApparelSingleRowAlignment(); });
-      splide.on('move', function(){ applyApparelSingleRowAlignment(); });
       splide.mount();
+      
+      // Run alignment once after mount, not on every move
+      setTimeout(applyApparelSingleRowAlignment, 100);
     }
   } catch (e) {}
+
+  // Simple Yotpo initialization
+  setTimeout(function() {
+    try {
+      if (typeof window.yotpoWidgetsContainer !== 'undefined' && typeof window.yotpoWidgetsContainer.initWidgets === 'function') {
+        window.yotpoWidgetsContainer.initWidgets();
+      } else if (typeof window.yotpo !== 'undefined' && typeof window.yotpo.initWidgets === 'function') {
+        window.yotpo.initWidgets();
+      }
+    } catch (e) {}
+  }, 1000);
 
   document.querySelectorAll('.fcc-purchase-option input[type="radio"]').forEach(function(r) {
     r.addEventListener('change', function() {
