@@ -722,7 +722,10 @@
 .fgc-card__reviews { flex: 0 0 auto; }
 .fgc-card__reviews .yotpo .text-m, .fgc-card__reviews .yotpo .yotpo-bottomline-box-1, .fgc-card__reviews .yotpo .yotpo-bottomline .text-m, .fgc-card__reviews .yotpo .standalone-bottomline .text-m { display: none !important; }
 .fgc-card__reviews .yotpo-sr-bottom-line-right-panel, .fgc-card__reviews .yotpo-sr-vertical-border { display: none !important; }
-.fgc-card .yotpo-sr-star-full path, .fgc-card .yotpo-icon-star, .fgc-card svg.star-container path { fill: var(--card-series-featured, #AE1F24) !important; stroke: var(--card-series-featured, #AE1F24) !important; }
+.fgc-card .yotpo-sr-star-full path, .fgc-card .yotpo-sr-star-full svg path { fill: var(--card-series-featured, #AE1F24) !important; stroke: var(--card-series-featured, #AE1F24) !important; }
+.fgc-card .yotpo-sr-star-empty path, .fgc-card .yotpo-sr-star-empty svg path, .fgc-card .yotpo-sr-star-empty svg, .fgc-card svg.yotpo-sr-star-empty path { fill: #ccc !important; stroke: #ccc !important; }
+.fgc-card .star-container.yotpo-sr-star-empty path { fill: #ccc !important; stroke: #ccc !important; }
+.fgc-card .yotpo-sr-bottom-line-left-panel, .fgc-card .yotpo-sr-bottom-line-score { display: flex !important; }
 .fgc-card .yotpo-sr-bottom-line-left-panel.yotpo-sr-bottom-line-score, .fgc-card .yotpo-sr-bottom-line-score { color: var(--card-series-featured, #AE1F24) !important; }
 .fgc-card__price { display: flex; justify-content: flex-end; align-items: baseline; gap: 8px; flex-shrink: 0; }
 .fgc-price-display { font-family: 'Acumin Pro', sans-serif; font-size: 16px; font-weight: 400; color: black; }
@@ -1443,9 +1446,46 @@ document.addEventListener('DOMContentLoaded', function() {
       document.dispatchEvent(new CustomEvent('yotpo:init'));
       window.dispatchEvent(new CustomEvent('yotpo:init'));
       
+      // After Yotpo initializes, check for missing scores and add "0" for products with no reviews
+      setTimeout(addMissingYotpoScores, 500);
+      
     } catch (e) {
       console.error('Error reinitializing Yotpo:', e);
     }
+  }
+  
+  // Function to add "0" score for products with no reviews
+  function addMissingYotpoScores() {
+    const yotpoWidgets = document.querySelectorAll('.fgc-card .yotpo.bottomLine, .fgc-card .yotpo-widget-instance');
+    yotpoWidgets.forEach(function(widget) {
+      // Check if the widget has been initialized (has star elements)
+      const hasStars = widget.querySelector('.yotpo-sr-star-full, .yotpo-sr-star-empty, .yotpo-icon-star, svg.star-container');
+      const scoreElement = widget.querySelector('.yotpo-sr-bottom-line-score');
+      
+      // If widget has stars but no score element, or score is empty, add "0"
+      if (hasStars && (!scoreElement || scoreElement.textContent.trim() === '')) {
+        // Find the left panel where score should be
+        let leftPanel = widget.querySelector('.yotpo-sr-bottom-line-left-panel');
+        
+        // If no left panel, try to find the stars container and add score before it
+        if (!leftPanel) {
+          const starsContainer = widget.querySelector('.yotpo-bottomline, .yotpo-stars, [class*="stars"]');
+          if (starsContainer && !starsContainer.previousElementSibling?.classList?.contains('yotpo-sr-bottom-line-score')) {
+            const scoreSpan = document.createElement('span');
+            scoreSpan.className = 'yotpo-sr-bottom-line-score added-score';
+            scoreSpan.textContent = '0';
+            scoreSpan.style.cssText = 'display: inline-flex; align-self: center; color: var(--card-series-featured, #AE1F24); font-family: "Acumin Pro Regular", sans-serif; font-size: 16px; margin-right: 8px;';
+            starsContainer.parentNode.insertBefore(scoreSpan, starsContainer);
+          }
+        } else if (!leftPanel.querySelector('.yotpo-sr-bottom-line-score')) {
+          const scoreSpan = document.createElement('span');
+          scoreSpan.className = 'yotpo-sr-bottom-line-left-panel yotpo-sr-bottom-line-score added-score';
+          scoreSpan.textContent = '0';
+          scoreSpan.style.cssText = 'display: flex; align-self: center; color: var(--card-series-featured, #AE1F24); font-family: "Acumin Pro Regular", sans-serif; font-size: 16px; margin-inline: 0px 10px; margin-bottom: 1px; padding-top: 3px;';
+          leftPanel.insertBefore(scoreSpan, leftPanel.firstChild);
+        }
+      }
+    });
   }
 
   // Debounce function to prevent excessive calls
@@ -1456,15 +1496,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     yotpoDebounceTimer = setTimeout(function() {
       console.log('Debounced Yotpo initialization starting...');
-      // Multiple attempts with increasing delays
+      // Multiple attempts with increasing delays - extended for filter clear timing
       setTimeout(reinitializeYotpo, 100);
+      setTimeout(reinitializeYotpo, 300);
       setTimeout(reinitializeYotpo, 500);
+      setTimeout(reinitializeYotpo, 800);
       setTimeout(reinitializeYotpo, 1000);
       setTimeout(reinitializeYotpo, 1500);
       setTimeout(reinitializeYotpo, 2000);
       setTimeout(reinitializeYotpo, 2500);
       setTimeout(reinitializeYotpo, 3000);
-    }, 300);
+      setTimeout(reinitializeYotpo, 4000);
+      setTimeout(reinitializeYotpo, 5000);
+    }, 100);
+  }
+  
+  // Aggressive Yotpo init that doesn't debounce - for critical moments like filter clear
+  function forceYotpoInit() {
+    console.log('Force Yotpo initialization...');
+    reinitializeYotpo();
+    setTimeout(reinitializeYotpo, 200);
+    setTimeout(reinitializeYotpo, 500);
+    setTimeout(reinitializeYotpo, 1000);
+    setTimeout(reinitializeYotpo, 1500);
+    setTimeout(reinitializeYotpo, 2000);
+    setTimeout(reinitializeYotpo, 3000);
+    setTimeout(reinitializeYotpo, 4000);
+    setTimeout(reinitializeYotpo, 5000);
   }
   
   // Watch for changes to the collection results (when filters are applied)
@@ -1474,15 +1532,79 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM changed, reapplying flavor filter...');
       setTimeout(applyFlavorFilter, 200);
       
-      // Use debounced Yotpo initialization
-      debouncedYotpoInit();
+      // Use force Yotpo initialization on DOM changes
+      forceYotpoInit();
     });
     observer.observe(collectionResults, { childList: true, subtree: true });
   }
   
-  // Also initialize Yotpo on page load
+  // Intercept fetch requests to detect when Shopify AJAX filtering completes
+  const originalFetch = window.fetch;
+  window.fetch = function(...args) {
+    return originalFetch.apply(this, args).then(response => {
+      const url = args[0]?.toString() || '';
+      // Check if this is a collection/filter request
+      if (url.includes('collection') || url.includes('filter') || url.includes('?') || url.includes('page')) {
+        console.log('Fetch completed for:', url);
+        // Schedule Yotpo re-initialization after fetch completes
+        setTimeout(forceYotpoInit, 100);
+        setTimeout(forceYotpoInit, 500);
+        setTimeout(forceYotpoInit, 1000);
+        setTimeout(forceYotpoInit, 2000);
+      }
+      return response;
+    });
+  };
+  
+  // Also intercept XMLHttpRequest for older AJAX implementations
+  const originalXHROpen = XMLHttpRequest.prototype.open;
+  const originalXHRSend = XMLHttpRequest.prototype.send;
+  
+  XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+    this._url = url;
+    return originalXHROpen.apply(this, [method, url, ...rest]);
+  };
+  
+  XMLHttpRequest.prototype.send = function(...args) {
+    this.addEventListener('load', function() {
+      const url = this._url || '';
+      if (url.includes('collection') || url.includes('filter') || url.includes('?')) {
+        console.log('XHR completed for:', url);
+        setTimeout(forceYotpoInit, 100);
+        setTimeout(forceYotpoInit, 500);
+        setTimeout(forceYotpoInit, 1000);
+        setTimeout(forceYotpoInit, 2000);
+      }
+    });
+    return originalXHRSend.apply(this, args);
+  };
+  
+  // Also initialize Yotpo on page load with multiple attempts
+  setTimeout(reinitializeYotpo, 500);
   setTimeout(reinitializeYotpo, 1000);
+  setTimeout(reinitializeYotpo, 1500);
   setTimeout(reinitializeYotpo, 2000);
+  setTimeout(reinitializeYotpo, 3000);
+  
+  // Listen for URL changes (popstate) to reinitialize Yotpo when navigating back/forward
+  window.addEventListener('popstate', function() {
+    console.log('URL changed (popstate), reinitializing Yotpo...');
+    debouncedYotpoInit();
+  });
+  
+  // Listen for Shopify's AJAX filter events
+  document.addEventListener('shopify:section:load', function() {
+    console.log('Shopify section loaded, reinitializing Yotpo...');
+    debouncedYotpoInit();
+  });
+  
+  // Also listen for any form submissions in the filter area
+  document.addEventListener('submit', function(e) {
+    if (e.target.closest('.facets, .filters, [data-facets]')) {
+      console.log('Filter form submitted, scheduling Yotpo re-initialization...');
+      setTimeout(debouncedYotpoInit, 500);
+    }
+  }, true);
   
   // Listen for clicks on "Clear all" or filter removal buttons
   document.addEventListener('click', function(e) {
@@ -1502,11 +1624,32 @@ document.addEventListener('DOMContentLoaded', function() {
         target.closest('facet-remove') ||
         target.closest('a[href*="filter"]')) {
       console.log('Filter clear/remove clicked, scheduling Yotpo re-initialization...');
-      // Use debounced initialization for consistency
-      debouncedYotpoInit();
-      // Also schedule additional attempts with longer delays
-      setTimeout(debouncedYotpoInit, 1000);
-      setTimeout(debouncedYotpoInit, 2000);
+      // Use force initialization for filter clear - critical moment
+      forceYotpoInit();
+      setTimeout(forceYotpoInit, 1000);
+      setTimeout(forceYotpoInit, 2000);
+      setTimeout(forceYotpoInit, 3000);
+    }
+    
+    // Check if clicking on pagination links
+    if (target.closest('.pagination, [class*="pagination"], nav[role="navigation"], .page-numbers, a[href*="page="]')) {
+      console.log('Pagination clicked, scheduling Yotpo re-initialization...');
+      forceYotpoInit();
+      setTimeout(forceYotpoInit, 1000);
+      setTimeout(forceYotpoInit, 2000);
+      setTimeout(forceYotpoInit, 3000);
+    }
+  }, true);
+  
+  // Listen for any checkbox changes in filter area (including unchecking/clearing)
+  document.addEventListener('change', function(e) {
+    const target = e.target;
+    if (target.type === 'checkbox' && target.closest('.facets, .filters, [data-facets], .facet-filters')) {
+      console.log('Filter checkbox changed, scheduling Yotpo re-initialization...');
+      // Use force initialization for checkbox changes - critical for uncheck/clear
+      forceYotpoInit();
+      setTimeout(forceYotpoInit, 1000);
+      setTimeout(forceYotpoInit, 2000);
     }
   }, true);
   
